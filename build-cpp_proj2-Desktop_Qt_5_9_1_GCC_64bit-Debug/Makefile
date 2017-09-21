@@ -38,7 +38,7 @@ DISTNAME      = cpp_proj21.0.0
 DISTDIR = /uio/hume/student-u10/halvarsu/uio/compphys/project2/build-cpp_proj2-Desktop_Qt_5_9_1_GCC_64bit-Debug/.tmp/cpp_proj21.0.0
 LINK          = g++
 LFLAGS        = 
-LIBS          = $(SUBLIBS)  
+LIBS          = $(SUBLIBS) -larmadillo -llapack -lblas 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -204,6 +204,7 @@ DIST          = /mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/spec_pre.
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/qt_config.prf \
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/spec_post.prf \
+		../cpp_proj2/.qmake.stash \
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/toolchain.prf \
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/default_pre.prf \
@@ -381,6 +382,7 @@ Makefile: ../cpp_proj2/cpp_proj2.pro /mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspe
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/qt_config.prf \
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/toolchain.prf \
 		/mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/default_pre.prf \
@@ -548,6 +550,7 @@ Makefile: ../cpp_proj2/cpp_proj2.pro /mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspe
 /mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/qt_config.prf:
 /mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/linux-g++/qmake.conf:
 /mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/exclusive_builds.prf:
 /mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/toolchain.prf:
 /mn/felt/u18/anderhaf/Qt/5.9.1/gcc_64/mkspecs/features/default_pre.prf:

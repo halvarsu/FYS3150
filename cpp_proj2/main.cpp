@@ -1,5 +1,6 @@
 #include <iostream>
 #include <armadillo>
+#include "solve.h"
 
 double potential(double r);
 void f(double  * a);
@@ -43,6 +44,8 @@ int main()
     // diagonalize and obtain eigenvalues, unsorted
     arma::vec eigValues;
     arma::mat eigVectors;
+
+    // The algorithm
     arma::eig_sym(eigValues, eigVectors, hamilton);
 
     eigValues.save("eigval.txt", arma::arma_ascii);

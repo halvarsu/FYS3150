@@ -1,0 +1,116 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{esvect}
+\usepackage[margin=0.7in]{geometry}
+\usepackage{float}
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\usepackage[norsk]{babel}
+\usepackage[parfill]{parskip}  
+
+\begin{document}
+\title{Schroedringers equation}  
+\\ Project 2
+\\ FYS2160}
+\author{Ragnar Bruvoll}
+\date{September 2017}
+\maketitle{\begin{center}\end{center}}
+\pagenumbering{gobble}
+\thispagestyle{empty}
+
+\newpage
+\pagenumbering{arabic}
+
+
+
+Ser på den radielle Schrôdringerligninen for ett elektron. Den ser slik ut:
+
+\begin{equation*}
+  -\frac{\hbar^2}{2 m} \left ( \frac{1}{r^2} \frac{d}{dr} r^2
+  \frac{d}{dr} - \frac{l (l + 1)}{r^2} \right )R(r) 
+     + V(r) R(r) = E R(r)
+\end{equation*}
+der  $V(r) = (1/2)kr^2$ er harmonisk oscillator potensial, $k=m\omega^2$, $\omega$ er oscillatorfrekvens, E er energien til den harmoniske oscillatoren og tar verdiene
+
+\begin{equation*}
+E_{nl}=  \hbar \omega \left(2n+l+\frac{3}{2}\right),
+\end{equation*}
+der n og l er kvantetall og tar verdiene $n=0,1,2,\dots$ and $l=0,1,2,\dots$. Ettersom vi bruker sfæriske coordinater vil $r\in [0,\infty)$.\\
+
+For å forenkle uttrykket kan vi sette $R(r) = (1/r) u(r)$, som gir
+
+\begin{equation*}
+  -\frac{\hbar^2}{2 m} \frac{d^2}{dr^2} u(r) + \left ( V(r) + \frac{l (l + 1)}{r^2}\frac{\hbar^2}{2 m}\right ) u(r)  = E u(r)
+\end{equation*}
+der $u(0)=0$ og $u(\infty)=0$ ettersom sannsynlighetskurven flater drastisk ut når r stiger. Ved å substituere $\rho = (1/\alpha) r$ kan vi gjøre variablen dimensjonsløs.
+
+\begin{equation*}
+  -\frac{\hbar^2}{2 m \alpha^2} \frac{d^2}{d\rho^2} u(\rho)+ \left ( V(\rho) + \frac{l (l + 1)}{\rho^2}\frac{\hbar^2}{2 m\alpha^2} \right ) u(\rho)  = E u(\rho)
+\end{equation*}
+Dersom vi setter momentet $l=0$ og plugger inn potensialet og multipliserer med $2m\alpha^2/\hbar^2$ får vi følgende ligning
+
+\begin{equation*}
+  -\frac{d^2}{d\rho^2} u(\rho) 
+       + \frac{mk}{\hbar^2} \alpha^4\rho^2u(\rho)  = \frac{2m\alpha^2}{\hbar^2}E u(\rho) .
+\end{equation*}
+Dersom vi bestemmer at $\alpha  \left(\frac{\hbar^2}{mk}\right)^{1/4}$ og lager variabel $\lambda = \frac{2m\alpha^2}{\hbar^2}E$
+ender vi opp med en Schrödringer-ligning på formen
+\begin{equation*}
+  -\frac{d^2}{d\rho^2} u(\rho) + \rho^2u(\rho)  = \lambda u(\rho) .
+\end{equation*}
+
+Som forklart i forrige prosjekt, kan den andrederiverte skrives på formen
+\begin{equation}
+    u''=\frac{u(\rho+h) -2u(\rho) +u(\rho-h)}{h^2} +O(h^2),
+    \label{eq:diffoperation}
+\end{equation}
+Grenseverdiene for $\rho$, $\rho_{\mathrm{min}}=0$ og $\rho_{\mathrm{max}}$, bestemmes av hvor elektronet kan befinne seg, altså et sted mellom 0 og uendelig langt borte. Maksverdien må riktignok forenkles til en mer håndterlig verdi. Skrittlengden vi bruker blir den totale lengden delt på antall skritt.
+
+\begin{equation*}
+  h=\frac{\rho_N-\rho_0 }{N}.
+\end{equation*}
+Schrödingerligningen ser da slik ut:
+$$
+-\frac{u(\rho_i+h) -2u(\rho_i) +u(\rho_i-h)}{h^2}+\rho_i^2u(\rho_i)  = \lambda u(\rho_i),
+$$
+som kan skrives på en enklere måte der $u(p_i+h)=u_{i+1}$ osv:
+$$
+-\frac{u_{i+1} -2u_i +u_{i-1} }{h^2}+V_iu_i  = \lambda u_i,
+$$
+der $V_i=\rho_i^2$. Som forklart i forrige prosjekt kan dette settet av line're ligninger uttrykkes ved å bruke matriseregning med en diagonalvektor som en vektor på hver side av diagonalen. Det første elementet i den diagonale matrisen blir
+\begin{equation*}
+   d_i=\frac{2}{h^2}+V_i,
+\end{equation*}
+mens det første elementet utenfor diagonalen blir
+\begin{equation*}
+   e_i=-\frac{1}{h^2}.
+\end{equation*}
+og dermed kan Schrödringerligningen skrives som
+\begin{equation*}
+d_iu_i+e_{i-1}u_{i-1}+e_{i+1}u_{i+1}  = \lambda u_i,
+\end{equation*}
+Som vi ser vil kun $V_i$ påvirke verdien til matriseelementene. Ligningssettet kan nå skrives som en ligning for egenverdier.
+
+\begin{equation}
+    \begin{bmatrix}d_0 & e_0 & 0   & 0    & \dots  &0     & 0 \\
+    e_1 & d_1 & e_1 & 0    & \dots  &0     &0 \\
+    0   & e_2 & d_2 & e_2  &0       &\dots & 0\\
+    \dots  & \dots & \dots & \dots  &\dots      &\dots & \dots\\
+    0   & \dots & \dots & \dots  &\dots  e_{N-1}     &d_{N-1} & e_{N-1}\\
+    0   & \dots & \dots & \dots  &\dots       &e_{N} & d_{N}
+\end{bmatrix}
+\begin{bmatrix} u_{0} \\
+    u_{1} \\
+    \dots\\ \dots\\ \dots\\
+    u_{N}
+    \end{bmatrix}=\lambda \begin{bmatrix} u_{0} \\
+    u_{1} \\
+    \dots\\ \dots\\ \dots\\
+    u_{N}
+    \end{bmatrix}.  
+    \label{eq:sematrix}
+\end{equation}
+
+\end{document}

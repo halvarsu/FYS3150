@@ -1,5 +1,6 @@
 #include <iostream>
 #include <armadillo>
+// #include "solve.h"
 #include "solve.h"
 
 
@@ -48,6 +49,7 @@ int main(int argc, char * argv[])
 
     // The algorithm
     // arma::eig_sym(eigValues, eigVectors, hamilton);
+    jacobiSolver(eigValues, eigVectors, hamilton);
 
     eigValues.save("eigval.txt", arma::arma_ascii);
     eigVectors.save("eigvec.txt", arma::arma_ascii);

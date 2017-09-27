@@ -1,29 +1,24 @@
-#include "solve.h"
+//#include "solve.h"
 #include <armadillo>
 
 // Finding best
 
-solve::solve()
-{
-    int A = 1;
-    std::cout << A << std::endl;
-}
-
-void jacobiSolver(arma::vec& eigval, arma::vec& eigvec, arma::mat& A){
-    int n = A.size();
-    double max_akl;
-    int k,l;
-    double tol = 1e-8;
-    while (max_akl > tol){
-        max_akl = maxOffDiag(A,k,l,n);
-        jacobiRotate(A,eigvec,k,l,n);
-        std::cout << A << std::endl;
+double maxOffDiag(arma::mat& A, int &k, int &l, int n){
+    double maxOff = 0;
+    for (int i = 0; i < n; i++){
+        for (int j = i+1; j < n; j++){
+            if (A(i,j)*A(i,j) > maxOff){
+                maxOff = A(i,j)*A(i,j);
+                k = i;
+                l = j;
+            }
+        }
     }
-
+    return maxOff;
 }
 
 
-void jacobiRotate(arma::mat& A, arma::vec& R, int k, int l, int n){
+void jacobiRotate(arma::mat& A, arma::mat& R, int k, int l, int n){
     // Rotates the matrix A in place so that A(k,l)=A(l,k)=0.
     // Also rotates the eigenvector for A, R
     double c,s,t;
@@ -60,21 +55,30 @@ void jacobiRotate(arma::mat& A, arma::vec& R, int k, int l, int n){
     return;
 }
 
-double maxOffDiag(arma::mat& A, int &k, int &l, int n){
-    double maxOff = 0;
-    for (int i = 0; i < n; i++){
-        for (int j = i+1; j < n; j++){
-            if (A(i,j)*A(i,j) > maxOff){
-                maxOff = A(i,j)*A(i,j);
-                k = i;
-                l = j;
-            }
+
+
+
+void jacobiSolver(arma::vec& eigval, arma::mat& eigvec, arma::mat& A){
+    unsigned int i, max_iter, n;
+    n = A.size();
+    double max_akl = std::numeric_limits<double>::infinity();
+    int k,l;
+    double tol = 1e-8;
+
+    eigvec = arma::eye<arma::mat>(n,n);
+
+
+    i = 0;
+    for (int i = 0; i < max_iter; i++) {
+        if (max_akl > tol ){
+            max_akl = maxOffDiag(A,k,l,n);
+            jacobiRotate(A,eigvec,k,l,n);
+            std::cout << A << std::endl;
+           } else {
+            break;
         }
     }
-    return maxOff;
 }
-
-
 
 
 

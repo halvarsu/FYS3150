@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-file_dir = "../build-cpp_proj2-Desktop_Qt_5_9_1_GCC_64bit-Debug/"
+file_dir = "../build-proj2-Desktop_Qt_5_9_1_GCC_64bit-Debug/"
 
 eigval = np.loadtxt(file_dir + "eigval.txt",skiprows=2)
 eigvec = np.loadtxt(file_dir + "eigvec.txt",skiprows=2)

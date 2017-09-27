@@ -6,10 +6,9 @@ CONFIG -= qt
 SOURCES += main.cpp \
     solve.cpp \
     tests/tests.cpp \
-    solver.cpp \
-    tests/tests_main.cpp
+    tests/tests_main.cpp \
+    hamilton_solver.cpp
 
-HEADERS += solve.h catch.hpp \
-    solver.h
+HEADERS += solve.h catch.hpp
 
 LIBS += -larmadillo -llapack -lblas

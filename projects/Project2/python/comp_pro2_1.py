@@ -66,29 +66,29 @@ for i in range(N):
 		B[k,i] = B[i,k]
 		B[i,l] = A[i,l]*c - A[i,k]*s
 		B[l,i] = B[i,l]
-print B
+#print B
 
 
 def matB(A,N,n):
 	B = np.copy(A)
 	for i in range(n):
-		k = find_largest(B,N)[1]
-		l = find_largest(B,N)[2]
+		_, k, l = find_largest(B,N)
+
 		s = s_c(B,k,l)[0]
 		c = s_c(B,k,l)[1]
-		B[k,k] = A[k,k]*c**2-2*A[k,l]*c*s+A[l,l]*s**2
-		B[l,l] = A[l,l]*c**2+2*A[k,l]*c*s+A[k,k]*s**2
+		B[k,k] = B[k,k]*c**2-2*B[k,l]*c*s+B[l,l]*s**2
+		B[l,l] = B[l,l]*c**2+2*B[k,l]*c*s+B[k,k]*s**2
 		B[k,l] = 0 #(A[k,k]-A[l,l])*c*s + A[k,l]*(c**2-s**2)
 		B[l,k] = 0 
 		for i in range(N):
 			if i != k and i!= l:
-				B[i,k] = A[i,k]*c - A[i,l]*s
+				B[i,k] = B[i,k]*c - B[i,l]*s
 				B[k,i] = B[i,k]
-				B[i,l] = A[i,l]*c - A[i,k]*s
+				B[i,l] = B[i,l]*c - B[i,k]*s
 				B[l,i] = B[i,l]
 	return B
 
-print matB(A,N,10000000)	
+print matB(A,N,40)	
 
 
 

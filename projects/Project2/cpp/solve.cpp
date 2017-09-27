@@ -1,10 +1,6 @@
 #include "solve.h"
 #include <armadillo>
 
-void jacobiSolver(arma::vec& eigval, arma::vec& eigvec, arma::mat& A);
-void jacobiRotate(arma::mat& A, arma::vec& R ,int k, int l,int n);
-double maxOffDiag(arma::mat& A, int& k, int& l, int n);
-
 // Finding best
 
 solve::solve()

@@ -2,11 +2,12 @@
 #include <armadillo>
 #include "solve.h"
 
+
 double potential(double r);
 void f(double  * a);
 void initialize(double *rMin, double *rMax, int* lOrbital, int* dim);
 
-int main()
+int main(int argc, char * argv[])
 {
     double rMin, rMax;
     int lOrbital, dim;
@@ -46,7 +47,7 @@ int main()
     arma::mat eigVectors;
 
     // The algorithm
-    arma::eig_sym(eigValues, eigVectors, hamilton);
+    // arma::eig_sym(eigValues, eigVectors, hamilton);
 
     eigValues.save("eigval.txt", arma::arma_ascii);
     eigVectors.save("eigvec.txt", arma::arma_ascii);

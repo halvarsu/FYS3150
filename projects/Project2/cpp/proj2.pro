@@ -5,9 +5,7 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     solve.cpp \
-    tests/tests.cpp \
-    tests/tests_main.cpp \
-    hamilton_solver.cpp
+    tests/test.cpp
 
 HEADERS += solve.h catch.hpp
 

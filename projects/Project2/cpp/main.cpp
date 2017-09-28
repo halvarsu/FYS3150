@@ -2,6 +2,8 @@
 #include <armadillo>
 // #include "solve.h"
 #include "solve.h"
+#define CATCH_CONFIG_RUNNER
+#include "catch.hpp"
 
 
 double potential(double r);
@@ -10,6 +12,14 @@ void initialize(double *rMin, double *rMax, int* lOrbital, int* dim);
 
 int main(int argc, char * argv[])
 {
+    if(argc > 1 && (std::string) argv[1] == "test"){
+        std::cout << argv[1] << std::endl;
+        int dumb = 1;
+        char* dumb1[1];
+        int result = Catch::Session().run(dumb, dumb1);
+        return result;
+    }
+
     double rMin, rMax;
     int lOrbital, dim;
     initialize(&rMin, &rMax, &lOrbital, &dim);
@@ -59,15 +69,12 @@ int main(int argc, char * argv[])
     return 0;
 }
 
-void f(double  * a){
-    *a = 10.;
-}
 
 void initialize(double *rMin, double *rMax, int* lOrbital, int* dim){
     *rMin = 0.0;
     *rMax = 5.0;
     *lOrbital = 0;
-    *dim = 200;
+    *dim = 100;
 }
 
 

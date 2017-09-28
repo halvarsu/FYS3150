@@ -22,14 +22,14 @@ TEST_CASE("Test jacobiRotate") {
     A(1,3) =  A(1,3) = 9.;
     jacobiRotate(A, vectors, 3, 4, n);
     REQUIRE(A(3,4) == 0);
+    REQUIRE(A(4,3) == 0);
 }
 
-TEST_CASE("testest") {
+TEST_CASE("Test jacobiSolver") {
     int n = 3;
     arma::mat A;
     A << 1 << 2 << 3 << arma::endr
       << 1 << 2 << 3 << arma::endr
       << 1 << 2 << 3;
     std::cout << A << std::endl;
-
 }

@@ -51,8 +51,8 @@ void jacobiRotate(arma::mat& A, arma::mat& R, int k, int l, int n){
         }
         double rik = R(i,k);
         double ril = R(i,l);
-        R(i,l) = c*rik - s*ril;
-        R(i,k) = c*ril + s*rik;
+        R(i,k) = c*rik - s*ril;
+        R(i,l) = c*ril + s*rik;
     }
     return;
 }
@@ -77,16 +77,8 @@ void jacobiSolver(arma::vec& eigval, arma::mat& eigvec, arma::mat& A){
             break;
         }
     }
-    eigval = arma::sort(A.diag());
+    eigval = A.diag();
 }
-
-
-
-
-
-
-
-
 
 
 

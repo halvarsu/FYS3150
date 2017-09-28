@@ -6,7 +6,7 @@
 #include "catch.hpp"
 
 
-double potential(double r);
+double potential(double r, double omega, bool interacting);
 void f(double  * a);
 void initialize(double *rMin, double *rMax, int* lOrbital, int* dim);
 
@@ -34,9 +34,12 @@ int main(int argc, char * argv[])
     arma::vec v = arma::zeros(dim);
     arma::vec r = arma::linspace(rMin, rMax, dim);
 
+    bool interacting = true;
+    double omega = 1/4.;
+
     for	(int i = 0; i < dim; i++){
         r[i] = rMin + (i+1) * step;
-        v[i] = potential(r[i]) + orbitalFactor/(r[i] * r[i]);
+        v[i] = potential(r[i], omega, interacting) + orbitalFactor/(r[i] * r[i]);
     }
 
     // setting up a tridiagonal matrix and finding eigenvectors and -values
@@ -61,6 +64,7 @@ int main(int argc, char * argv[])
     // arma::eig_sym(eigValues, eigVectors, hamilton);
     jacobiSolver(eigValues, eigVectors, hamilton);
 
+    // eigValues.print();
     eigValues.save("eigval.txt", arma::arma_ascii);
     eigVectors.save("eigvec.txt", arma::arma_ascii);
     r.save("radial_val.txt", arma::arma_ascii);
@@ -72,12 +76,30 @@ int main(int argc, char * argv[])
 
 void initialize(double *rMin, double *rMax, int* lOrbital, int* dim){
     *rMin = 0.0;
-    *rMax = 5.0;
+    *rMax = 10.0;
     *lOrbital = 0;
     *dim = 100;
 }
 
 
-double potential(double r){
-    return r*r;
+double potential(double r, double omega, bool interacting){
+    if (interacting) {
+        return omega*omega*r*r +1/r;
+    } else {
+        return r*r;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

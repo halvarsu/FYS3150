@@ -2,12 +2,10 @@
 
 \usepackage{amsmath}
 \usepackage{graphicx}
-\usepackage{esvect}
 \usepackage[margin=0.7in]{geometry}
 \usepackage{float}
 \usepackage{listings}
 \usepackage[utf8]{inputenc}
-\usepackage[norsk]{babel}
 \usepackage[parfill]{parskip}  
 
 \begin{document}
@@ -22,107 +20,97 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-    We study the cases of one and two electrons trapped in a harmonic oscillator. 
+    We stbihihudy theoioio cases of one and two electrons trapped in a harmonic oscillator. 
 
 \end{abstract}
 \newpage
 \pagenumbering{arabic}
 
 
-% \section*{Teori}
-
-
+\section*{Abstract}
 Ser på den radielle Schrôdringerligninen for ett elektron. Den ser slik ut:
 
+
+\section*{Introduction}
+Eigenvalues a
+
+
+\section*{Theory/Methods}
+\subsection*{Making the matrix}
+The analytical Schroedringer equation is as follows
 \begin{equation*}
   -\frac{\hbar^2}{2 m} \left ( \frac{1}{r^2} \frac{d}{dr} r^2
   \frac{d}{dr} - \frac{l (l + 1)}{r^2} \right )R(r) 
      + V(r) R(r) = E R(r)
 \end{equation*}
-der  $V(r) = (1/2)kr^2$ er harmonisk oscillator potensial, $k=m\omega^2$,
-$\omega$ er oscillatorfrekvens, E er energien til den harmoniske
-oscillatoren og tar verdiene
+where  $V(r) = (1/2)kr^2$ is the harmonic oscillator potential, k is the displacement factor where $k=m\omega^2$.
+$\omega$ is the frequence of the oscillator and m is the mass of whatever's oscillating, in this case the electron. E is the energy og the oscillator and will take the values
 
 \begin{equation*}
 E_{nl}=  \hbar \omega \left(2n+l+\frac{3}{2}\right),
 \end{equation*}
-der n og l er kvantetall og tar verdiene $n=0,1,2,\dots$ and
-$l=0,1,2,\dots$. Ettersom vi bruker sfæriske coordinater vil $r\in
-[0,\infty)$.\\
 
-For å forenkle uttrykket kan vi sette $R(r) = (1/r) u(r)$, som gir
+due to quantum mechanical effects, where n and l are quantum numbers with the following possible values $n=0,1,2,\dots$ and
+$l=0,1,2,\dots$. R is the wave function, dependant on distance r. We'll be using spherical coordinates, such that $r\in [0,\infty)$ is the distance from the center of the oscillator to the position of the electron.\\
+
+In order to simplify the equation, we'll make the new variable $u(r)$ such that $R(r) = (1/r) u(r)$. This gives
 
 \begin{equation*}
   -\frac{\hbar^2}{2 m} \frac{d^2}{dr^2} u(r) + \left ( V(r) + \frac{l (l + 1)}{r^2}\frac{\hbar^2}{2 m}\right ) u(r)  = E u(r)
 \end{equation*}
-der $u(0)=0$ og $u(\infty)=0$ ettersom sannsynlighetskurven flater drastisk
-ut når r stiger. Ved å substituere $\rho = (1/\alpha) r$ kan vi gjøre
-variablen dimensjonsløs.
+
+the next step in generalizing the equation will be making the variable dimentionless by introducing a new variable $\rho = (1/\alpha) r$ where  $u(0)=0$ and $u(\infty)=0$. The equation is now a function of the dimentionless $\rho$.
 
 \begin{equation*}
   -\frac{\hbar^2}{2 m \alpha^2} \frac{d^2}{d\rho^2} u(\rho)+ \left ( V(\rho) + \frac{l (l + 1)}{\rho^2}\frac{\hbar^2}{2 m\alpha^2} \right ) u(\rho)  = E u(\rho)
 \end{equation*}
-Dersom vi setter momentet $l=0$ og plugger inn potensialet og multipliserer
-med $2m\alpha^2/\hbar^2$ får vi følgende ligning
+We will be looking at a case with no angular momentum, $l=0$. The last step will be inserting the potential and removing all constants from the second derivative by multiplying with $2m\alpha^2/\hbar^2$. This leaves us with
 
 \begin{equation*}
   -\frac{d^2}{d\rho^2} u(\rho) 
        + \frac{mk}{\hbar^2} \alpha^4\rho^2u(\rho)  = \frac{2m\alpha^2}{\hbar^2}E u(\rho) .
 \end{equation*}
-Dersom vi bestemmer at $\alpha  = \left(\frac{\hbar^2}{mk}\right)^{1/4}$ og
-lager variabel $\lambda = \frac{2m\alpha^2}{\hbar^2}E$ ender vi opp med en
-Schrödringer-ligning på formen
+
+Since $\alpha$ is an introduced constant, we can set it to $\alpha  = \left(\frac{\hbar^2}{mk}\right)^{1/4}$ and define a new eigenvalue $\lambda = \frac{2m\alpha^2}{\hbar^2}E$. This will result in a new Schrödringer equation which is a lot easier to handle numerically;
 \begin{equation*}
   -\frac{d^2}{d\rho^2} u(\rho) + \rho^2u(\rho)  = \lambda u(\rho) .
 \end{equation*}
-
-Som forklart i forrige prosjekt, kan den andrederiverte skrives på formen
+As explained in the previous project (Project 1), the second derivative can be expressed as
 \begin{equation}
     u''=\frac{u(\rho+h) -2u(\rho) +u(\rho-h)}{h^2} +O(h^2),
     \label{eq:diffoperation}
 \end{equation}
-Grenseverdiene for $\rho$, $\rho_{\mathrm{min}}=0$ og
-$\rho_{\mathrm{max}}$, bestemmes av hvor elektronet kan befinne seg, altså
-et sted mellom 0 og uendelig langt borte. Maksverdien må riktignok
-forenkles til en mer håndterlig verdi. Skrittlengden vi bruker blir den
-totale lengden delt på antall skritt.
+where the interval of $\rho$ is $\rho_{\mathrm{min}}=0$ and
+$\rho_{\mathrm{max}}$ correlates to the point where the wave function is reasonably close to zero. Theoretically it should be set to infinity, but this is practically difficult to enforce. The step length of the numerical second derivative function will then be the total length of the distance we're working devided by number of steps.
 
 \begin{equation*}
   h=\frac{\rho_N-\rho_0 }{N}.
 \end{equation*}
-Schrödingerligningen ser da slik ut:
+This gives us a set of discrete values for the variable $\rho_i = ih$ since $\rho_0 = 0$\\\\
+By now, put equation reads
 \begin{equation}
 -\frac{u(\rho_i+h) -2u(\rho_i) +u(\rho_i-h)}{h^2}+\rho_i^2u(\rho_i)  = \lambda u(\rho_i),
 \end{equation}
-som kan skrives på en enklere måte der $u(p_i+h)=u_{i+1}$ osv:
+which can by compacted by doing the following transformation $u(p_i+h)=u_{i+1}$ etc.:
 
 \begin{equation}
--\frac{u_{i+1} -2u_i +u_{i-1} }{h^2}+V_iu_i  = \lambda u_i,
+-\frac{u_{i+1} -2u_i +u_{i-1} }{h^2}+\rho_i^2u_i  = \lambda u_i,
 \end{equation}
 
-der $V_i=\rho_i^2$. Som forklart i forrige prosjekt kan dette settet av
-lineære ligninger uttrykkes ved å bruke matriseregning med en
-diagonalvektor som en vektor på hver side av diagonalen. Det første
-elementet i den diagonale matrisen blir
+This will result in a set of linear equations which can be expressed through matrix calculations. It will be an NxN triagonal matrix with values only on the diagonal and directly underneath and above the diagnoal. The rest will be zero. The diagnoal elements will be
 
 \begin{equation*}
    d_i=\frac{2}{h^2}+V_i,
 \end{equation*}
 
-mens det første elementet utenfor diagonalen blir
+and the rest of the non-zero will be
 
 \begin{equation*}
    e_i=-\frac{1}{h^2}.
 \end{equation*}
 
-og dermed kan Schrödringerligningen skrives som
+Finally, we're left with an eigenvalue equation
 
-\begin{equation*}
-d_iu_i+e_{i-1}u_{i-1}+e_{i+1}u_{i+1}  = \lambda u_i,
-\end{equation*}
-
-Som vi ser vil kun $V_i$ påvirke verdien til matriseelementene.
-Ligningssettet kan nå skrives som en ligning for egenverdier.
 
 \begin{equation}
     \begin{bmatrix}
@@ -142,5 +130,36 @@ Ligningssettet kan nå skrives som en ligning for egenverdier.
     \end{bmatrix}.  
     \label{eq:sematrix}
 \end{equation}
+and our Schroedringer equation is
+\begin{equation*}
+d_iu_i+e_{i-1}u_{i-1}+e_{i+1}u_{i+1}  = \lambda u_i,
+\end{equation*}
+where $u$ is unknown. 
+\subsection*{Jacobi rotation algorithm}
+In order to find the eigenvalues of this matrix, we will use Jacobi's method, which is based on turning our matrix into a tri diagonal one with unitary transformations. We can do this with the following process
+\begin{align*}
+    \textbf{B} = \textbf{S}^T\textbf{AS}
+\end{align*}
+where $\textbf{A}$ is our original matrix and $\textbf{B}$ is the tridiagonal matrix we wish to find.
+\begin{align*}
+    \tau &= \frac{a_{ll}-a_{kk}}{2a_{kl}}\\
+    t^2 &+2\tau t -1 = 0\\
+    t &= -\tau\pm \sqrt{1+\tau^2}\\
+    c &= \frac{1}{\sqrt{1+t^2}}
+\end{align*}.
+
+\begin{align*}
+    b_{ik} &= a_{ik}cos\theta-a_{il}sin\theta\ \ i\neq k, i \neq l\\
+    b_{il} &= a_{il}cos\theta-a_{ik}sin\theta\ \ i\neq k, i \neq l\\
+    b_{kk} &= a_{kk}cos^2\theta-2a_{kl}cos\theta sin\theta + a_ {ll}sin^2\theta\\
+    b_{ll} &= a_{ll}cos^2\theta+2a_{kl}cos\theta sin\theta + a_ {kk}sin^2\theta\\
+    b_ {kl} &= (a_{kk}-a_{ll})cos\theta sin\theta +a_{kl}(cos^2\theta-sin^2\theta)
+\end{align*}
+
+
+\section*{Code/Implementation}
+\section*{Results}
+\section*{Conclusions}
+\section*{References}
 
 \end{document}

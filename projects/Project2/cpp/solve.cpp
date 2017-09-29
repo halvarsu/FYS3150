@@ -2,8 +2,14 @@
 #include <armadillo>
 
 // Finding best
+int hamiltonSolve(arma::vec& rho, arma::vec& eigval, arma::mat& eigvec,
+                  double omega, int lOrbital,  bool interacting){
+    hamiltonSolve(rho, eigval,eigvec, omega, lOrbital, interacting, "jacobi");
+}
 
-int hamiltonSolve(arma::vec& rho, arma::vec& eigval, arma::mat& eigvec, double omega, int lOrbital, bool interacting){
+int hamiltonSolve(arma::vec& rho, arma::vec& eigval, arma::mat& eigvec,
+                  double omega, int lOrbital,  bool interacting,
+                  std::string solver){
     int dim = rho.n_rows;
     double step = rho[1] - rho[0];
     double diagConst = 2.0/(step*step);
@@ -31,8 +37,11 @@ int hamiltonSolve(arma::vec& rho, arma::vec& eigval, arma::mat& eigvec, double o
     hamilton(dim-1,dim-1) = diagConst + v[dim-1];
 
     // The algorithm to solve ham and fill in eigenvectors and -values
-    // arma::eig_sym(eigValues, eigVectors, hamilton);
-    jacobiSolver(eigval, eigvec, hamilton);
+    if (solver == "jacobi") {
+        jacobiSolver(eigval, eigvec, hamilton);
+    } else if(solver == "arma") {
+        arma::eig_sym(eigval, eigvec, hamilton);
+    }
 
     return 0;
 }
@@ -45,6 +54,29 @@ double potential(double r, double omega, bool interacting){
     }
 }
 
+
+void jacobiSolver(arma::vec& eigval, arma::mat& eigvec, arma::mat& A){
+    unsigned int max_iter, n;
+    unsigned int iter;
+    n = A.n_cols;
+    max_iter = n*n*n;
+    double max_akl = std::numeric_limits<double>::infinity();
+    int k,l;
+    double tol = 1e-8;
+
+    eigvec = arma::eye<arma::mat>(n,n);
+
+    for (unsigned int i = 0; i < max_iter; i++) {
+        if (max_akl > tol ){
+            max_akl = maxOffDiag(A,k,l,n);
+            jacobiRotate(A,eigvec,k,l,n);
+           } else {
+            std::cout << "iterations used: " << i-1 << std::endl;
+            break;
+        }
+    }
+    eigval = A.diag();
+}
 
 double maxOffDiag(arma::mat& A, int &k, int &l, int n){
     /* Accepts a matrix, two indices and the size of the matrix,
@@ -103,28 +135,6 @@ void jacobiRotate(arma::mat& A, arma::mat& R, int k, int l, int n){
 
 
 
-void jacobiSolver(arma::vec& eigval, arma::mat& eigvec, arma::mat& A){
-    unsigned int max_iter, n;
-    unsigned int iter;
-    n = A.n_cols;
-    max_iter = n*n*n;
-    double max_akl = std::numeric_limits<double>::infinity();
-    int k,l;
-    double tol = 1e-8;
-
-    eigvec = arma::eye<arma::mat>(n,n);
-
-    for (unsigned int i = 0; i < max_iter; i++) {
-        if (max_akl > tol ){
-            max_akl = maxOffDiag(A,k,l,n);
-            jacobiRotate(A,eigvec,k,l,n);
-           } else {
-            std::cout << "iterations used: " << i << std::endl;
-            break;
-        }
-    }
-    eigval = A.diag();
-}
 
 
 

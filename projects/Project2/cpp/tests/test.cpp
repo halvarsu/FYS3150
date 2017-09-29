@@ -28,8 +28,42 @@ TEST_CASE("Test jacobiRotate") {
 TEST_CASE("Test jacobiSolver") {
     int n = 3;
     arma::mat A;
-    A << 1 << 2 << 3 << arma::endr
-      << 1 << 2 << 3 << arma::endr
-      << 1 << 2 << 3;
-    std::cout << A << std::endl;
+    A << 2 << -4 << 2 << arma::endr
+      << -4 << 4 << 4 << arma::endr
+      << 2 << 4 << 2;
+    arma::mat eigvec;
+    arma::vec eigval, expect;
+    expect << -4 << arma::endr << 4 << arma::endr << 8;
+
+    jacobiSolver(eigval, eigvec, A);
+    REQUIRE(arma::all(arma::vectorise(expect - arma::sort(eigval)) < 1e-10 ));
 }
+
+
+TEST_CASE("Test hamiltonSolve") {
+    // testing orthogonality
+    int dim = 100;
+    double rhoMin = 0, rhoMax = 10., omega = 0;
+    double step = (rhoMax - rhoMin)/dim;
+    arma::mat eigvec, eigvecT, I, r;
+    arma::vec eigval, rho;
+    bool interacting = false;
+
+    rho = arma::linspace(rhoMin + step, rhoMax, dim);
+    hamiltonSolve(rho, eigval, eigvec, omega, 0, interacting);
+
+    eigvecT = arma::trans(eigvec);
+    I = arma::eye(dim,dim);
+    REQUIRE(arma::all(arma::vectorise(eigvec*eigvecT- I) < 1e-10));
+}
+
+
+
+
+
+
+
+
+
+
+

@@ -3,6 +3,49 @@
 
 // Finding best
 
+int hamiltonSolve(arma::vec& rho, arma::vec& eigval, arma::mat& eigvec, double omega, int lOrbital, bool interacting){
+    int dim = rho.n_rows;
+    double step = rho[1] - rho[0];
+    double diagConst = 2.0/(step*step);
+    double offDiagConst = -1.0/(step*step);
+    double orbitalFactor = lOrbital * ( lOrbital + 1.0 );
+    arma::vec v = arma::zeros(dim);
+
+    for	(int i = 0; i < dim; i++){
+        v[i] = potential(rho[i], omega, interacting) + orbitalFactor/(rho[i] * rho[i]);
+    }
+
+    // setting up a tridiagonal matrix
+    arma::mat hamilton = arma::zeros<arma::mat>(dim, dim);
+    hamilton(0,0) = diagConst  + v[0];
+    hamilton(0,1) = offDiagConst;
+
+
+    for (int i = 1; i < dim - 1; i++ ) {
+        hamilton(i,i-1) = offDiagConst;
+        hamilton(i,i) = diagConst + v[i];
+        hamilton(i,i+1) = offDiagConst;
+    }
+
+    hamilton(dim-1,dim-2) = offDiagConst;
+    hamilton(dim-1,dim-1) = diagConst + v[dim-1];
+
+    // The algorithm to solve ham and fill in eigenvectors and -values
+    // arma::eig_sym(eigValues, eigVectors, hamilton);
+    jacobiSolver(eigval, eigvec, hamilton);
+
+    return 0;
+}
+
+double potential(double r, double omega, bool interacting){
+    if (interacting) {
+        return omega*omega*r*r +1/r;
+    } else {
+        return r*r;
+    }
+}
+
+
 double maxOffDiag(arma::mat& A, int &k, int &l, int n){
     /* Accepts a matrix, two indices and the size of the matrix,
      * sets the indices to argmax(A) and returns max(A) */
@@ -62,7 +105,9 @@ void jacobiRotate(arma::mat& A, arma::mat& R, int k, int l, int n){
 
 void jacobiSolver(arma::vec& eigval, arma::mat& eigvec, arma::mat& A){
     unsigned int max_iter, n;
+    unsigned int iter;
     n = A.n_cols;
+    max_iter = n*n*n;
     double max_akl = std::numeric_limits<double>::infinity();
     int k,l;
     double tol = 1e-8;
@@ -74,6 +119,7 @@ void jacobiSolver(arma::vec& eigval, arma::mat& eigvec, arma::mat& A){
             max_akl = maxOffDiag(A,k,l,n);
             jacobiRotate(A,eigvec,k,l,n);
            } else {
+            std::cout << "iterations used: " << i << std::endl;
             break;
         }
     }

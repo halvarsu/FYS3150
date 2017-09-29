@@ -8,7 +8,7 @@
 
 double potential(double r, double omega, bool interacting);
 void f(double  * a);
-void initialize(double *rMin, double *rMax, int* lOrbital, int* dim);
+void initialize(double *omega, double *rMin, double *rMax, int* lOrbital, int* dim);
 
 int main(int argc, char * argv[])
 {
@@ -20,86 +20,37 @@ int main(int argc, char * argv[])
         return result;
     }
 
-    double rMin, rMax;
     int lOrbital, dim;
-    initialize(&rMin, &rMax, &lOrbital, &dim);
+    double rhoMin, rhoMax, step, omega;
+    bool interacting;
+    arma::mat eigvec;
+    arma::vec eigval, rho;
 
-    // initialize constants
-    double step = rMax/(dim+1);
-    double diagConst = 2.0/(step*step);
-    double offDiagConst = -1.0/(step*step);
-    double orbitalFactor = lOrbital* ( lOrbital + 1.0);
+    lOrbital = 0;
+    dim      = 200;
+    omega    = 0.0;
+    rhoMin 	  = 0.0;
+    rhoMax 	  = 7.0;
+    step = (rhoMax - rhoMin)/dim;
+    interacting = false;
 
-    // Calculate array of potential values
-    arma::vec v = arma::zeros(dim);
-    arma::vec r = arma::linspace(rMin, rMax, dim);
+    // Calculate array of position values
+    rho = arma::linspace(rhoMin+step, rhoMax, dim);
 
-    bool interacting = true;
-    double omega = 1/4.;
+    // setting up a soon to be tridiagonal matrix and storage for its
+    // eigenvectors and -values
+    hamiltonSolve(rho, eigval, eigvec, omega, 0, interacting);
 
-    for	(int i = 0; i < dim; i++){
-        r[i] = rMin + (i+1) * step;
-        v[i] = potential(r[i], omega, interacting) + orbitalFactor/(r[i] * r[i]);
-    }
 
-    // setting up a tridiagonal matrix and finding eigenvectors and -values
-    arma::mat hamilton = arma::zeros<arma::mat>(dim, dim);
-    hamilton(0,0) = diagConst  + v[0];
-    hamilton(0,1) = offDiagConst;
+    // creating filename and saving values
+    char* filename = new char[20];
+    int len = std::sprintf(filename, "%.2f_%.2f_%d",omega,rhoMax, dim);
+    std::cout << filename << std::endl;
 
-    for (int i = 1; i < dim - 1; i++ ) {
-        hamilton(i,i-1) = offDiagConst;
-        hamilton(i,i) = diagConst + v[i];
-        hamilton(i,i+1) = offDiagConst;
-    }
-
-    hamilton(dim-1,dim-2) = offDiagConst;
-    hamilton(dim-1,dim-1) = diagConst + v[dim-1];
-
-    // diagonalize and obtain eigenvalues, unsorted
-    arma::vec eigValues;
-    arma::mat eigVectors;
-
-    // The algorithm
-    // arma::eig_sym(eigValues, eigVectors, hamilton);
-    jacobiSolver(eigValues, eigVectors, hamilton);
-
-    // eigValues.print();
-    eigValues.save("eigval.txt", arma::arma_ascii);
-    eigVectors.save("eigvec.txt", arma::arma_ascii);
-    r.save("radial_val.txt", arma::arma_ascii);
-
-    std::cout << "Hello World!" << step << std::endl;
+    // eigvals.print();
+    eigval.save((std::string)filename+"val.txt", arma::arma_ascii);
+    eigvec.save((std::string)filename+"vec.txt", arma::arma_ascii);
+    rho.save((std::string)filename+"rho.txt", arma::arma_ascii);
     return 0;
 }
-
-
-void initialize(double *rMin, double *rMax, int* lOrbital, int* dim){
-    *rMin = 0.0;
-    *rMax = 10.0;
-    *lOrbital = 0;
-    *dim = 100;
-}
-
-
-double potential(double r, double omega, bool interacting){
-    if (interacting) {
-        return omega*omega*r*r +1/r;
-    } else {
-        return r*r;
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -2,27 +2,39 @@
 #include <armadillo>
 
 // Finding best
-int hamiltonSolve(arma::vec& rho, arma::vec& eigval, arma::mat& eigvec,
-                  double omega, int lOrbital,  bool interacting){
-    hamiltonSolve(rho, eigval,eigvec, omega, lOrbital, interacting, "jacobi");
+int hamiltonSolve(double rhoMin, double rhoMax, int dim,
+                  double omega, int lOrbital, bool interacting, std::string solver){
+    arma::vec eigval;
+    arma::mat eigvec;
+    return hamiltonSolve(eigval, eigvec, rhoMin, rhoMax, dim, omega, lOrbital, interacting, solver);
 }
 
-int hamiltonSolve(arma::vec& rho, arma::vec& eigval, arma::mat& eigvec,
-                  double omega, int lOrbital,  bool interacting,
-                  std::string solver){
-    int dim = rho.n_rows;
-    double step = rho[1] - rho[0];
-    double diagConst = 2.0/(step*step);
-    double offDiagConst = -1.0/(step*step);
-    double orbitalFactor = lOrbital * ( lOrbital + 1.0 );
-    arma::vec v = arma::zeros(dim);
+int hamiltonSolve(arma::vec& eigval, arma::mat& eigvec, double rhoMin, double rhoMax, int dim,
+                  double omega, int lOrbital, bool interacting, std::string solver){
+    arma::vec rho, v;
+    arma::mat hamilton;
+    double step, diagConst, offDiagConst, orbitalFactor;
+    std::string filename;
+    char* temp;
+
+    step = (rhoMax - rhoMin)/(dim);
+    diagConst = 2.0/(step*step);
+    offDiagConst = -1.0/(step*step);
+    orbitalFactor = lOrbital * ( lOrbital + 1.0 );
+
+    rho = arma::zeros(dim);
+    v = arma::zeros(dim);
 
     for	(int i = 0; i < dim; i++){
-        v[i] = potential(rho[i], omega, interacting) + orbitalFactor/(rho[i] * rho[i]);
+        rho[i] = rhoMin + (i+1)*step;
+        v[i] = potential(rho[i], omega, interacting); //+ orbitalFactor/(rho[i] * rho[i]);
     }
+//    std::cout << step << std::endl;
+//    std::cout << rho(1) - rho(0) << std::endl;
+//    std::cout << rho(dim-1) << std::endl;
 
     // setting up a tridiagonal matrix
-    arma::mat hamilton = arma::zeros<arma::mat>(dim, dim);
+    hamilton = arma::zeros<arma::mat>(dim, dim);
     hamilton(0,0) = diagConst  + v[0];
     hamilton(0,1) = offDiagConst;
 
@@ -37,13 +49,29 @@ int hamiltonSolve(arma::vec& rho, arma::vec& eigval, arma::mat& eigvec,
     hamilton(dim-1,dim-1) = diagConst + v[dim-1];
 
     // The algorithm to solve ham and fill in eigenvectors and -values
-    if (solver == "jacobi") {
+    if ((std::string) solver == "jacobi") {
         jacobiSolver(eigval, eigvec, hamilton);
-    } else if(solver == "arma") {
+    } else if((std::string) solver == "arma") {
         arma::eig_sym(eigval, eigvec, hamilton);
     }
 
+    temp = new char[30];
+    if (interacting) {
+        std::sprintf(temp, "omega_%.2f_rho_%.2f_N_%d",omega, rhoMax, dim);
+        filename = "interacting/" + solver + "/" + (std::string) temp;
+    } else {
+        std::sprintf(temp, "rho_%.2f_N_%d",rhoMax, dim);
+        filename = "non_interacting/" + solver + "/" + (std::string) temp;
+    }
+    std::cout << "saving " << filename << std::endl;
+    save(rho, eigval, eigvec, filename);
     return 0;
+}
+
+void save(arma::vec& rho,arma::vec& eigval,arma::mat& eigvec, std::string filename) {
+    eigval.save((std::string)filename+"val.txt", arma::arma_ascii);
+    eigvec.save((std::string)filename+"vec.txt", arma::arma_ascii);
+    rho.save((std::string)filename+"rho.txt", arma::arma_ascii);
 }
 
 double potential(double r, double omega, bool interacting){
@@ -108,6 +136,8 @@ void jacobiRotate(arma::mat& A, arma::mat& R, int k, int l, int n){
         }
         c = 1/sqrt(1+t*t);
         s = t*c;
+    } else {
+        return;
     }
     double akk = A(k,k);
     double all = A(l,l);

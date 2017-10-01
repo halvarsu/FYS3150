@@ -7,6 +7,7 @@ SOURCES += main.cpp \
     solve.cpp \
     tests/test.cpp
 
-HEADERS += solve.h catch.hpp
+HEADERS += solve.h catch.hpp \
+    main.h
 
 LIBS += -larmadillo -llapack -lblas

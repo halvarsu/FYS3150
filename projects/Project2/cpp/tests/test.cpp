@@ -50,7 +50,7 @@ TEST_CASE("Test hamiltonSolve") {
     bool interacting = false;
 
     rho = arma::linspace(rhoMin + step, rhoMax, dim);
-    hamiltonSolve(rho, eigval, eigvec, omega, 0, interacting);
+    hamiltonSolve(eigval, eigvec,  rhoMin, rhoMax, dim, omega, 0, interacting, "jacobi");
 
     eigvecT = arma::trans(eigvec);
     I = arma::eye(dim,dim);

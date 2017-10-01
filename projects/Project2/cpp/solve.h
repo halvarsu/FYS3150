@@ -3,15 +3,13 @@
 
 #include <armadillo>
 
-int hamiltonSolve(arma::vec& rho, arma::vec& eigval, arma::mat& eigvec,
-                  double omega, int lOrbital, bool interacting);
-int hamiltonSolve(arma::vec& rho, arma::vec& eigval, arma::mat& eigvec,
-                  double omega, int lOrbital, bool interacting,
-                  std::string solver);
-void jacobiSolver(arma::vec& eigval, arma::mat& eigvec, arma::mat& A);
-void jacobiRotate(arma::mat& A, arma::mat& R ,int k, int l,int n);
-double maxOffDiag(arma::mat& A, int& k, int& l, int n);
-double potential(double r, double omega, bool interacting);
+void save(arma::vec&, arma::vec&, arma::mat&, std::string);
+int hamiltonSolve(double, double, int, double, int, bool, std::string = "jacobi");
+int hamiltonSolve(arma::vec&, arma::mat&, double, double, int, double, int, bool, std::string = "jacobi");
+void jacobiSolver(arma::vec&, arma::mat&, arma::mat&);
+void jacobiRotate(arma::mat&, arma::mat& ,int, int, int);
+double maxOffDiag(arma::mat&, int&, int&, int);
+double potential(double, double, bool);
 
 class solve
 {

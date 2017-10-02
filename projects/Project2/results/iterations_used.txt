@@ -1,0 +1,11 @@
+iterations used: 3205
+iterations used: 9510
+iterations used: 19020
+iterations used: 32139
+iterations used: 48405
+iterations used: 68532
+iterations used: 91713
+iterations used: 118156
+iterations used: 147812
+iterations used: 182453
+iterations used: 219750

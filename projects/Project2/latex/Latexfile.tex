@@ -20,7 +20,7 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-    We study the cases of one and two electrons trapped in a harmonic oscillator. 
+    We stbihihudy theoioio cases of one and two electrons trapped in a harmonic oscillator. 
 
 \end{abstract}
 \newpage
@@ -136,18 +136,37 @@ d_iu_i+e_{i-1}u_{i-1}+e_{i+1}u_{i+1}  = \lambda u_i,
 \end{equation*}
 where $u$ is unknown. 
 \subsection*{Jacobi rotation algorithm}
-In order to find the eigenvalues of this matrix, we will use Jacobi's method, which is based on turning our matrix into a tri diagonal one with unitary transformations. We can do this with the following process
+In order to find the eigenvalues of this matrix, we will use Jacobi's method, which is based on turning our matrix into a tri diagonal one with unitary transformations. We can do this with the following equation 
 \begin{align*}
     \textbf{B} = \textbf{S}^T\textbf{AS}
 \end{align*}
-where $\textbf{A}$ is our original matrix and $\textbf{B}$ is the tridiagonal matrix we wish to find.
+where $\textbf{A}$ is our original matrix and $\textbf{B}$ is the tridiagonal matrix we wish to find. $\textbf{S}$ and $\textbf{S}^T=\textbf{S}^{-1}$ are our transformation matrices. The process will rotate the 2-dimentional linear subspace such that all the non-diagonal elements will get closer to zero for each rotation.
+The $\textbf{S}$ matrix has has the form
 \begin{align*}
-    \tau &= \frac{a_{ll}-a_{kk}}{2a_{kl}}\\
-    t^2 &+2\tau t -1 = 0\\
-    t &= -\tau\pm \sqrt{1+\tau^2}\\
-    c &= \frac{1}{\sqrt{1+t^2}}
-\end{align*}.
+    \textbf{S} &=
+    \begin{bmatrix}
+        1     & 0     & 0     & \dots  & 0 & 0 & \dots & 0 & 0\\
+        0     & 1     & 0     & \dots  & 0 & 0 & \dots & 0 & 0\\
+        0     & 0     & 1     & \dots  & 0 & 0 & \dots & 0 & 0\\
+        \dots & \dots & \dots & \dots & \dots & \dots & \dots& \dots & \dots\\
+        0 & 0 & 0 & \dots & cos\theta & 0 & \dots& 0 & sin\theta\\
+        0     & 0 & 0 & \dots & 0 & 1 &\dots & 0 & 0\\
+        \dots & \dots & \dots & \dots & \dots & \dots & \dots& \dots & \dots\\
+        0     & 0 & 0 & \dots  & 0 & 0 & \dots & 1 & 0\\
+        0     & 0 & 0 & \dots  & -sin\theta & 0 & \dots &  0 & cos\theta
+    \end{bmatrix}
+\end {align*}
+and does the rotation around the angle $\theta$ which is chosen such that $cot(2\theta) = \frac{a_{ll}-a_{kk}}{2a_{kl}}$. The matrix element $a_{kl}$ will be the largest element outside the diagonal and the sinus og cosinus is determined by  
 
+
+\begin{align*}
+    \tau &= cot(2\theta) = \frac{a_{ll}-a_{kk}}{2a_{kl}}\\
+    t^2 &+2\tau t -1 = 0\\
+    \rightarrow t &= -\tau\pm \sqrt{1+\tau^2}\\
+    c &= \frac{1}{\sqrt{1+t^2}}\\
+    s &= tc
+\end{align*}.
+Once the angles are known, the corresponding matrix elements will be given the new values
 \begin{align*}
     b_{ik} &= a_{ik}cos\theta-a_{il}sin\theta\ \ i\neq k, i \neq l\\
     b_{il} &= a_{il}cos\theta-a_{ik}sin\theta\ \ i\neq k, i \neq l\\
@@ -155,16 +174,50 @@ where $\textbf{A}$ is our original matrix and $\textbf{B}$ is the tridiagonal ma
     b_{ll} &= a_{ll}cos^2\theta+2a_{kl}cos\theta sin\theta + a_ {kk}sin^2\theta\\
     b_ {kl} &= (a_{kk}-a_{ll})cos\theta sin\theta +a_{kl}(cos^2\theta-sin^2\theta)
 \end{align*}
+By doing this process enough times, the non diagonal elements will be close or equal to zero, and we're left with a diagnoal matrix containing the eigenvalues of our wave function.\\
+
+A way to ensure that our matrix converges to a diagonal matrix and is preserving its properties, we can make sure that the Frobenius norm is preseved. The Frobenius norm is defined
+\begin{align*}
+    \left|\left|\textbf{A}\right|\right|_F &= \sqrt{\sum_{i=1}^n\sum_{j=1}^n|a_{ij}|^2}
+\end{align*}
+and the aim is to reduce the norm of the off-diagonal matrix elements thus getting closer to a diagonal matrix step by step. Using a 2x2 matrix for simplicity, our transformation will take the form
+\begin{align*}
+    \begin{bmatrix}
+        b_{kk} & 0\\
+        0 & b_{ll}
+    \end{bmatrix}&=
+    \begin{bmatrix}
+        c & -s\\
+        s & c
+    \end{bmatrix}
+    \begin{bmatrix}
+        a_{kk} & a_{kl}\\
+        a_{lk} & a_{ll}
+    \end{bmatrix}
+    \begin{bmatrix}
+        c & s\\
+        -s & c
+    \end{bmatrix}\\
+\end{align*}
+Meaning
+\begin{align*}
+    b_{kk}^2+b_{ll}^2 &= a_{kk}^2+a_{ll}^2+2a_{kl}^2
+\end{align*}
+since B is the diagonal matrix and A is symmetrical.
+\begin{align*}
+    &\boxed{||\textbf{B}||_F^2 = off(\textbf{B})^2+\sum_{i=1}^nb_{ii}^2 =||\textbf{A}||_F^2 = off(\textbf{A})^2+\sum_{i=1}^na_{ii}^2}\\
+    off(\textbf{B})^2 &= ||\textbf{B}||_F^2 -\sum_{i=1}^nb_{ii}^2
+    = off(\textbf{A})^2 + \sum_{i=1}^na_{ii}^2 -\sum_{i=1}^nb_{ii}^2\\
+    &= off(\textbf{A})^2+\left(a_{kk}^2+a_{ll}^2+b_{kk}^2+b_{ll}^2\right)\\
+    ||\textbf{B}||^2-\sum_{i=1}^nb_{ii} &= norm(\textbf{A})_F^2-\sum_{i=1}^na_{ii}^2\left(a_{kk}^2+a_{ll}^2+b_{kk}^2+b_{ll}^2\right)
+\end{align*}
+which will give us an $\textbf{A}$ which is closer to a diagonal matrix than before the transformation.
 
 
-\section*{Methods}
-\input{methods.tex}
+
+\section*{Code/Implementation}
 \section*{Results}
-\input{results.tex}
-
 \section*{Conclusions}
-\input{conclusions.tex}
 \section*{References}
-
 
 \end{document}

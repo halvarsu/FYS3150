@@ -14,6 +14,7 @@ int hamiltonSolve(arma::vec& eigval, arma::mat& eigvec, double rhoMin, double rh
     arma::vec rho, v;
     arma::mat hamilton;
     double step, diagConst, offDiagConst, orbitalFactor;
+    int iterationsUsed;
     std::string filename;
     char* temp;
 
@@ -50,22 +51,23 @@ int hamiltonSolve(arma::vec& eigval, arma::mat& eigvec, double rhoMin, double rh
 
     // The algorithm to solve ham and fill in eigenvectors and -values
     if ((std::string) solver == "jacobi") {
-        jacobiSolver(eigval, eigvec, hamilton);
+        iterationsUsed = jacobiSolver(eigval, eigvec, hamilton);
     } else if((std::string) solver == "arma") {
         arma::eig_sym(eigval, eigvec, hamilton);
+        iterationsUsed = 0;
     }
 
     temp = new char[30];
     if (interacting) {
         std::sprintf(temp, "omega_%.2f_rho_%.2f_N_%d",omega, rhoMax, dim);
-        filename = "interacting/" + solver + "/" + (std::string) temp;
+        filename = solver + "/interacting/" + (std::string) temp;
     } else {
         std::sprintf(temp, "rho_%.2f_N_%d",rhoMax, dim);
-        filename = "non_interacting/" + solver + "/" + (std::string) temp;
+        filename = solver + "/non_interacting/" + (std::string) temp;
     }
     std::cout << "saving " << filename << std::endl;
     save(rho, eigval, eigvec, filename);
-    return 0;
+    return iterationsUsed;
 }
 
 void save(arma::vec& rho,arma::vec& eigval,arma::mat& eigvec, std::string filename) {
@@ -83,9 +85,8 @@ double potential(double r, double omega, bool interacting){
 }
 
 
-void jacobiSolver(arma::vec& eigval, arma::mat& eigvec, arma::mat& A){
-    unsigned int max_iter, n;
-    unsigned int iter;
+int jacobiSolver(arma::vec& eigval, arma::mat& eigvec, arma::mat& A){
+    unsigned int iter, max_iter, n;
     n = A.n_cols;
     max_iter = n*n*n;
     double max_akl = std::numeric_limits<double>::infinity();
@@ -94,16 +95,16 @@ void jacobiSolver(arma::vec& eigval, arma::mat& eigvec, arma::mat& A){
 
     eigvec = arma::eye<arma::mat>(n,n);
 
-    for (unsigned int i = 0; i < max_iter; i++) {
+    for (iter = 0; iter < max_iter; iter++) {
         if (max_akl > tol ){
             max_akl = maxOffDiag(A,k,l,n);
             jacobiRotate(A,eigvec,k,l,n);
            } else {
-            std::cout << "iterations used: " << i-1 << std::endl;
             break;
         }
     }
     eigval = A.diag();
+    return iter;
 }
 
 double maxOffDiag(arma::mat& A, int &k, int &l, int n){

@@ -22,23 +22,28 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-    We stbihihudy theoioio cases of one and two electrons trapped in a harmonic oscillator. 
+    We stbihihudy theoioio cases of one and two electrons trapped in a harmonic  oscillator. Ser på den radielle Schrôdringerligninen for ett elektron. Den ser slik ut: 
 
 \end{abstract}
 \newpage
 \pagenumbering{arabic}
 
 
-\section*{Abstract}
-Ser på den radielle Schrôdringerligninen for ett elektron. Den ser slik ut:
 
 
-\section*{Introduction}
-Eigenvalues a
 
 
-\section*{Theory/Methods}
-\subsection*{Making the matrix}
+\section{Introduction}
+The purpose of this project is to develop a general algorithm that solves a set of linear equations by using Jacobi's method of finding eigenvalues. 
+
+We're starting with a tridiagonal matrix from which we seek to find the eigenvalues and eigenvectors. The method we will use "rotates" the the matrix by a specific angle $\theta$ such that it gets closer to a diagnoal matrix by making all the off-diagonal elements smaller each step. In the end we're left with a diagonal matrix and and the corresponding eigenvalues and eigenvectors.
+
+We will use the program to solved a set of linear equations derived from Schrödringer's equation for two electrons stuck in a three-dimentional harmonic oscillator with and without Coloumb interaction. In order to do this in an effective fashion, we will show how to scale and discretize the original equation to a more manageable one.
+
+
+
+\section{Theory/Methods}
+\subsection{Making the matrix}
 The analytical Schroedringer equation is as follows
 \begin{equation*}
   -\frac{\hbar^2}{2 m} \left ( \frac{1}{r^2} \frac{d}{dr} r^2
@@ -137,7 +142,7 @@ and our Schroedringer equation is
 d_iu_i+e_{i-1}u_{i-1}+e_{i+1}u_{i+1}  = \lambda u_i,
 \end{equation*}
 where $u$ is unknown. 
-\subsection*{Jacobi rotation algorithm}
+\subsection{Jacobi rotation algorithm}
 In order to find the eigenvalues of this matrix, we will use Jacobi's method, which is based on turning our matrix into a tri diagonal one with unitary transformations. We can do this with the following equation 
 \begin{align*}
     \textbf{B} = \textbf{S}^T\textbf{AS}
@@ -217,12 +222,28 @@ which will give us an $\textbf{A}$ which is closer to a diagonal matrix than bef
 
 
 
-\section*{Methods}
+\section{Methods}
+\subsection{Testing}
+In order to detect, repair and prevent errors in algorithms, implementing unit tests is common practice. The earlier these tests are implemented, the less time is wasted on locating the source of the errors. Even small errors can accumulate to big ones with enough iterations. For this project there are several simple tests that can confirm the validity of the program.  
+
+\subsubsection{Finding the right element}
+To ensure that $\textbf{B}$ is converging towards a diagonal matrix, and to make the algorithm as effective as possible, it is important that we locate the largest off-diagonal matrix element for every rotation. By setting any element $a_{ij}\neq a_{ii}$ to a number known to be the largest in that matrix, we can test if the algorithm finds this number by printing k and l. If these correspond to i and j, we know they're correct.
+
+\subsubsection{Setting right element to zero}
+Now that we're sure the code finds the right indices, it's easy to test if the right elements are being nulled. We do this by setting $a_{kl}$ to a non-zero number, running the Jacobi rotate function and printing the same element. If the print is anything else than zero, we know something is wrong.
+
+\subsubsection{Testing if the eigenvalues}
+By creating a simple 3x3 matrix with known eigenvalues and running it through the algorithm, we can test if the result checks out. Although this won't consider the numerical errors a big matrix and a large number of transformations would accompany, the error will be detected by our tolerance, set to $10^{-10}$. The test funciton also includes a test of the Frobenius norm, which checks that $||A_{before}||^2 = ||A_{after}||^2$, the Frobenius norm is preserved.
+
+\subsubsection{Testing orthonormality of eigenvectors}
+Since what we're really looking for are the eigenvectors, we would be remiss not to test their orthonormality, as this is a criteria for any diagonal matrix. This can easily be done by multiplying the matrix with its transposed and checking if this is 1 or close enough. If $\textbf{B}$ is orthonormal, it should give the identity matrix if multiplied with its transposed. By testing if $\textbf{B}\cdot\textbf{B}^T -\textbf{I}< 10^{-10}$ holds, we know that $\textbf{B}$ is orthonormal. The tolerance is there to accept negligible numerical errors.
+
+
 \input{methods.tex}
-\section*{Results}
+\section{Results}
 \input{results.tex}
-\section*{Conclusions}
+\section{Conclusions}
 \input{conclusions.tex}
-\section*{References}
+\section{References}
 
 \end{document}

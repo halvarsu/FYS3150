@@ -11,8 +11,14 @@
 \usepackage{siunitx}
 \usepackage{cleveref}
 \usepackage{cite}
+\usepackage{caption}
+
+\captionsetup{width=0.6\linewidth}
 
 \newcommand{\rhomax}{\rho_{\text{max}}}
+\newcommand{\relerr}{\epsilon_{\text{rel}}}
+\newcommand{\bigO}[1]{\mathcal{O}(#1)}
+
 \graphicspath{{../results/}}
 
 \begin{document}
@@ -61,7 +67,7 @@ matrix by making all the off-diagonal elements smaller each step. In the
 end we're left with a diagonal matrix and and the corresponding eigenvalues
 and eigenvectors.
 
-We will use the program to solved a set of linear equations derived from
+We will use the program to solve a set of linear equations derived from
 Schrödringer's equation for two electrons stuck in a three-dimentional
 harmonic oscillator with and without Coloumb interaction. In order to do
 this in an effective fashion, we will show how to scale and discretize the
@@ -295,6 +301,16 @@ than before the transformation.
 
 
 \section{Methods}
+\subsection{Stability analysis}
+In order to test the stability of our Jacobi solver, an analysis of the
+computed eigenvalues dependence of $\rhomax$ and $N$ was made. In the
+former, the step size $\rhomax/N$ was held constant for increasing
+$\rhomax$, while during the latter $\rhomax$ was set to a constant value
+found to be sufficient from the first analysis. In addition, we also
+recorded the number of
+jacobi rotations for the max off diagonal matrix element to be below a
+tolerance for different $N$.
+
 \subsection{Testing}
 In order to detect, repair and prevent errors in algorithms, implementing
 unit tests is common practice. The earlier these tests are implemented, the
@@ -336,13 +352,49 @@ transposed. By testing if $\textbf{B}\cdot\textbf{B}^T -\textbf{I}<
 10^{-10}$ holds (for all elements of B), we know that $\textbf{B}$ is
 orthonormal. The tolerance is there to accept negligible numerical errors.
 
+\subsection{Interacting case} 
+For the interacting case, the jacobi algorithm was run with potentials of
+$\omega \in {0.01, 0.25, 0.5, 1, 5}$. For low  values of $\omega$,
+corresponding to a weak harmonic oscillator, the wave function of the
+electron was spread out requiring a large $\rhomax$. The corresponding
+domain sizes was $\rhomax \in {4, 7, 10, 15, 100}$, choses by testing for
+the different $\omega_r$ where the cutoff point of the wave function was.
+To prevent a loss of accuracy due to large step size, we set a constant $N
+= 600$. This was more than large enough for the four smallest domains, and the lowest
+value $\omega_r=0.01$ was considered more of a proof of concept, showing
+the large spread of the wave function for a low potential.
 
-\input{methods.tex}
 \section{Results}
 \input{results.tex}
-\section{Conclusions}
-\input{conclusions.tex}
-% \section{References}
+
+\section{Discussion and conclusions}
+
+As seen, Jacobis method converges slowly for larger matrices; it needs in
+the order of $\bigO{N^{2.06}}$ rotations to converge, and with each
+rotation requires $\bigO{4N}$ operations (see \cite{lectureNotes}) this
+gives a total of $\bigO{\approx N^3}$ operations. The whole matrix also has
+to be stored in memory, which is unfeasible for large matrices.
+
+Though Jacobis method provides us with all the eigenvalues of the system,
+not all of them are useful. In the quantum mechanical state, the $n$'th
+eigenfunction generally has $(n-1)$ nodes. The absolute minimum amount of
+mesh points required to represent a node is two, with one point over and
+under zero. All eigenfunctions for $n>N/2$ is then not properly represented, and
+one can assume that the corresponding eigenvalues are also poorly
+defined.
+
+That said, the method is stable and is guaranteed to converge for high enough
+$N$ and $\rhomax$. Our implementation reproduced the expected analytical
+values of $E_n = 4(n+3/4)$ for the non-interacting case and $E_1 = 1.25$
+when $\omega_r = 1/4$ in the interacting case, as expected from
+\cite{PhysRevA.48.3561}. 
+
+Finally, we showed that two interacting electrons in a harmonic oscillator
+give high electron density and large gaps in the electron energy spectrum
+for a strong potential, and large spread out electrons with a tight
+spectrum for weak potentials, as one could intuitively expect.
+
+
 
 \bibliography{bib1}{}
 \bibliographystyle{plain}

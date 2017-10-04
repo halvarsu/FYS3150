@@ -32,15 +32,12 @@ def get_omega_files(omega, dim, file_dir):
 def plot_interacting(args, file_dir ,cmap = plt.cm.jet):
     import glob
     files =  glob.glob(file_dir + "*")
-    omega_vals = [0.25,0.5,1,5]
+    omega_vals = [0.01,0.25,0.5,1,5]
     dim = args.dim
     omega_files = [get_omega_files(omega,dim,file_dir) for omega in omega_vals]
 
-    print(omega_files)
     #omega_files = 
-    print(file_dir)
-    print(omega_files) 
-    fig,ax = plt.subplots()
+    fig,ax = plt.subplots(figsize=args.figsize)
     ev_i = 0
     cutoff = 1e-12
     x_max = 0
@@ -61,12 +58,12 @@ def plot_interacting(args, file_dir ,cmap = plt.cm.jet):
 
         step = (rho[-1]-rho[0])/rho.size
         # plot normalized
-        ax.plot(rho, vec[:,0]**2/step,label='omega = %.2f' %omega)
+        ax.plot(rho, vec[:,0]**2/step,label='$\\omega = %.2f$' %omega)
 
         # find first point after maxima where third wave function < cutoff
         max_point = np.argmax(vec[:,ev_i]**2)
         mask = vec[max_point:,ev_i]**2 < cutoff
-        print("eigenvalue 0: ",val[sort][ev_i])
+        print("eigenvalues: $"+"$ & $".join(map("{:.3f}".format, val[sort][:3]))+"$")
         print("normalized?", np.sum(vec[:,ev_i]**2))
         try:
             cutoff_rho = rho[max_point:][mask][0]

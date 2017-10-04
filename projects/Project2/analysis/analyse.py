@@ -2,13 +2,15 @@ import omega_analysis as interact
 import argparse
 
 def main(args):
+    from matplotlib import rcParams
+    rcParams.update({'figure.autolayout': True})
     if args.stability_analysis:
         from stability_analysis import stability_analysis
         case = "non_interacting"
         method = args.method
         file_base = "build/{0}/{1}/".format(method, case)
 
-        stability_analysis(file_base)
+        stability_analysis(file_base,args.figsize)
 
     if args.interacting_analysis:
         from omega_analysis import plot_interacting
@@ -41,5 +43,7 @@ if __name__ == "__main__":
             choices =['arma','jacobi'])
     parser.add_argument('-N', '--dim',default=1000,
             type=int)
+    parser.add_argument('-f', '--figsize',nargs=2,
+            type=float, default=(6,4))
     args = parser.parse_args()
     main(args)

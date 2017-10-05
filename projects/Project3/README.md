@@ -8,11 +8,11 @@ To setup, you need to configure your project manually (yes its tedious, sorry...
     - under Projects/Run/Deployment/ add a custom buildstep with the
       following parameters:
 
-      ```
+```
     Command: mkdir
     Arguments: -p out
     Working directory: %{buildDir}
-      ```
+```
 
     - under Projects/Run/Run/ set Working Directory to the project folder,
 

@@ -2,12 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-x = np.loadtxt('out/posx', skiprows=2, dtype=float)
-y = np.loadtxt('out/posy', skiprows=2, dtype=float)
-vx = np.loadtxt('out/velx', skiprows=2, dtype=float)
-vy = np.loadtxt('out/vely', skiprows=2, dtype=float)
+pos = np.loadtxt('out/pos.txt', skiprows=2, dtype=float)
+vel = np.loadtxt('out/vel.txt', skiprows=2, dtype=float)
 plt.scatter(0,0, c='y')
 plt.axis('equal')
 
-plt.plot(x,y)
+print(pos.shape)
+
+#plt.plot(pos[:,0],pos[:,1])
+plt.plot(vel[:,0],vel[:,1])
 plt.show()

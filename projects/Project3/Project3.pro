@@ -5,3 +5,5 @@ CONFIG -= qt
 
 SOURCES += \
     cpp/main.cpp
+
+LIBS += -larmadillo -lblas -llapack

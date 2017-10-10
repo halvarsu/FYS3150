@@ -23,6 +23,11 @@ int main(int argc, char * argv[]) {
     pos.save("out/pos.txt", arma::arma_ascii);
     vel.save("out/vel.txt", arma::arma_ascii);
     pos.print();
+    arma::vec test;
+    test = arma::ones(3);
+    test.print();
+    double test2;
+    cout << test2 << std::endl;
     return 0;
 }
 

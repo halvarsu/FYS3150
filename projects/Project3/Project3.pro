@@ -4,6 +4,14 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-    cpp/main.cpp
+    cpp/main.cpp \
+    cpp/planet.cpp \
+    cpp/celestialbody.cpp \
+    cpp/solarsystem.cpp
 
 LIBS += -larmadillo -lblas -llapack
+
+HEADERS += \
+    cpp/planet.h \
+    cpp/celestialbody.h \
+    cpp/solarsystem.h

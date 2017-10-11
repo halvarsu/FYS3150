@@ -2,6 +2,7 @@
 #define CELESTIALBODY_H
 
 #include <armadillo>
+#define ASTRO_G 4*arma::datum::pi*arma::datum::pi
 
 class CelestialBody
 {
@@ -10,7 +11,6 @@ public:
     arma::vec velocity;
     arma::vec force;
     double mass;
-    double G;
 
     CelestialBody(arma::vec position, arma::vec velocity, double mass);
     CelestialBody(double x, double y, double z, double vx, double vy, double vz, double mass);

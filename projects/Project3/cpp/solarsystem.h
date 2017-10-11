@@ -5,11 +5,12 @@
 #include "celestialbody.h"
 #include <string>
 #include <fstream>
+#define ASTRO_GRAV_CONST 4*arma::datum::pi*arma::datum::pi
 
 class SolarSystem
 {
 public:
-    SolarSystem();
+    SolarSystem(double G_ = ASTRO_GRAV_CONST);
     void createCelestialBody(arma::vec pos, arma::vec vel, double mass_);
     void createCelestialBody(double, double, double, double, double, double, double mass_);
     void calculateForcesAndEnergy();
@@ -27,6 +28,7 @@ private:
     std::ofstream m_file;
     double m_kineticEnergy;
     double m_potentialEnergy;
+    double m_G; //gravitational constant
 };
 
 #endif // SOLARSYSTEM_H

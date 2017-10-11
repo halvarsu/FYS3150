@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <armadillo>
+#include "solarsystem.h"
+#include "integrators/forwardeuler.h"
 #define PI 3.14159265359
 
 using namespace std;
@@ -9,28 +11,61 @@ void initialize(arma::mat& pos, arma::mat& vel,
                 double x0, double y0,double z0, double vx0, double vy0, double vz0);
 
 void eulerChromer(arma::mat& pos, arma::mat& vel, double dt);
+int readInt(string& line, ifstream& infile, int& lineNumber);
+void initialiseSystemFromFile(string filename, SolarSystem &system, int& steps, int& years);
 
 int main(int argc, char * argv[]) {
-    int n = 10000;
-    double T = 10.;
-    double dt = T/n;
+    SolarSystem system = SolarSystem();
 
-    arma::mat pos, vel;
-    pos = arma::zeros<arma::mat>(n,3);
-    vel = arma::zeros<arma::mat>(n,3);
-    initialize(pos, vel, 1, 0, 0, 0, 2*PI,0);
-    eulerChromer(pos, vel, dt);
-    pos.save("out/pos.txt", arma::arma_ascii);
-    vel.save("out/vel.txt", arma::arma_ascii);
-    pos.print();
-    arma::vec test;
-    test = arma::ones(3);
-    test.print();
-    double test2;
-    cout << test2 << std::endl;
+    if (argc > 1){
+        string filename = (string) argv[1];
+        initialiseSystemFromFile(filename, system, 1.);
+        return 0;
+    }
+
     return 0;
 }
 
+void initialiseSystemFromFile(string filename, SolarSystem &system, int& steps, int& years){
+    try {
+        ifstream infile;
+        int lineNumber = 1;
+        int numberOfPlanets;
+        double x, y, z, vx, vy, vz, mass;
+
+        infile.open(filename);
+
+        years 			= readInt(line, infile, lineNumber);
+        stepsPerYear 	= readInt(line, infile, lineNumber);
+        numberOfPlanets	= readInt(line, infile, lineNumber);
+
+        cout << "Reading " << numberOfPlanets << " planets" << endl;
+
+        // Read each planet:
+        i++;
+        for (int j = 1; j < numberOfPlanets+1; j++){
+            string line;
+            getline(infile, line);
+            cout << "planet " << j + 1 << ": " << line << endl;
+            istringstream iss(line);
+            if (!(iss >> x >> y >> z >> vx >> vy >> vz >> mass)) { throw i; } // error
+            system.createCelestialBody(x,y,z,vx,vy,vz,mass);
+            i++;
+        }
+
+    } catch (int lineNumber) {
+        cout << "Couldn't read line " << lineNumber  << " in file " << filename << endl;
+        throw;
+    }
+}
+
+int readInt(string& line, ifstream& infile, int& lineNumber){
+    double out;
+    getline(infile, line);
+    istringstream iss(line);
+    if (!(iss >> out)) { throw lineNumber; } // error
+    return out;
+}
 
 void initialize(arma::mat& pos, arma::mat& vel,
                 double x0, double y0, double z0, double vx0, double vy0, double vz0){

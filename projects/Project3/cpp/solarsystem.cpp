@@ -4,10 +4,12 @@
 using namespace std;
 
 // some kind of magical c++ syntax for declaring attributes (member variables) in the constructor:
-SolarSystem::SolarSystem() :
+SolarSystem::SolarSystem(double G_) :
     m_kineticEnergy(0),
-    m_potentialEnergy(0)
+    m_potentialEnergy(0),
+    m_G(G_)
 {
+
 }
 
 
@@ -24,6 +26,7 @@ void SolarSystem::addCelestialBody(const CelestialBody& body){
     m_bodies.push_back( body );
 }
 
+
 void SolarSystem::calculateForcesAndEnergy()
 {
     m_kineticEnergy = 0;
@@ -36,12 +39,15 @@ void SolarSystem::calculateForcesAndEnergy()
 
     for(int i=0; i<numberOfBodies(); i++) {
         CelestialBody &body1 = m_bodies[i];
+
         for(int j=i+1; j<numberOfBodies(); j++) {
             CelestialBody &body2 = m_bodies[j];
             arma::vec deltaRVector = body1.position - body2.position;
             // calculate norm of vector as \sqrt{\sum_i{x_i^2}}
             double dr = arma::norm(deltaRVector);
+
             // Calculate the force and potential energy here
+            // 
         }
 
         double vel_squared = arma::dot(body1.velocity, body1.velocity);
@@ -82,7 +88,7 @@ void SolarSystem::writeToFile(string filename)
     m_file << numberOfBodies() << endl;
     m_file << "Comment line that needs to be here. Balle." << endl;
     for(CelestialBody &body : m_bodies) {
-        m_file << "1 " << setprecision(10) << body.position.x() << " " << setprecision(10) << body.position.y() << " " << setprecision(10) << body.position.z() << "\n";
+        m_file << "1 " << setprecision(10) << body.position(0) << " " << setprecision(10) << body.position(1) << " " << setprecision(10) << body.position(2) << "\n";
     }
 }
 

@@ -10,7 +10,8 @@
 class SolarSystem
 {
 public:
-    SolarSystem(double G_ = ASTRO_GRAV_CONST);
+    SolarSystem();
+    SolarSystem(double G_);
     void createCelestialBody(arma::vec pos, arma::vec vel, double mass_);
     void createCelestialBody(double, double, double, double, double, double, double mass_);
     void calculateForcesAndEnergy();
@@ -21,7 +22,7 @@ public:
     double potentialEnergy() const;
     double kineticEnergy() const;
     void writeToFile(std::string filename);
-    std::vector<CelestialBody> &bodies();
+    std::vector<CelestialBody> & bodies();
 
 private:
     std::vector<CelestialBody> m_bodies;

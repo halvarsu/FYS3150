@@ -4,14 +4,19 @@
 using namespace std;
 
 // some kind of magical c++ syntax for declaring attributes (member variables) in the constructor:
-SolarSystem::SolarSystem(double G_) :
-    m_kineticEnergy(0),
-    m_potentialEnergy(0),
-    m_G(G_)
+SolarSystem::SolarSystem(double G_)
 {
-
+    m_kineticEnergy = 0;
+    m_potentialEnergy = 0;
+    m_G = G_;
 }
 
+SolarSystem::SolarSystem()
+{
+    m_kineticEnergy = 0;
+    m_potentialEnergy = 0;
+    m_G = ASTRO_GRAV_CONST;
+}
 
 void SolarSystem::createCelestialBody(arma::vec position, arma::vec velocity, double mass) {
     m_bodies.push_back( CelestialBody(position, velocity, mass) );
@@ -46,8 +51,11 @@ void SolarSystem::calculateForcesAndEnergy()
             // calculate norm of vector as \sqrt{\sum_i{x_i^2}}
             double dr = arma::norm(deltaRVector);
 
-            // Calculate the force and potential energy here
-            // 
+            double force = m_G*body1.mass*body2.mass/(dr*dr);
+            arma::vec forceVector = force*deltaRVector/dr;
+            body1.force -= forceVector;
+            body2.force += forceVector;
+            // m_potentialEnergy += force * dr;
         }
 
         double vel_squared = arma::dot(body1.velocity, body1.velocity);
@@ -77,18 +85,21 @@ double SolarSystem::kineticEnergy() const
 
 void SolarSystem::writeToFile(string filename)
 {
-    if(!m_file.good()) {
+    if(!m_file.good() || !m_file.is_open()) {
         m_file.open(filename.c_str(), ofstream::out);
+        m_file << numberOfBodies() << endl;
         if(!m_file.good()) {
             cout << "Error opening file " << filename << ". Aborting!" << endl;
             terminate();
         }
     }
 
-    m_file << numberOfBodies() << endl;
-    m_file << "Comment line that needs to be here. Balle." << endl;
-    for(CelestialBody &body : m_bodies) {
-        m_file << "1 " << setprecision(10) << body.position(0) << " " << setprecision(10) << body.position(1) << " " << setprecision(10) << body.position(2) << "\n";
+    int i = 0;
+    for (CelestialBody &body : m_bodies) {
+        m_file << setprecision(10) << body.position(0) << " "
+               << setprecision(10) << body.position(1) << " "
+               << setprecision(10) << body.position(2) << endl;
+        i++;
     }
 }
 

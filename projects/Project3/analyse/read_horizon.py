@@ -12,11 +12,11 @@ def parse_pos_and_vel(text):
     non_decimal = re.compile(r'[^\d=.E\-+]+')
     pos = non_decimal.sub('',pos).split('=')
     vel = non_decimal.sub('',vel).split('=')
-    vel = [str(float(v)*365.25).lower() for v in vel if v]
+    vel = [str(float(v)*365.242199).lower() for v in vel if v]
     pos = [p.lower() for p in pos if p]
     return pos,vel
 
-def process_data(filename, outfile = None):
+def process_data(filename):
     with open(filename) as infile:
         infile.readline()
         
@@ -37,19 +37,15 @@ def process_data(filename, outfile = None):
             print(np.linalg.norm(list(map(float, vel))))
 
         data = " ".join(pos) + " " + " ".join(vel) + " "+ str(mass)
+    return planet_name, data
 
-    if outfile is None:
-        with open(planet_name + "_data.txt","w") as outfile:
-            outfile.write(data)
-    else:
-        outfile.write(data)
 
 def get_args():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-f','--filename',default='planet_data/horizons_results*.txt')
     parser.add_argument('-F','--folder',default='')
-    parser.add_argument('-o','--outfile',default='in/data.txt')
+    parser.add_argument('-o','--outfile',default='')
     parser.add_argument('-y','--years',default=2, type=int)
     parser.add_argument('-s','--steps_per_year',default=10000, type=int)
     args = parser.parse_args()
@@ -77,16 +73,33 @@ if __name__ == "__main__":
     print(files)
     years = args.years
     steps_per_year = args.steps_per_year
-    if args.outfile:
-        outfile = open(args.outfile, 'w')
-        outfile.write("%d\n%d\n%d\n"%(years,steps_per_year, len(files)))
-    else:
-        outfile = None
+    n_bodies = len(files)
+    outfile_lines = [years, steps_per_year, n_bodies]
+    bodies = [] 
     for filename in files:
-        process_data(filename, outfile)
-        if args.outfile:
-            outfile.write('\n') 
+        # main file parser:
+        planet_name, data = process_data(filename)
+        if planet_name == 'Sun':
+            # Set as the first body
+            outfile_lines.insert(3,data)
+            bodies.insert(0,planet_name)
+        else:
+            outfile_lines.append(data)
+            bodies.append(planet_name)
 
+    outfile_text = '\n'.join(map(str, outfile_lines))
     if args.outfile:
-        outfile.close()
+        outfile_name = args.outfile
+    elif args.folder:
+        outfile_name = 'in/'
+        outfile_name += [a for a in args.folder.split('/') if a][-1]
+        outfile_name += '.txt'
+    elif n_bodies == 1:
+        outfile_name = planet_name + '.txt'
+    else:
+        outfile_name = 'in/data.txt'
+    print('opening file ' + outfile_name)
 
+    with open(outfile_name, 'w') as outfile:
+        outfile.write(data)
+        print('wrote %d characters on %d lines to file' %(len(data),len(outfile_lines)))

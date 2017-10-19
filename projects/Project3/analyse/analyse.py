@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 
 x0=1.563246546807631E+00 
@@ -21,6 +22,8 @@ planets = np.zeros((pos.shape[0]//n_planets, n_planets, pos.shape[1]))
 for i in range(n_planets):
     planets[:,i] = pos[i::n_planets]
 
-plt.plot(planets[:,:,1],planets[:,:,0], '-o', markersize =1)
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+plt.plot(planets[:,:,0], planets[:,:,1],planets[:,:,2], '-o', markersize =1)
 plt.axis('equal')
 plt.show()

@@ -55,7 +55,8 @@ void SolarSystem::calculateForcesAndEnergy()
             arma::vec forceVector = force*deltaRVector/dr;
             body1.force -= forceVector;
             body2.force += forceVector;
-            // m_potentialEnergy += force * dr;
+            m_potentialEnergy -= force * dr;
+
         }
 
         double vel_squared = arma::dot(body1.velocity, body1.velocity);

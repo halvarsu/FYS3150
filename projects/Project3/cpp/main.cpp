@@ -24,15 +24,9 @@ int main(int argc, char * argv[]) {
     if (argc > 1){
         filename = (string) argv[1];
         initialiseSystemFromFile(filename, *system, stepsPerYear, years);
-        vector<CelestialBody> bodies = system->bodies();
-        cout << bodies[9].position << endl;
-        cout << bodies[9].velocity << endl;
-        cout << bodies[9].mass << endl;
-
     } else {
         cout << "No arguments! Doing nothing" << endl;
         return 0;
-
     }
 
     int steps = stepsPerYear*years;
@@ -44,15 +38,25 @@ int main(int argc, char * argv[]) {
 //        cout << "--------- body ---------" << endl;
 //        body.force.print();
 //    }
-
+    std::ofstream outfile;
+    outfile.open("out/energies.txt");
+    double energy= system->totalEnergy();
     //system->calculateForcesAndEnergy();
     for(int i = 0; i < steps; i++) {
         integrator->integrateOneStepVelocityVerlet(*system);
         if (i % 100 == 0) {
             // cout << i << endl;
             system->writeToFile("out/test.txt");
+            //energy = system->totalEnergy();
+            kinetic   = system->kineticEnergy();
+            potential = system->potentialEnergy();
+            total = system->totalEnergy();
+            outfile <<"Kinetic: "<<kineticEnergy()<< " Potential: "<< m_potentialEnergy()<<" Total: "<< totalEnergy()<<std::endl;
         }
+
+    cout << "HALLPOOO" << endl;
     }
+    outfile.close();
     return 0;
 }
 

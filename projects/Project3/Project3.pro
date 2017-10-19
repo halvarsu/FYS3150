@@ -5,7 +5,6 @@ CONFIG -= qt
 
 SOURCES += \
     cpp/main.cpp \
-    cpp/planet.cpp \
     cpp/celestialbody.cpp \
     cpp/solarsystem.cpp \
     cpp/forwardeuler.cpp \

@@ -1,0 +1,418 @@
+\documentclass[10pt]{article}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[margin=0.7in]{geometry}
+\usepackage{float}
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\usepackage[parfill]{parskip}  
+\usepackage{multicol}
+\usepackage{siunitx}
+\usepackage{cleveref}
+\usepackage{cite}
+\usepackage{caption}
+
+\captionsetup{width=0.6\linewidth}
+
+\newcommand{\rhomax}{\rho_{\text{max}}}
+\newcommand{\relerr}{\epsilon_{\text{rel}}}
+\newcommand{\bigO}[1]{\mathcal{O}(#1)}
+
+\graphicspath{{../results/}}
+
+\begin{document}
+\title{The Schrödinger equation
+\\ Project 2
+\\ FYS3150}
+\author{Ragnar Bruvoll \and Halvard Sutterud}
+%\author{Halvard Sutterud}
+\date{September 2017}
+\maketitle{\begin{center}\end{center}}
+\pagenumbering{gobble}
+\thispagestyle{empty}
+
+\begin{abstract}
+    We study the cases of one and two electrons trapped in a harmonic
+    oscillator. Jacobi's method for finding the eigenvalues of a matrix is
+    implemented, and applied to a discrete approximation of the
+    Schr\"{o}dinger equation. The analytic energies of a single electron 
+    is reproduced within a relative error of $\SI{e-4}{}$. Then the method
+    is applied to two interacting electrons in the same potential, where
+    analytic results from \cite{PhysRevA.48.3561} for certain
+    frequencies is reproduced.
+
+\end{abstract}
+
+\tableofcontents
+
+\newpage
+\pagenumbering{arabic}
+
+
+
+
+\begin{multicols}{2}
+
+\section{Bararvivnaf}
+\subsection{Discretizing equations and defining acceleration}
+Using Newton's second law, which states that the sum of all the forces equals mass times acceleration, $\sum F=ma$, we can calculate the acceleration of the planet in relation to the sun. We know this acceleration to be the sentripetal acceleration, and the force is the gravitational force
+$$F_G = M_Ea = M_E\frac{v^2}{r} = G\frac{M_OM_E}{r^2}$$
+with the earth as an example. With this in mind, we can simplify the equations and calculations by using astronomical units and years as unit lengths. So in stead of using $r = 1.5\cdot10^{11}m$ and , we'll simply assert $r = 1AU$. With simple multiplication, the expressions for sentripetal force and gravitational force can be written as 
+$$\rightarrow v^2r = GM_O$$
+and with the new unit lengths applied we can simplify it further. We know that the radius from the earth to it's spin system's centre is one astronomical unit, 1 AU. The orbit speed is one round per year, that is 2$\pi$AU/year. This means
+$$GM_O = v^2r = 4\pi^2AU^3/year^2$$
+We can now subtitute this constant and get an expression for the general acceleration of any object with an circular orbit around the sun
+$$M_Ea = GM_O\frac{M_E}{r^2}$$
+$$a = \frac{4\pi^2}{r^2}$$
+with the acceleraion as expression of astronomical units per year squared. 
+
+
+\section{Introduction}
+    The purpose of this project is to develop a general algorithm that
+    solves a set of linear equations by using Jacobi's method of finding
+    eigenvalues. 
+
+We're starting with a tridiagonal matrix from which we seek to find the
+eigenvalues and eigenvectors. The method we will use "rotates" the the
+matrix by a specific angle $\theta$ such that it gets closer to a diagnoal
+matrix by making all the off-diagonal elements smaller each step. In the
+end we're left with a diagonal matrix and and the corresponding eigenvalues
+and eigenvectors.
+
+We will use the program to solve a set of linear equations derived from
+Schrödringer's equation for two electrons stuck in a three-dimentional
+harmonic oscillator with and without Coloumb interaction. In order to do
+this in an effective fashion, we will show how to scale and discretize the
+original equation to a more manageable one.
+
+
+
+\section{Theory/Methods}
+\subsection{Making the matrix}
+The analytical Schroedringer equation is as follows
+\begin{equation*}
+  -\frac{\hbar^2}{2 m} \left ( \frac{1}{r^2} \frac{d}{dr} r^2
+  \frac{d}{dr} - \frac{l (l + 1)}{r^2} \right )R(r) 
+     + V(r) R(r) = E R(r)
+\end{equation*}
+where  $V(r) = (1/2)kr^2$ is the harmonic oscillator potential, k is the
+displacement factor where $k=m\omega^2$.  $\omega$ is the frequence of the
+oscillator and m is the mass of whatever's oscillating, in this case the
+electron. E is the energy og the oscillator and will take the values
+
+\begin{equation*}
+E_{nl}=  \hbar \omega \left(2n+l+\frac{3}{2}\right),
+\end{equation*}
+
+due to quantum mechanical effects, where n and l are quantum numbers with
+the following possible values $n=0,1,2,\dots$ and $l=0,1,2,\dots$. R is the
+wave function, dependant on distance r. We'll be using spherical
+coordinates, such that $r\in [0,\infty)$ is the distance from the center of
+the oscillator to the position of the electron.\\
+
+In order to simplify the equation, we'll make the new variable $u(r)$ such
+that $R(r) = (1/r) u(r)$. This gives
+
+\begin{equation*}
+  -\frac{\hbar^2}{2 m} \frac{d^2}{dr^2} u(r) + \left ( V(r) + \frac{l (l + 1)}{r^2}\frac{\hbar^2}{2 m}\right ) u(r)  = E u(r)
+\end{equation*}
+
+the next step in generalizing the equation will be making the variable
+dimentionless by introducing a new variable $\rho = (1/\alpha) r$ where
+$u(0)=0$ and $u(\infty)=0$. The equation is now a function of the
+dimentionless $\rho$.
+
+\begin{equation*}
+  -\frac{\hbar^2}{2 m \alpha^2} \frac{d^2}{d\rho^2} u(\rho)+ \left ( V(\rho) + \frac{l (l + 1)}{\rho^2}\frac{\hbar^2}{2 m\alpha^2} \right ) u(\rho)  = E u(\rho)
+\end{equation*}
+We will be looking at a case with no angular momentum, $l=0$. The last step
+will be inserting the potential and removing all constants from the second
+derivative by multiplying with $2m\alpha^2/\hbar^2$. This leaves us with
+
+\begin{equation*}
+  -\frac{d^2}{d\rho^2} u(\rho) 
+       + \frac{mk}{\hbar^2} \alpha^4\rho^2u(\rho)  = \frac{2m\alpha^2}{\hbar^2}E u(\rho) .
+\end{equation*}
+
+Since $\alpha$ is an introduced constant, we can set it to $\alpha  =
+\left(\frac{\hbar^2}{mk}\right)^{1/4}$ and define a new eigenvalue $\lambda
+= \frac{2m\alpha^2}{\hbar^2}E$. This will result in a new Schrödringer
+equation which is a lot easier to handle numerically;
+
+\begin{equation*}
+  -\frac{d^2}{d\rho^2} u(\rho) + \rho^2u(\rho)  = \lambda u(\rho) .
+\end{equation*}
+As explained in the previous project (Project 1), the second derivative can
+be expressed as
+
+
+\begin{equation}
+    u''=\frac{u(\rho+h) -2u(\rho) +u(\rho-h)}{h^2} +O(h^2),
+    \label{eq:diffoperation}
+\end{equation}
+where the interval of $\rho$ is $\rho_{\mathrm{min}}=0$ and
+$\rho_{\mathrm{max}}$ correlates to the point where the wave function is
+reasonably close to zero. Theoretically it should be set to infinity, but
+this is practically difficult to enforce. The step length of the numerical
+second derivative function will then be the total length of the distance
+we're working devided by number of steps.
+
+\begin{equation*}
+  h=\frac{\rho_N-\rho_0 }{N}.
+\end{equation*}
+This gives us a set of discrete values for the variable $\rho_i = ih$ since
+$\rho_0 = 0$\\\\ By now, put equation reads
+
+\begin{equation}
+-\frac{u(\rho_i+h) -2u(\rho_i) +u(\rho_i-h)}{h^2}+\rho_i^2u(\rho_i)  = \lambda u(\rho_i),
+\end{equation}
+which can by compacted by doing the following transformation
+$u(p_i+h)=u_{i+1}$ etc.:
+
+\begin{equation}
+-\frac{u_{i+1} -2u_i +u_{i-1} }{h^2}+\rho_i^2u_i  = \lambda u_i,
+\end{equation}
+
+This will result in a set of linear equations which can be expressed
+through matrix calculations. It will be an NxN triagonal matrix with values
+only on the diagonal and directly underneath and above the diagnoal. The
+rest will be zero. The diagnoal elements will be
+
+\begin{equation*}
+   d_i=\frac{2}{h^2}+V_i,
+\end{equation*}
+
+and the rest of the non-zero will be
+
+\begin{equation*}
+   e_i=-\frac{1}{h^2}.
+\end{equation*}
+
+Finally, we're left with an eigenvalue equation
+
+
+\begin{equation*}
+    \begin{bmatrix}
+        d_0    & e_0   & 0      & \dots & 0     & 0 \\
+        e_1    & d_1   & e_1    & \dots & 0     &0 \\
+        0      & e_2   & d_2    & 0     & \dots & 0\\
+        \dots  & \dots & \dots  & \dots & \dots & \dots\\
+        0      & \dots & \dots  & e_{N-1}     &d_{N-1} & e_{N-1}\\
+        0      & \dots & \dots  & \dots & e_{N} & d_{N}
+    \end{bmatrix}
+    \begin{bmatrix} 
+        u_{0} \\ u_{1} \\ \dots\\ \dots\\ \dots\\ u_{N} 
+    \end{bmatrix}
+    =\lambda \begin{bmatrix} 
+        u_{0} \\ u_{1} \\ \dots\\ \dots\\ \dots\\ u_{N}
+    \end{bmatrix}.  
+    \label{eq:sematrix}
+\end{equation*}
+and our Schroedringer equation is
+\begin{equation*}
+d_iu_i+e_{i-1}u_{i-1}+e_{i+1}u_{i+1}  = \lambda u_i,
+\end{equation*}
+where $u$ is unknown. 
+\subsection{Jacobi rotation algorithm}
+In order to find the eigenvalues of this matrix, we will use Jacobi's
+method, which is based on turning our matrix into a tri diagonal one with
+unitary transformations. We can do this with the following equation
+\begin{align*}
+    \textbf{B} = \textbf{S}^T\textbf{AS}
+\end{align*}
+where $\textbf{A}$ is our original matrix and $\textbf{B}$ is the
+tridiagonal matrix we wish to find. $\textbf{S}$ and
+$\textbf{S}^T=\textbf{S}^{-1}$ are our transformation matrices. The process
+will rotate the 2-dimentional linear subspace such that all the
+non-diagonal elements will get closer to zero for each rotation.  The
+$\textbf{S}$ matrix has has the form
+\begin{align*}
+    \textbf{S} &=
+    \begin{bmatrix}
+        1     & 0     & 0     & \dots  & 0 & 0 & \dots & 0 & 0\\
+        0     & 1     & 0     & \dots  & 0 & 0 & \dots & 0 & 0\\
+        0     & 0     & 1     & \dots  & 0 & 0 & \dots & 0 & 0\\
+        \dots & \dots & \dots & \dots & \dots & \dots & \dots& \dots & \dots\\
+        0 & 0 & 0 & \dots & cos\theta & 0 & \dots& 0 & sin\theta\\
+        0     & 0 & 0 & \dots & 0 & 1 &\dots & 0 & 0\\
+        \dots & \dots & \dots & \dots & \dots & \dots & \dots& \dots & \dots\\
+        0     & 0 & 0 & \dots  & 0 & 0 & \dots & 1 & 0\\
+        0     & 0 & 0 & \dots  & -sin\theta & 0 & \dots &  0 & cos\theta
+    \end{bmatrix}
+\end {align*}
+and does the rotation around the angle $\theta$ which is chosen such that
+$cot(2\theta) = \frac{a_{ll}-a_{kk}}{2a_{kl}}$. The matrix element $a_{kl}$
+will be the largest element outside the diagonal and the sinus og cosinus
+is determined by  
+
+
+\begin{align*}
+    \tau &= cot(2\theta) = \frac{a_{ll}-a_{kk}}{2a_{kl}}\\
+    t^2 &+2\tau t -1 = 0\\
+    \rightarrow t &= -\tau\pm \sqrt{1+\tau^2}\\
+    c &= \frac{1}{\sqrt{1+t^2}}\\
+    s &= tc
+\end{align*}.
+Once the angles are known, the corresponding matrix elements will be given
+the new values
+\begin{align*}
+    b_{ik} &= a_{ik}cos\theta-a_{il}sin\theta\ \ i\neq k, i \neq l\\
+    b_{il} &= a_{il}cos\theta-a_{ik}sin\theta\ \ i\neq k, i \neq l\\
+    b_{kk} &= a_{kk}cos^2\theta-2a_{kl}cos\theta sin\theta + a_ {ll}sin^2\theta\\
+    b_{ll} &= a_{ll}cos^2\theta+2a_{kl}cos\theta sin\theta + a_ {kk}sin^2\theta\\
+    b_ {kl} &= (a_{kk}-a_{ll})cos\theta sin\theta +a_{kl}(cos^2\theta-sin^2\theta)
+\end{align*}
+By doing this process enough times, the non diagonal elements will be close
+or equal to zero, and we're left with a diagnoal matrix containing the
+eigenvalues of our wave function.\\
+
+A way to ensure that our matrix converges to a diagonal matrix and is
+preserving its properties, we can make sure that the Frobenius norm is
+preseved. The Frobenius norm is defined
+\begin{align*}
+    \left|\left|\textbf{A}\right|\right|_F &= \sqrt{\sum_{i=1}^n\sum_{j=1}^n|a_{ij}|^2}
+\end{align*}
+and the aim is to reduce the norm of the off-diagonal matrix elements thus
+getting closer to a diagonal matrix step by step. Using a 2x2 matrix for
+simplicity, our transformation will take the form
+\begin{align*}
+    \begin{bmatrix}
+        b_{kk} & 0\\
+        0 & b_{ll}
+    \end{bmatrix}&=
+    \begin{bmatrix}
+        c & -s\\
+        s & c
+    \end{bmatrix}
+    \begin{bmatrix}
+        a_{kk} & a_{kl}\\
+        a_{lk} & a_{ll}
+    \end{bmatrix}
+    \begin{bmatrix}
+        c & s\\
+        -s & c
+    \end{bmatrix}\\
+\end{align*}
+Meaning
+\begin{align*}
+    b_{kk}^2+b_{ll}^2 &= a_{kk}^2+a_{ll}^2+2a_{kl}^2
+\end{align*}
+since B is the diagonal matrix and A is symmetrical.
+\begin{align*}
+    &\boxed{||\textbf{B}||_F^2 = off(\textbf{B})^2+\sum_{i=1}^nb_{ii}^2 =||\textbf{A}||_F^2 = off(\textbf{A})^2+\sum_{i=1}^na_{ii}^2}\\
+\end{align*}
+\begin{align*}
+    off(\textbf{B})^2 &= ||\textbf{B}||_F^2 -\sum_{i=1}^nb_{ii}^2
+    = off(\textbf{A})^2 + \sum_{i=1}^na_{ii}^2 -\sum_{i=1}^nb_{ii}^2\\
+    &= off(\textbf{A})^2+\left(a_{kk}^2+a_{ll}^2+b_{kk}^2+b_{ll}^2\right)\\
+    ||\textbf{B}||^2-\sum_{i=1}^nb_{ii} &= norm(\textbf{A})_F^2-\sum_{i=1}^na_{ii}^2\left(a_{kk}^2+a_{ll}^2+b_{kk}^2+b_{ll}^2\right)
+\end{align*}
+which will give us an $\textbf{A}$ which is closer to a diagonal matrix
+than before the transformation.
+
+
+
+\section{Methods}
+\subsection{Stability analysis}
+In order to test the stability of our Jacobi solver, an analysis of the
+computed eigenvalues dependence of $\rhomax$ and $N$ was made. In the
+former, the step size $\rhomax/N$ was held constant for increasing
+$\rhomax$, while during the latter $\rhomax$ was set to a constant value
+found to be sufficient from the first analysis. In addition, we also
+recorded the number of
+jacobi rotations for the max off diagonal matrix element to be below a
+tolerance for different $N$.
+
+\subsection{Testing}
+In order to detect, repair and prevent errors in algorithms, implementing
+unit tests is common practice. The earlier these tests are implemented, the
+less time is wasted on locating the source of the errors. Even small errors
+can accumulate to big ones with enough iterations. For this project there
+are several simple tests that can confirm the validity of the program.  
+
+\subsubsection{Finding the right element}
+To ensure that $\textbf{B}$ is converging towards a diagonal matrix, and to
+make the algorithm as effective as possible, it is important that we locate
+the largest off-diagonal matrix element for every rotation. By setting any
+element $a_{ij}\neq a_{ii}$ to a number known to be the largest in that
+matrix, we can test if the algorithm finds this number by printing k and l.
+If these correspond to i and j, we know they're correct.
+
+\subsubsection{Setting right element to zero}
+Now that we're sure the code finds the right indices, it's easy to test if
+the right elements are being nulled. We do this by setting $a_{kl}$ to a
+non-zero number, running the Jacobi rotate function and printing the same
+element. If the print is anything else than zero, we know something is
+wrong.
+
+\subsubsection{Testing if the eigenvalues}
+By creating a simple 3x3 matrix with known eigenvalues and running it
+through the algorithm, we can test if the result checks out. Although this
+won't consider the numerical errors a big matrix and a large number of
+transformations would accompany, the error will be detected by our
+tolerance, set to $10^{-10}$. The test funciton also includes a test of the
+Frobenius norm, which checks that $||A_{before}||^2 = ||A_{after}||^2$, the
+Frobenius norm is preserved.
+
+\subsubsection{Testing orthonormality of eigenvectors}
+Since what we're really looking for are the eigenvectors, we would be
+remiss not to test their orthonormality, as this is a criteria for any
+diagonal matrix. This can easily be done by multiplying the matrix with its
+transposed and checking if this is 1 or close enough. If $\textbf{B}$ is
+orthonormal, it should give the identity matrix if multiplied with its
+transposed. By testing if $\textbf{B}\cdot\textbf{B}^T -\textbf{I}<
+10^{-10}$ holds (for all elements of B), we know that $\textbf{B}$ is
+orthonormal. The tolerance is there to accept negligible numerical errors.
+
+\subsection{Interacting case} 
+For the interacting case, the jacobi algorithm was run with potentials of
+$\omega \in {0.01, 0.25, 0.5, 1, 5}$. For low  values of $\omega$,
+corresponding to a weak harmonic oscillator, the wave function of the
+electron was spread out requiring a large $\rhomax$. The corresponding
+domain sizes was $\rhomax \in {4, 7, 10, 15, 100}$, choses by testing for
+the different $\omega_r$ where the cutoff point of the wave function was.
+To prevent a loss of accuracy due to large step size, we set a constant $N
+= 600$. This was more than large enough for the four smallest domains, and the lowest
+value $\omega_r=0.01$ was considered more of a proof of concept, showing
+the large spread of the wave function for a low potential.
+
+\section{Results}
+\input{results.tex}
+
+\section{Discussion and conclusions}
+
+As seen, Jacobis method converges slowly for larger matrices; it needs in
+the order of $\bigO{N^{2.06}}$ rotations to converge, and with each
+rotation requires $\bigO{4N}$ operations (see \cite{lectureNotes}) this
+gives a total of $\bigO{\approx N^3}$ operations. The whole matrix also has
+to be stored in memory, which is unfeasible for large matrices.
+
+Though Jacobis method provides us with all the eigenvalues of the system,
+not all of them are useful. In the quantum mechanical state, the $n$'th
+eigenfunction generally has $(n-1)$ nodes. The absolute minimum amount of
+mesh points required to represent a node is two, with one point over and
+under zero. All eigenfunctions for $n>N/2$ is then not properly represented, and
+one can assume that the corresponding eigenvalues are also poorly
+defined.
+
+That said, the method is stable and is guaranteed to converge for high enough
+$N$ and $\rhomax$. Our implementation reproduced the expected analytical
+values of $E_n = 4(n+3/4)$ for the non-interacting case and $E_1 = 1.25$
+when $\omega_r = 1/4$ in the interacting case, as expected from
+\cite{PhysRevA.48.3561}. 
+
+Finally, we showed that two interacting electrons in a harmonic oscillator
+give high electron density and large gaps in the electron energy spectrum
+for a strong potential, and large spread out electrons with a tight
+spectrum for weak potentials, as one could intuitively expect.
+
+
+
+\bibliography{bib1}{}
+\bibliographystyle{plain}
+
+\end{multicols}
+
+
+\end{document}

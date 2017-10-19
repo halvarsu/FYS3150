@@ -104,6 +104,9 @@ void SolarSystem::writeToFile(string filename)
     }
 }
 
+void closeFile(){
+    m_file.close();
+}
 
 std::vector<CelestialBody> &SolarSystem::bodies()
 {

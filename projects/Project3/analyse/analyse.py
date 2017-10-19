@@ -17,9 +17,10 @@ with open(filename, 'r') as infile:
     n_planets = int(infile.readline())
 
 pos = np.loadtxt(filename, skiprows=1, dtype=float)
-planets = np.zeros((pos.shape[0]/n_planets, n_planets, pos.shape[1]))
+planets = np.zeros((pos.shape[0]//n_planets, n_planets, pos.shape[1]))
 for i in range(n_planets):
     planets[:,i] = pos[i::n_planets]
 
-plt.plot(planets[:,:,1],planets[:,:,0], '-o', markersize =3)
+plt.plot(planets[:,:,1],planets[:,:,0], '-o', markersize =1)
+plt.axis('equal')
 plt.show()

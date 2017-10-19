@@ -14,11 +14,6 @@ int main(int argc, char * argv[]) {
     double T = 10.;
     double dt = T/n;
 
-    int years = 1;
-    int stepsPerYear = 1000;
-    int N = years*stepsPerYear;
-    double dt = 1.0/(stepsPerYear);
-
     arma::mat pos, vel;
     pos = arma::zeros<arma::mat>(n,3);
     vel = arma::zeros<arma::mat>(n,3);
@@ -63,11 +58,16 @@ void eulerChromer(arma::mat& pos, arma::mat& vel, double dt){
     }
 }
 
-void velocityVerletOneStep(arma::mat& pos, arma::mat& vel, double dt){
-
+void velocityVerlet(arma::mat& pos, arma::mat& vel, double dt){
+    double r;
+    double G = 4*PI*PI;
     for int(i = 0; 1 < n-1; i++) {
         r = sqrt(pos(i,0)*pos(i,0)+ pos(i,1)*pos(i,1) + pos(i,2)*pos(i,2));
         pos(i+1,0) = pos(i,0) + vel(i)*dt + dt*dt*0.5*(G*pos(i,0))/(r*r*r);
         vel(i+1,0) = vel(i,0) + h/2*((G*pos(i,0))/(r*r*r)+(G*pos(i,0))/(arma::norm(pos(i))*arma::norm(pos(i))*arma::norm(pos(i))))
+        pos(i+1,1) = pos(i,1) + vel(i)*dt + dt*dt*0.5*(G*pos(i,1))/(r*r*r);
+        vel(i+1,1) = vel(i,1) + h/2*((G*pos(i,1))/(r*r*r)+(G*pos(i,1))/(arma::norm(pos(i))*arma::norm(pos(i))*arma::norm(pos(i))))
+        pos(i+1,2) = pos(i,2) + vel(i)*dt + dt*dt*0.5*(G*pos(i,2))/(r*r*r);
+        vel(i+1,2) = vel(i,2) + h/2*((G*pos(i,2))/(r*r*r)+(G*pos(i,2))/(arma::norm(pos(i))*arma::norm(pos(i))*arma::norm(pos(i))))
     }
 }

@@ -2,7 +2,8 @@
 #include <fstream>
 #include <armadillo>
 #include "solarsystem.h"
-#include "integrators/forwardeuler.h"
+#include "celestialbody.h"
+#include "integrator.h"
 #define PI 3.14159265359
 
 using namespace std;
@@ -12,23 +13,53 @@ void initialize(arma::mat& pos, arma::mat& vel,
 
 void eulerChromer(arma::mat& pos, arma::mat& vel, double dt);
 int readInt(string& line, ifstream& infile, int& lineNumber);
-void initialiseSystemFromFile(string filename, SolarSystem &system, int& steps, int& years);
+void initialiseSystemFromFile(string filename, SolarSystem &system, int &stepsPerYear, int &years);
 
 int main(int argc, char * argv[]) {
-    SolarSystem system = SolarSystem();
+    SolarSystem * system = new SolarSystem();
+    int stepsPerYear;
+    int years;
+    string  filename;
 
     if (argc > 1){
-        string filename = (string) argv[1];
-        initialiseSystemFromFile(filename, system, 1.);
+        filename = (string) argv[1];
+        initialiseSystemFromFile(filename, *system, stepsPerYear, years);
+        vector<CelestialBody> bodies = system->bodies();
+        cout << bodies[9].position << endl;
+        cout << bodies[9].velocity << endl;
+        cout << bodies[9].mass << endl;
+
+    } else {
+        cout << "No arguments! Doing nothing" << endl;
         return 0;
+
     }
 
+    int steps = stepsPerYear*years;
+    double dt = 1./stepsPerYear;
+    Integrator * integrator = new Integrator(dt);
+
+    system->calculateForcesAndEnergy();
+//    for (CelestialBody &body : system->bodies()){
+//        cout << "--------- body ---------" << endl;
+//        body.force.print();
+//    }
+
+    for(int i = 0; i < steps; i++) {
+        system->calculateForcesAndEnergy();
+        integrator->integrateOneStep(*system);
+        if (i % 100 == 0) {
+            // cout << i << endl;
+            system->writeToFile("out/test.txt");
+        }
+    }
     return 0;
 }
 
-void initialiseSystemFromFile(string filename, SolarSystem &system, int& steps, int& years){
+void initialiseSystemFromFile(string filename, SolarSystem &system, int & stepsPerYear, int & years){
     try {
         ifstream infile;
+        string line;
         int lineNumber = 1;
         int numberOfPlanets;
         double x, y, z, vx, vy, vz, mass;
@@ -39,18 +70,19 @@ void initialiseSystemFromFile(string filename, SolarSystem &system, int& steps, 
         stepsPerYear 	= readInt(line, infile, lineNumber);
         numberOfPlanets	= readInt(line, infile, lineNumber);
 
-        cout << "Reading " << numberOfPlanets << " planets" << endl;
+        cout << "Reading " << numberOfPlanets << " planets.\n"
+             << "Data is: x y z vx vy vz mass" << endl;
 
         // Read each planet:
-        i++;
+        lineNumber++;
         for (int j = 1; j < numberOfPlanets+1; j++){
             string line;
             getline(infile, line);
-            cout << "planet " << j + 1 << ": " << line << endl;
+            cout << "planet " << j << ": " << line << endl;
             istringstream iss(line);
-            if (!(iss >> x >> y >> z >> vx >> vy >> vz >> mass)) { throw i; } // error
+            if (!(iss >> x >> y >> z >> vx >> vy >> vz >> mass)) { throw lineNumber; } // error
             system.createCelestialBody(x,y,z,vx,vy,vz,mass);
-            i++;
+            lineNumber++;
         }
 
     } catch (int lineNumber) {

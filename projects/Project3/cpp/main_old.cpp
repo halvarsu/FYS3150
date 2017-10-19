@@ -7,13 +7,17 @@ using namespace std;
 
 void initialize(arma::mat& pos, arma::mat& vel,
                 double x0, double y0,double z0, double vx0, double vy0, double vz0);
-
 void eulerChromer(arma::mat& pos, arma::mat& vel, double dt);
 
 int main(int argc, char * argv[]) {
     int n = 10000;
     double T = 10.;
     double dt = T/n;
+
+    int years = 1;
+    int stepsPerYear = 1000;
+    int N = years*stepsPerYear;
+    double dt = 1.0/(stepsPerYear);
 
     arma::mat pos, vel;
     pos = arma::zeros<arma::mat>(n,3);
@@ -56,5 +60,14 @@ void eulerChromer(arma::mat& pos, arma::mat& vel, double dt){
         pos(i+1,1) = pos(i,1) + vel(i+1,1)*dt;
         vel(i+1,2) = vel(i,2) - (G*pos(i,2))/(r*r*r)*dt;
         pos(i+1,2) = pos(i,2) + vel(i+1,2)*dt;
+    }
+}
+
+void velocityVerletOneStep(arma::mat& pos, arma::mat& vel, double dt){
+
+    for int(i = 0; 1 < n-1; i++) {
+        r = sqrt(pos(i,0)*pos(i,0)+ pos(i,1)*pos(i,1) + pos(i,2)*pos(i,2));
+        pos(i+1,0) = pos(i,0) + vel(i)*dt + dt*dt*0.5*(G*pos(i,0))/(r*r*r);
+        vel(i+1,0) = vel(i,0) + h/2*((G*pos(i,0))/(r*r*r)+(G*pos(i,0))/(arma::norm(pos(i))*arma::norm(pos(i))*arma::norm(pos(i))))
     }
 }

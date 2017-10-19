@@ -7,6 +7,7 @@ public:
     double m_dt;
     Integrator(double dt);
     void integrateOneStep(class SolarSystem &system);
+    void integrateOneStepVelocityVerlet(class SolarSystem &system);
 };
 
 #endif // INTEGRATOR_H

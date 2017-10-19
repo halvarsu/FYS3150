@@ -10,6 +10,7 @@ public:
     arma::vec position;
     arma::vec velocity;
     arma::vec force;
+    arma::vec prevForce;
     double mass;
 
     CelestialBody(arma::vec position, arma::vec velocity, double mass);

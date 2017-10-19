@@ -45,9 +45,9 @@ int main(int argc, char * argv[]) {
 //        body.force.print();
 //    }
 
+    //system->calculateForcesAndEnergy();
     for(int i = 0; i < steps; i++) {
-        system->calculateForcesAndEnergy();
-        integrator->integrateOneStep(*system);
+        integrator->integrateOneStepVelocityVerlet(*system);
         if (i % 100 == 0) {
             // cout << i << endl;
             system->writeToFile("out/test.txt");

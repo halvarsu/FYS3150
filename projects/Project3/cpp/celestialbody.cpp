@@ -16,5 +16,6 @@ CelestialBody::CelestialBody(double x, double y, double z, double vx, double vy,
     mass = mass_;
 }
 void CelestialBody::resetForce(){
+    prevForce = force;
     force << 0 << arma::endr<< 0 << arma::endr<< 0;
 }

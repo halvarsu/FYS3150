@@ -24,7 +24,7 @@ public:
 
     // Function for updating all forces in the celestialBody-members of the system and
     // updating the internal (member) variables m_kineticEnergy and m_potentialEnergy:
-    void calculateForcesAndEnergy();
+    void calculateForcesAndEnergy(bool relativisticForce=false);
 
     // Function for getting how many objects the system has:
     int numberOfBodies() const;

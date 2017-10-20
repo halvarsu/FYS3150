@@ -22,8 +22,20 @@ planets = np.zeros((pos.shape[0]//n_planets, n_planets, pos.shape[1]))
 for i in range(n_planets):
     planets[:,i] = pos[i::n_planets]
 
+
+print(planets.shape)
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-plt.plot(planets[:,:,0], planets[:,:,1],planets[:,:,2], '-o', markersize =1)
-plt.axis('equal')
+for i in range(n_planets):
+	ax.plot(planets[:,i,0], planets[:,i,1], zs=planets[:,i,2])
+m = np.max(np.abs(planets))
+print(m)
+boxlen = [-m,m]
+ax.auto_scale_xyz(boxlen,boxlen,boxlen)
 plt.show()
+
+
+
+
+
+

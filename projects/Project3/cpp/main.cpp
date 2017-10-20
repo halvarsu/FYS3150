@@ -40,7 +40,12 @@ int main(int argc, char * argv[]) {
 //    }
     std::ofstream outfile;
     outfile.open("out/energies.txt");
+    outfile <<"Kinetic:    " << "Potential:    "<<"Total:"<<std::endl;
+
     double energy= system->totalEnergy();
+    double kinetic;
+    double potential;
+    double total;
     //system->calculateForcesAndEnergy();
     for(int i = 0; i < steps; i++) {
         integrator->integrateOneStepVelocityVerlet(*system);
@@ -51,11 +56,12 @@ int main(int argc, char * argv[]) {
             kinetic   = system->kineticEnergy();
             potential = system->potentialEnergy();
             total = system->totalEnergy();
-            outfile <<"Kinetic: "<<kineticEnergy()<< " Potential: "<< m_potentialEnergy()<<" Total: "<< totalEnergy()<<std::endl;
+            outfile <<kinetic<<"  "<< potential<<"  "<<total<<std::endl;
         }
 
-    cout << "HALLPOOO" << endl;
     }
+    cout << "HALLPOOO" << endl;
+
     outfile.close();
     return 0;
 }

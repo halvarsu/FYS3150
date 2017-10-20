@@ -72,13 +72,19 @@ void initialiseSystemFromFile(string filename, SolarSystem &system, int & stepsP
         string line;
         int lineNumber = 1;
         int numberOfPlanets;
+        int fixedSun;
         double x, y, z, vx, vy, vz, mass;
 
         infile.open(filename);
 
         years 			= readInt(line, infile, lineNumber);
         stepsPerYear 	= readInt(line, infile, lineNumber);
+        fixedSun 		= readInt(line, infile, lineNumber);
+        cout << fixedSun << endl;
         numberOfPlanets	= readInt(line, infile, lineNumber);
+        cout << numberOfPlanets << endl;
+
+        system.setFixedSun((bool)fixedSun);
 
         cout << "Reading " << numberOfPlanets << " planets.\n"
              << "Data is: x y z vx vy vz mass" << endl;

@@ -24,16 +24,14 @@ def process_data(text):
     # pick out target name
     planet_name = parse_planet_name(text)
     mass = masses[planet_name]
-    print(planet_name, mass)
+    print("Body: %10s  | Mass: %12g solar masses" %(planet_name, mass))
     pos, vel = parse_pos_and_vel(text)
 
     # Convert GM to sun masses 
     if planet_name == 'Earth':
         import numpy as np
-        print("earth dist to sun[AU]:")
-        print(np.linalg.norm(list(map(float, pos))))
-        print("earth velocity[AU/yr]:")
-        print(np.linalg.norm(list(map(float, vel))))
+        print("earth dist to sun[AU]: %g " %np.linalg.norm(list(map(float, pos))))
+        print("earth velocity[AU/yr]: %g " %np.linalg.norm(list(map(float, vel))))
 
     data = " ".join(pos) + " " + " ".join(vel) + " "+ str(mass)
     return planet_name, data
@@ -60,6 +58,7 @@ def get_args():
     parser.add_argument('-o','--outfile',default='')
     parser.add_argument('-y','--years',default=2, type=int)
     parser.add_argument('-s','--steps_per_year',default=10000, type=int)
+    parser.add_argument('--fixed_sun',action='store_true')
     args = parser.parse_args()
     return args
 
@@ -88,8 +87,10 @@ if __name__ == "__main__":
     years = args.years
     steps_per_year = args.steps_per_year
     n_bodies = len(files)
-    outfile_lines = [years, steps_per_year, n_bodies]
-    bodies = [] 
+    hasFixedSun = int(args.fixed_sun)
+    outfile_lines = [years, steps_per_year, hasFixedSun, n_bodies]
+    n_info_lines = len(outfile_lines)
+    # bodies = [] 
     for filename in files:
         # main file parser:
         with open(filename) as infile:
@@ -97,26 +98,32 @@ if __name__ == "__main__":
             planet_name, data = process_data(text)
         if planet_name == 'Sun':
             # Set as the first body
-            outfile_lines.insert(3,data)
-            bodies.insert(0,planet_name)
+            outfile_lines.insert(4,data)
+            # bodies.insert(0,planet_name)
         else:
             outfile_lines.append(data)
-            bodies.append(planet_name)
+            # bodies.append(planet_name)
 
     outfile_text = '\n'.join(map(str, outfile_lines))
+
     if args.outfile:
+        # if name of outfile is specified
         outfile_name = args.outfile
     elif args.folder:
+        # use name of folder 
         outfile_name = 'in/'
         outfile_name += [a for a in args.folder.split('/') if a][-1]
         outfile_name += '.txt'
     elif n_bodies == 1:
+        # use name of planet
         outfile_name = planet_name + '.txt'
     else:
+        # default filename
         outfile_name = 'in/data.txt'
-    print('opening file ' + outfile_name)
-    print(data)
+
+    print('opening file...')
 
     with open(outfile_name, 'w') as outfile:
         outfile.write(outfile_text)
-        print('wrote %d characters on %d lines to file' %(len(data),len(outfile_lines)))
+        print('Success! Wrote %d characters on %d lines to file %s'
+                %(len(data),len(outfile_lines), outfile_name))

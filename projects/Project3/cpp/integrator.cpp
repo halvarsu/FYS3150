@@ -11,6 +11,9 @@ void Integrator::integrateOneStepEuler(SolarSystem &system){
         body.position += body.velocity * m_dt;
         body.velocity += body.force / body.mass * m_dt;
     }
+    if (system.hasFixedSun()) {
+        system.bodies()[0].position << 0 << 0 << 0;
+    }
 }
 
 void Integrator::integrateOneStepVelocityVerlet(SolarSystem &system){
@@ -22,5 +25,9 @@ void Integrator::integrateOneStepVelocityVerlet(SolarSystem &system){
 
     for (CelestialBody &body : system.bodies()){
         body.velocity += m_dt * 0.5 * (body.force + body.prevForce) / body.mass;
+    }
+
+    if (system.hasFixedSun()) {
+        system.bodies()[0].position << 0 << 0 << 0;
     }
 }

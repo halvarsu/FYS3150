@@ -24,7 +24,11 @@ public:
 
     // Function for updating all forces in the celestialBody-members of the system and
     // updating the internal (member) variables m_kineticEnergy and m_potentialEnergy:
-    void calculateForcesAndEnergy(bool relativisticForce=false);
+    void calculateForcesAndEnergy();
+
+    //
+    void setFixedSun(bool) ;
+    bool hasFixedSun() const;
 
     // Function for getting how many objects the system has:
     int numberOfBodies() const;
@@ -50,6 +54,7 @@ public:
 private:
     std::vector<CelestialBody> m_bodies;
     std::ofstream m_file;
+    bool m_fixedSun = false;
     double m_kineticEnergy;
     double m_potentialEnergy;
     double m_G; //gravitational constant

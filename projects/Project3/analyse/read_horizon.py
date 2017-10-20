@@ -16,28 +16,40 @@ def parse_pos_and_vel(text):
     pos = [p.lower() for p in pos if p]
     return pos,vel
 
-def process_data(filename):
-    with open(filename) as infile:
-        infile.readline()
-        
-        text = infile.read()
+def process_data(text):
+    # infile.readline()
+    
+    # text = infile.read()
 
-        # pick out target name
-        planet_name = parse_planet_name(text)
-        mass = masses[planet_name]
-        print(planet_name, mass)
-        pos, vel = parse_pos_and_vel(text)
+    # pick out target name
+    planet_name = parse_planet_name(text)
+    mass = masses[planet_name]
+    print(planet_name, mass)
+    pos, vel = parse_pos_and_vel(text)
 
-        # Convert GM to sun masses 
-        if planet_name == 'Earth':
-            import numpy as np
-            print("earth dist to sun[AU]:")
-            print(np.linalg.norm(list(map(float, pos))))
-            print("earth velocity[AU/yr]:")
-            print(np.linalg.norm(list(map(float, vel))))
+    # Convert GM to sun masses 
+    if planet_name == 'Earth':
+        import numpy as np
+        print("earth dist to sun[AU]:")
+        print(np.linalg.norm(list(map(float, pos))))
+        print("earth velocity[AU/yr]:")
+        print(np.linalg.norm(list(map(float, vel))))
 
-        data = " ".join(pos) + " " + " ".join(vel) + " "+ str(mass)
+    data = " ".join(pos) + " " + " ".join(vel) + " "+ str(mass)
     return planet_name, data
+
+
+def read_mbox(args):
+    import mailbox
+
+    mb = mailbox.mbox('NASA.mbox', create=False)
+    mails = mb.values()
+
+    for i,mail in enumerate(mails):
+        mail_text = str(mail)
+        message_start = mail_text.find('Automated mail xmit by MAIL_REQUEST')
+        if message_start > 0:
+            message = mail_text[message_start:]
 
 
 def get_args():
@@ -51,6 +63,8 @@ def get_args():
     args = parser.parse_args()
     return args
 
+def main(args):
+    return
 
 if __name__ == "__main__":
     args =  get_args()
@@ -78,7 +92,9 @@ if __name__ == "__main__":
     bodies = [] 
     for filename in files:
         # main file parser:
-        planet_name, data = process_data(filename)
+        with open(filename) as infile:
+            text = infile.read()
+            planet_name, data = process_data(text)
         if planet_name == 'Sun':
             # Set as the first body
             outfile_lines.insert(3,data)
@@ -99,7 +115,8 @@ if __name__ == "__main__":
     else:
         outfile_name = 'in/data.txt'
     print('opening file ' + outfile_name)
+    print(data)
 
     with open(outfile_name, 'w') as outfile:
-        outfile.write(data)
+        outfile.write(outfile_text)
         print('wrote %d characters on %d lines to file' %(len(data),len(outfile_lines)))

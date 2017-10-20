@@ -32,7 +32,7 @@ void SolarSystem::addCelestialBody(const CelestialBody& body){
 }
 
 
-void SolarSystem::calculateForcesAndEnergy()
+void SolarSystem::calculateForcesAndEnergy(bool relativisticForce=false)
 {
     m_kineticEnergy = 0;
     m_potentialEnergy = 0;
@@ -42,7 +42,10 @@ void SolarSystem::calculateForcesAndEnergy()
         body.resetForce();
     }
 
-    for(int i=0; i<numberOfBodies(); i++) {
+
+    int i;
+    // Sun should be first celestial body
+    for(; i<numberOfBodies(); i++) {
         CelestialBody &body1 = m_bodies[i];
 
         for(int j=i+1; j<numberOfBodies(); j++) {

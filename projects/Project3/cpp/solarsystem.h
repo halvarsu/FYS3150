@@ -5,7 +5,8 @@
 #include "celestialbody.h"
 #include <string>
 #include <fstream>
-#define ASTRO_GRAV_CONST 4*arma::datum::pi*arma::datum::pi
+#define ASTRO_GRAV_CONST 4*arma::datum::pi*arma::datum::pi // AU**3/yr**2
+#define ASTRO_LIGHT_SPEED 63239.7263 // AU/yr
 
 class SolarSystem
 {
@@ -24,11 +25,15 @@ public:
 
     // Function for updating all forces in the celestialBody-members of the system and
     // updating the internal (member) variables m_kineticEnergy and m_potentialEnergy:
-    void calculateForcesAndEnergy();
+    // void calculateForcesAndEnergy();
+    virtual void calculateForcesAndEnergy();
 
     //
     void setFixedSun(bool) ;
     bool hasFixedSun() const;
+
+    void setRelativistic(bool) ;
+    bool hasRelativisticCorr() const;
 
     // Function for getting how many objects the system has:
     int numberOfBodies() const;
@@ -51,13 +56,21 @@ public:
 
 
 // The private variables of the system. Should be self-explanatory
-private:
+protected:
     std::vector<CelestialBody> m_bodies;
     std::ofstream m_file;
     bool m_fixedSun = false;
+    bool m_relativistic = false;
     double m_kineticEnergy;
     double m_potentialEnergy;
-    double m_G; //gravitational constant
+    double m_G; // gravitational constant
+    double m_c_0_squared;
+};
+
+class TwoBodySystem : public SolarSystem
+{
+public:
+    virtual void calculateForcesAndEnergy();
 };
 
 #endif // SOLARSYSTEM_H

@@ -12,6 +12,7 @@ public:
     arma::vec velocity;
     arma::vec force;
     arma::vec prevForce;
+    arma::vec angularMomPerMass;
     double mass;
 
     // Two constructors, gives a choice of how to create the celestialBody objects:

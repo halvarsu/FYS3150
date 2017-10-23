@@ -5,6 +5,7 @@ CelestialBody::CelestialBody(arma::vec pos, arma::vec vel, double mass_) {
     // Uses astronomical units (with G = 4pi) as default!
     position = pos;
     velocity = vel;
+    angularMomPerMass = arma::cross(position, velocity);
     mass = mass_;
 }
 
@@ -13,6 +14,7 @@ CelestialBody::CelestialBody(double x, double y, double z, double vx, double vy,
     // this fancy arma syntax:
     position << x << arma::endr << y << arma::endr << z;
     velocity << vx << arma::endr<< vy<< arma::endr << vz;
+    angularMomPerMass = arma::cross(position, velocity);
     mass = mass_;
 }
 void CelestialBody::resetForce(){

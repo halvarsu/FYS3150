@@ -24,6 +24,10 @@ int main(int argc, char * argv[]) {
     if (argc > 1){
         filename = (string) argv[1];
         initialiseSystemFromFile(filename, *system, stepsPerYear, years);
+        cout << "Initialised system" << endl;
+        cout << "Number of bodies: " << system->numberOfBodies() << endl;
+        cout << "Fixed sun? " << system->hasFixedSun() << endl;
+        cout << "Relativistic Correction? " << system->hasRelativisticCorr() << endl;
     } else {
         cout << "No arguments! Doing nothing" << endl;
         return 0;
@@ -50,7 +54,9 @@ int main(int argc, char * argv[]) {
     for(int i = 0; i < steps; i++) {
         integrator->integrateOneStepVelocityVerlet(*system);
         if (i % 100 == 0) {
-            // cout << i << endl;
+            if (i % (steps/100) == 0) {
+                cout << (100. * i)/steps << "%" << endl;
+            }
             system->writeToFile("out/test.txt");
             //energy = system->totalEnergy();
             kinetic   = system->kineticEnergy();
@@ -73,20 +79,21 @@ void initialiseSystemFromFile(string filename, SolarSystem &system, int & stepsP
         int lineNumber = 1;
         int numberOfPlanets;
         int fixedSun;
+        int relativisticCorrection;
         double x, y, z, vx, vy, vz, mass;
 
         infile.open(filename);
 
-        years 			= readInt(line, infile, lineNumber);
-        stepsPerYear 	= readInt(line, infile, lineNumber);
-        fixedSun 		= readInt(line, infile, lineNumber);
-        cout << fixedSun << endl;
+        years 					= readInt(line, infile, lineNumber);
+        stepsPerYear 			= readInt(line, infile, lineNumber);
+        fixedSun 				= readInt(line, infile, lineNumber);
+        relativisticCorrection 	= readInt(line, infile, lineNumber);
         numberOfPlanets	= readInt(line, infile, lineNumber);
-        cout << numberOfPlanets << endl;
 
         system.setFixedSun((bool)fixedSun);
+        system.setRelativistic((bool)relativisticCorrection);
 
-        cout << "Reading " << numberOfPlanets << " planets.\n"
+        cout << "Reading " << numberOfPlanets << " bodies.\n"
              << "Data is: x y z vx vy vz mass" << endl;
 
         // Read each planet:

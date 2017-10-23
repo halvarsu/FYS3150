@@ -9,6 +9,7 @@ SolarSystem::SolarSystem(double G_)
     m_kineticEnergy = 0;
     m_potentialEnergy = 0;
     m_G = G_;
+    m_relativistic = true;
 }
 
 SolarSystem::SolarSystem()
@@ -16,7 +17,10 @@ SolarSystem::SolarSystem()
     m_kineticEnergy = 0;
     m_potentialEnergy = 0;
     m_G = ASTRO_GRAV_CONST;
+    m_c_0_squared = ASTRO_LIGHT_SPEED*ASTRO_LIGHT_SPEED;
+    m_relativistic = true;
 }
+
 
 void SolarSystem::createCelestialBody(arma::vec position, arma::vec velocity, double mass) {
     m_bodies.push_back( CelestialBody(position, velocity, mass) );
@@ -31,7 +35,6 @@ void SolarSystem::addCelestialBody(const CelestialBody& body){
     m_bodies.push_back( body );
 }
 
-
 void SolarSystem::calculateForcesAndEnergy()
 {
     m_kineticEnergy = 0;
@@ -42,9 +45,9 @@ void SolarSystem::calculateForcesAndEnergy()
         body.resetForce();
     }
 
-
     int i;
     // Sun should be first celestial body
+    if (m_fixedSun) {i = 1;} else {i = 0;}
     for(; i<numberOfBodies(); i++) {
         CelestialBody &body1 = m_bodies[i];
 
@@ -56,8 +59,19 @@ void SolarSystem::calculateForcesAndEnergy()
 
             double force = m_G*body1.mass*body2.mass/(dr*dr);
             arma::vec forceVector = force*deltaRVector/dr;
-            body1.force -= forceVector;
-            body2.force += forceVector;
+            if (m_relativistic) {
+                // Angular momentum per body assumed to be constant
+                double l1 = arma::norm(body1.angularMomPerMass);
+                double l2 = arma::norm(body2.angularMomPerMass);
+                double r1 = arma::norm(body1.position);
+                double r2 = arma::norm(body2.position);
+                // Correction is assumed to be around barycenter
+                body1.force -= forceVector(1+3*l1*l1/(r1*r1*m_c_0_squared));
+                body2.force += forceVector(1+3*l2*l2/(r2*r2*m_c_0_squared));
+            } else {
+                body1.force -= forceVector;
+                body2.force += forceVector;
+            }
             m_potentialEnergy -= force * dr;
         }
 
@@ -66,11 +80,49 @@ void SolarSystem::calculateForcesAndEnergy()
     }
 }
 
+void TwoBodySystem::calculateForcesAndEnergy()
+{
+    // Assumes two bodies, where one is a fixed massive object with mass defined by
+    // the gravitational constant such that M_{massive} = 1.
+    m_kineticEnergy = 0;
+    m_potentialEnergy = 0;
+
+    for(CelestialBody &body : m_bodies) {
+        // Reset forces on all bodies, also updating prevForce
+        body.resetForce();
+    }
+
+    // Sun should be first celestial body, and should be fixed at (0,0,0)
+    CelestialBody &body1 = m_bodies[0];
+    CelestialBody &body2 = m_bodies[1];
+
+    // calculate norm of vector as \sqrt{\sum_i{x_i^2}}
+    double r = arma::norm(body1.position);
+    double force = m_G*body1.mass*body2.mass/(r*r);
+
+    if (m_relativistic) {
+        double l = arma::norm(body2.angularMomPerMass);
+        force *= (1+3*l*l/(r*r*m_c_0_squared));
+    }
+
+    body2.force += force*body1.position/r;
+    m_potentialEnergy -= force * r;
+    double vel_squared = arma::dot(body1.velocity, body1.velocity);
+    m_kineticEnergy += 0.5*body1.mass*vel_squared;
+}
+
 void SolarSystem::setFixedSun(bool isFixed) {
     m_fixedSun = isFixed;
 }
 bool SolarSystem::hasFixedSun() const{
     return m_fixedSun;
+}
+
+void SolarSystem::setRelativistic(bool isRelativistic) {
+    m_relativistic = isRelativistic;
+}
+bool SolarSystem::hasRelativisticCorr() const{
+    return m_relativistic;
 }
 
 int SolarSystem::numberOfBodies() const
@@ -121,3 +173,4 @@ std::vector<CelestialBody> &SolarSystem::bodies()
 {
     return m_bodies;
 }
+

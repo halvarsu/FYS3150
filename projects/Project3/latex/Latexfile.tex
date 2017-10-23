@@ -135,6 +135,55 @@ acceleration of any object with an circular orbit around the sun
 \end{equation}
 with the acceleraion as expression of astronomical units per year squared. 
 
+\subsection{Integration}
+As the trajectories of all the objects in the solar system is being affected by all the other objects at all times, it is quite obvious that the acceleration is not constant as they would be in a circular orbit. We therefore need to integrate their position from Newton's equations for each timem step. This can be done with different methods, in our case Euler's forward algorithm and velocity Verlet method. They're both derived from the Taylor series. As we cannot make the time steps of the integration infinitesimaly small, the methods are bound to be incorrect to a certain degree. The impact of this error will be scrutinized in a later section.
+\subsubsection{Taylor expantion}
+The Taylor series is an infinite sum of terms given by the function's derivative at each point. The series con is used to express an unknown curve and it converges closer to the correct value with each degree. 
+\begin{equation}
+   f(x) =  \sum_{n=0}^\infty\frac{f^{(n)}(a)}{n!}(x-a)^n
+\end{equation}
+\begin{equation}
+    f(x) = f(a)+ \frac{f'(a)}{1!}(x-a)^1+\frac{f''(a)}{2!}(x-a)^2+\frac{f'''(a)}{3!}(x-a)^3+\dots
+\end{equation}
+It is however impossible to add an infinite number of terms, and each term will further burden the calculating system. But as the value of the terms decrease for each degree, we can justifiably simplify the series to one of three terms. This will entail a certain degree of error, but as we will  it varies between methods, and it is often so small we can ignore it.
+\subsubsection{Euler's forward algorithm}
+The Euler forward method is a first order method, meaning that the local error is proportional to the step size squared. This incentivizes ut to pick a step size as small as possible without making the program too slow. For this method we only use two of the taylor terms, knowing velocity derived to be acceleration.
+\begin{equation}
+    v_{i+1} = v_i +ah
+\end{equation}
+As for the position, we use the current velocity in the second term to increase the accuracy.
+\begin{equation}
+    x_{i+1} = v_i +v_{i+1}h
+\end{equation}
+With this algorithm we can calculate the position of the object at as many point as we like, with an increased error with bigger time steps. The algorithm requires an initial velocity, position and the acceleration at each point of the position, which we will derive from the forces action upon on the object. The Euler method has four FLOPS per time step.\\
+
+This method is good for finding an approximated trajectory, but as we will see, it is far from perfect.
+
+
+\subsubsection{Velocity Verlet method}
+A more accurate method for finding the trajectory, the velocity and position that is, would be the velocity Verlet method. This too is based on the Taylor series, with every term from the fourth and on assumed to be negligible.
+\begin{equation}
+    v_{i+1} = v_i +hv_i^{(1)}+\frac{h^2}{2}v_i^{(2)}+O(h^3)
+\end{equation}
+\begin{equation}
+    x_{i+1} = x_i +hx_i^{(1)}+\frac{h^2}{2}x_i^{(2)}+O(h^3)
+\end{equation}
+where $v_i^{(1)}$ is still the acceleration defined by the acting forces. We can remove second derivative by substituting it with the first derivative multiplied with the time step. 
+\begin{equation}
+    hv_i^{(2)} \approx v_{i+1}^{(1)}-v_i^{(1)}\nonumber
+\end{equation}
+This applied to our Taylor series gives us
+\begin{align}
+    v_{i+1} &= v_i + hv_i^{(1)}+\frac{h}{2}\left(v_{i+1}^{(1)}-v_i^{(1)}\right)\nonumber\\
+    &= v_i+\frac{h}{2}\left(v_{i+1}^{(1)}+v_i^{(1)}\right)
+\end{align}
+As for our position calculation, we will use the definition of motion derivatives, namely $v_i^{(1)}=x_i$.
+\begin{align}
+    x_{i+1} &= x_i +hx_i^{(1)}+\frac{h^2}{2}x_i^{2}+O(h^3)\nonumber\\
+    &= x_i + hv_i + \frac{h^2}{2}v_i^{(1)}
+\end{align}
+As shown in figure [xxxxx] this method makes for a more precise calculation of the trajectories. But with 9 FLOPS per time step, this method is way more demanding in terms of computational calculation than the aforementioned.
+
 \subsection{Perihelion precession}
 \subsection{Placeholder}
 

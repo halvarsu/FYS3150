@@ -24,7 +24,7 @@ def process_data(text):
     # pick out target name
     planet_name = parse_planet_name(text)
     mass = masses[planet_name]
-    print("Body: %10s  | Mass: %12g solar masses" %(planet_name, mass))
+    print("Parsing body: %10s  | Mass: %12g solar masses" %(planet_name, mass))
     pos, vel = parse_pos_and_vel(text)
 
     # Convert GM to sun masses 
@@ -59,6 +59,7 @@ def get_args():
     parser.add_argument('-y','--years',default=2, type=int)
     parser.add_argument('-s','--steps_per_year',default=10000, type=int)
     parser.add_argument('--fixed_sun',action='store_true')
+    parser.add_argument('--relativistic',action='store_true')
     args = parser.parse_args()
     return args
 
@@ -88,7 +89,8 @@ if __name__ == "__main__":
     steps_per_year = args.steps_per_year
     n_bodies = len(files)
     hasFixedSun = int(args.fixed_sun)
-    outfile_lines = [years, steps_per_year, hasFixedSun, n_bodies]
+    relativistic = int(args.relativistic)
+    outfile_lines = [years, steps_per_year, hasFixedSun, relativistic, n_bodies]
     n_info_lines = len(outfile_lines)
     # bodies = [] 
     for filename in files:
@@ -98,11 +100,10 @@ if __name__ == "__main__":
             planet_name, data = process_data(text)
         if planet_name == 'Sun':
             # Set as the first body
-            outfile_lines.insert(4,data)
-            # bodies.insert(0,planet_name)
+            print(" -----> Setting Sun as first body")
+            outfile_lines.insert(n_info_lines,data)
         else:
             outfile_lines.append(data)
-            # bodies.append(planet_name)
 
     outfile_text = '\n'.join(map(str, outfile_lines))
 
@@ -121,7 +122,7 @@ if __name__ == "__main__":
         # default filename
         outfile_name = 'in/data.txt'
 
-    print('opening file...')
+    print('opening file for writing...')
 
     with open(outfile_name, 'w') as outfile:
         outfile.write(outfile_text)

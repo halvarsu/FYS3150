@@ -1,10 +1,10 @@
 import sys
 import re
 
-def parse_planet_name(text):
+def parse_body_name(text):
     name_index = text.find("Target body name: ")
-    planet_name = text[name_index:].split("\n")[0].split()[3]
-    return planet_name
+    body_name = text[name_index:].split("\n")[0].split()[3]
+    return body_name
 
 def parse_pos_and_vel(text):
     index = text.find("$$SOE")
@@ -22,19 +22,19 @@ def process_data(text):
     # text = infile.read()
 
     # pick out target name
-    planet_name = parse_planet_name(text)
-    mass = masses[planet_name]
-    print("Parsing body: %10s  | Mass: %12g solar masses" %(planet_name, mass))
+    body_name = parse_body_name(text)
+    mass = masses[body_name]
+    print("Parsing body: %10s  | Mass: %12g solar masses" %(body_name, mass))
     pos, vel = parse_pos_and_vel(text)
 
     # Convert GM to sun masses 
-    if planet_name == 'Earth':
+    if body_name == 'Earth':
         import numpy as np
         print("earth dist to sun[AU]: %g " %np.linalg.norm(list(map(float, pos))))
         print("earth velocity[AU/yr]: %g " %np.linalg.norm(list(map(float, vel))))
 
     data = " ".join(pos) + " " + " ".join(vel) + " "+ str(mass)
-    return planet_name, data
+    return body_name, data
 
 
 def read_mbox(args):
@@ -56,6 +56,7 @@ def get_args():
     parser.add_argument('-f','--filename',default='planet_data/horizons_results*.txt')
     parser.add_argument('-F','--folder',default='')
     parser.add_argument('-o','--outfile',default='')
+    parser.add_argument('-m','--main_body',default='Sun')
     parser.add_argument('-y','--years',default=2, type=int)
     parser.add_argument('-s','--steps_per_year',default=10000, type=int)
     parser.add_argument('--fixed_sun',action='store_true')
@@ -88,17 +89,20 @@ if __name__ == "__main__":
     years = args.years
     steps_per_year = args.steps_per_year
     n_bodies = len(files)
-    hasFixedSun = int(args.fixed_sun)
+    has_fixed_sun = int(args.fixed_sun)
     relativistic = int(args.relativistic)
-    outfile_lines = [years, steps_per_year, hasFixedSun, relativistic, n_bodies]
+    outfile_lines = [years, steps_per_year, has_fixed_sun, relativistic, n_bodies]
+    print ("Years:  %d   Steps per year: %d   fixed:  %d  relativistic: "\
+            "%d"%(years, steps_per_year, has_fixed_sun, relativistic))
+    print ()
     n_info_lines = len(outfile_lines)
     # bodies = [] 
     for filename in files:
         # main file parser:
         with open(filename) as infile:
             text = infile.read()
-            planet_name, data = process_data(text)
-        if planet_name == 'Sun':
+            body_name, data = process_data(text)
+        if body_name == args.main_body:
             # Set as the first body
             print(" -----> Setting Sun as first body")
             outfile_lines.insert(n_info_lines,data)
@@ -114,10 +118,11 @@ if __name__ == "__main__":
         # use name of folder 
         outfile_name = 'in/'
         outfile_name += [a for a in args.folder.split('/') if a][-1]
+        outfile_name += "Fixed" if args.fixed_sun else ""
         outfile_name += '.txt'
     elif n_bodies == 1:
         # use name of planet
-        outfile_name = planet_name + '.txt'
+        outfile_name = body_name + '.txt'
     else:
         # default filename
         outfile_name = 'in/data.txt'

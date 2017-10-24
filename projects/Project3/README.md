@@ -32,10 +32,10 @@ An input file should be a plain text document with the following lines:
     x y z vx vy vz m (body parameters)
 ```
 
-where the last time is repeated n times, one for each body. The first body
+where the last line is repeated n times, one for each body. The first body
 should be the main body (most massive/closest to origin) if Fixed main body
 or Relativistic correction is to be used
 
 - Given a vector-table produced by https://ssd.jpl.nasa.gov/horizons.cgi,
 analysis/read_horizon.py can produce the infile needed. only works for the
-10 main bodies of the solar system.
+sun, the 8 planets of the solar system and pluto.

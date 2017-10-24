@@ -14,15 +14,19 @@ void initialize(arma::mat& pos, arma::mat& vel,
 void eulerChromer(arma::mat& pos, arma::mat& vel, double dt);
 int readInt(string& line, ifstream& infile, int& lineNumber);
 void initialiseSystemFromFile(string filename, SolarSystem &system, int &stepsPerYear, int &years);
+string getOutFilename(string filename);
 
 int main(int argc, char * argv[]) {
     SolarSystem * system = new SolarSystem();
     int stepsPerYear;
     int years;
-    string  filename;
+    string filename;
+    string outFilename;
 
     if (argc > 1){
         filename = (string) argv[1];
+        outFilename = getOutFilename(filename);
+
         initialiseSystemFromFile(filename, *system, stepsPerYear, years);
         cout << "Initialised system" << endl;
         cout << "Number of bodies: " << system->numberOfBodies() << endl;
@@ -50,14 +54,19 @@ int main(int argc, char * argv[]) {
     double kinetic;
     double potential;
     double total;
+    string outText;
+    int prevLength = 0;
     //system->calculateForcesAndEnergy();
     for(int i = 0; i < steps; i++) {
         integrator->integrateOneStepVelocityVerlet(*system);
         if (i % 100 == 0) {
             if (i % (steps/100) == 0) {
-                cout << (100. * i)/steps << "%" << endl;
+                outText = to_string( (int)(100. * i)/steps);
+                cout << outText << "%" << endl;
+                cout << "\033[A" ;//string(prevLength, );
+                prevLength = outText.length() + 1;
             }
-            system->writeToFile("out/test.txt");
+            system->writeToFile("out/" + outFilename);
             //energy = system->totalEnergy();
             kinetic   = system->kineticEnergy();
             potential = system->potentialEnergy();
@@ -66,8 +75,8 @@ int main(int argc, char * argv[]) {
         }
 
     }
-    cout << "HALLPOOO" << endl;
-
+    cout << "100% - DONE!" << endl;
+    cout << "Data written to out/" + outFilename << endl;
     outfile.close();
     return 0;
 }
@@ -120,6 +129,13 @@ int readInt(string& line, ifstream& infile, int& lineNumber){
     istringstream iss(line);
     if (!(iss >> out)) { throw lineNumber; } // error
     return out;
+}
+
+string getOutFilename(string filename){
+    // if no delimiter found (gives s.find()=-1), we want pos=0, else we want s.find()+3
+    int pos = filename.find("in/") + 1;
+    if (pos != 0) { pos += 2; }
+    return filename.substr(pos);
 }
 
 void initialize(arma::mat& pos, arma::mat& vel,

@@ -17,6 +17,7 @@ CelestialBody::CelestialBody(double x, double y, double z, double vx, double vy,
     angularMomPerMass = arma::cross(position, velocity);
     mass = mass_;
 }
+
 void CelestialBody::resetForce(){
     prevForce = force;
     force << 0 << arma::endr<< 0 << arma::endr<< 0;

@@ -46,8 +46,7 @@ void SolarSystem::calculateForcesAndEnergy()
     }
 
     int i;
-    // Sun should be first celestial body
-    if (m_fixedSun) {i = 1;} else {i = 0;}
+    // Main body should be first celestial body
     for(; i<numberOfBodies(); i++) {
         CelestialBody &body1 = m_bodies[i];
 
@@ -60,14 +59,18 @@ void SolarSystem::calculateForcesAndEnergy()
             double force = m_G*body1.mass*body2.mass/(dr*dr);
             arma::vec forceVector = force*deltaRVector/dr;
             if (m_relativistic) {
-                // Angular momentum per body assumed to be constant
-                double l1 = arma::norm(body1.angularMomPerMass);
-                double l2 = arma::norm(body2.angularMomPerMass);
-                double r1 = arma::norm(body1.position);
+                // Dont calculate for main body:
+                if (i != 0) {
+                    double l1 = arma::norm(arma::cross(body1.position,body1.velocity));
+                    double r1 = arma::norm(body1.position);
+                    body1.force -= forceVector*(1+3*l1*l1/(r1*r1*m_c_0_squared));
+                } else {
+                    body1.force -= forceVector;
+                }
+                double l2 = arma::norm(arma::cross(body2.position,body2.velocity));
                 double r2 = arma::norm(body2.position);
                 // Correction is assumed to be around barycenter
-                body1.force -= forceVector(1+3*l1*l1/(r1*r1*m_c_0_squared));
-                body2.force += forceVector(1+3*l2*l2/(r2*r2*m_c_0_squared));
+                body2.force += forceVector*(1+3*l2*l2/(r2*r2*m_c_0_squared));
             } else {
                 body1.force -= forceVector;
                 body2.force += forceVector;
@@ -77,6 +80,9 @@ void SolarSystem::calculateForcesAndEnergy()
 
         double vel_squared = arma::dot(body1.velocity, body1.velocity);
         m_kineticEnergy += 0.5*body1.mass*vel_squared;
+    }
+    if (m_fixedSun) {
+        m_bodies[0].force << 0 << 0 << 0;
     }
 }
 

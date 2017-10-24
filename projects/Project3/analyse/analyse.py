@@ -8,8 +8,9 @@ def get_args():
     parser.add_argument('-f', '--filename', default='out/example.txt')
     parser.add_argument('--fixed_sun', action='store_true')
     parser.add_argument('-dim', '--dimensions',type=int,help='plot dimension', default=2, choices=[2,3])
-    parser.add_argument('-s', '--plot_step', help='plot every nth data point',default=1)
-    parser.add_argument('-p', '--phase', help='plot phase precession of body 2',
+    parser.add_argument('-s', '--plot_step', help='plot every nth data point',
+            type=int,default=1)
+    parser.add_argument('-p', '--precession', help='plot perihelion precession of body 2',
             action = 'store_true')
     return parser.parse_args()
 
@@ -50,14 +51,27 @@ def plot(planets, args):
         ax.axis('equal')
         ax.grid()
     plt.show()
-    if args.phase:
-        plot_phase_precession(planets[:,1], args)
+    if args.precession:
+        plot_peri_precession(planets[:,1], args)
 
 
 
 
-def plot_phase_precession(planet,args):
-    pass
+def plot_peri_precession(planet,args):
+    print(planet.shape)
+    # Assuming two-dimensional
+    x,y,z = planet.T
+    r = np.sqrt(x**2 + y**2 + z**2)
+    maxima = np.r_[True, r[1:] < r[:-1]] & np.r_[r[:-1] < r[1:], True]
+    theta = np.arctan2(y,x)
+    #plt.plot(r[::args.plot_step],theta)
+    fix,[ax1,ax2] = plt.subplots(2)
+    ax1.plot(theta[maxima])
+    ax2.plot(x,y)
+    print(np.sum(maxima))
+    ax2.scatter(x[maxima],y[maxima])
+    ax2.axis('equal')
+    plt.show()
 
 def main():
     args = get_args()

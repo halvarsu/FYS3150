@@ -22,10 +22,29 @@ int main(int argc, char * argv[]) {
     int years;
     string filename;
     string outFilename;
+    string outInfoFilename;
+
+    arma::vec a, b;
+
+    a << 1. << 2. << 3.;
+    b << -1. << -2. << -3.;
+    cout << sizeof(a)<< endl;
+    ofstream outtest;
+    outtest.open("test.bin", ios::binary);
+
+    for (int i = 0; i < 4; i++){
+        a.save(outtest, arma::raw_binary);
+        b.save(outtest, arma::raw_binary);
+        a += 3;
+        b -= 3;
+    }
+    outtest.close();
 
     if (argc > 1){
         filename = (string) argv[1];
-        outFilename = getOutFilename(filename);
+        string outFnameBase = getOutFilename(filename);
+        outInfoFilename = "out/" + outFnameBase + ".info.txt";
+        outFilename = "out/" + outFnameBase + ".bin";
 
         initialiseSystemFromFile(filename, *system, stepsPerYear, years);
         cout << "Initialised system" << endl;
@@ -47,7 +66,10 @@ int main(int argc, char * argv[]) {
 //        body.force.print();
 //    }
     std::ofstream outfile;
-    outfile.open("out/energies.txt");
+    outfile.open(outInfoFilename);
+    outfile << system->numberOfBodies() << endl;
+    outfile << system->hasFixedSun() << endl;
+    outfile << system->hasRelativisticCorr() << endl;
     outfile <<"Kinetic:    " << "Potential:    "<<"Total:"<<std::endl;
 
     double energy= system->totalEnergy();
@@ -59,14 +81,14 @@ int main(int argc, char * argv[]) {
     //system->calculateForcesAndEnergy();
     for(int i = 0; i < steps; i++) {
         integrator->integrateOneStepVelocityVerlet(*system);
-        if (i % 100 == 0) {
+        if (i % 10 == 0) {
             if (i % (steps/100) == 0) {
-                outText = to_string( (int)(100. * i)/steps);
+                outText = to_string(i/(steps/100));
                 cout << outText << "%" << endl;
                 cout << "\033[A" ;//string(prevLength, );
                 prevLength = outText.length() + 1;
             }
-            system->writeToFile("out/" + outFilename);
+            system->writeToFile(outFilename);
             //energy = system->totalEnergy();
             kinetic   = system->kineticEnergy();
             potential = system->potentialEnergy();
@@ -76,8 +98,10 @@ int main(int argc, char * argv[]) {
 
     }
     cout << "100% - DONE!" << endl;
-    cout << "Data written to out/" + outFilename << endl;
+    cout << "Data written to " + outFilename << " and " << outInfoFilename <<  endl;
     outfile.close();
+    cout << sizeof(arma::arma_binary);
+    system->closeFile();
     return 0;
 }
 
@@ -133,9 +157,13 @@ int readInt(string& line, ifstream& infile, int& lineNumber){
 
 string getOutFilename(string filename){
     // if no delimiter found (gives s.find()=-1), we want pos=0, else we want s.find()+3
-    int pos = filename.find("in/") + 1;
-    if (pos != 0) { pos += 2; }
-    return filename.substr(pos);
+    int start = filename.find("in/") + 1;
+    int stop = filename.find(".txt");
+    if (start != 0) { start += 2; }
+    if (stop != -1) { stop -= start; }
+    cout << filename << endl;
+    cout << start << " " << stop << endl;
+    return filename.substr(start, stop);
 }
 
 void initialize(arma::mat& pos, arma::mat& vel,

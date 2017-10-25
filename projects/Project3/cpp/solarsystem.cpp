@@ -154,8 +154,8 @@ double SolarSystem::kineticEnergy() const
 void SolarSystem::writeToFile(string filename)
 {
     if(!m_file.good() || !m_file.is_open()) {
-        m_file.open(filename.c_str(), ofstream::out);
-        m_file << numberOfBodies() << endl;
+        cout << "opening file " << filename << endl;
+        m_file.open(filename.c_str(), ios::binary);
         if(!m_file.good()) {
             cout << "Error opening file " << filename << ". Aborting!" << endl;
             terminate();
@@ -164,9 +164,10 @@ void SolarSystem::writeToFile(string filename)
 
     int i = 0;
     for (CelestialBody &body : m_bodies) {
-        m_file << setprecision(10) << body.position(0) << " "
-               << setprecision(10) << body.position(1) << " "
-               << setprecision(10) << body.position(2) << endl;
+        body.position.save(m_file, arma::raw_binary);
+//        m_file << setprecision(10) << body.position(0) << " "
+//               << setprecision(10) << body.position(1) << " "
+//               << setprecision(10) << body.position(2) << endl;
         i++;
     }
 }

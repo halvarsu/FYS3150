@@ -12,6 +12,9 @@
 \usepackage{cleveref}
 \usepackage{cite}
 \usepackage{caption}
+%
+%\usepackage{wasysym}
+\usepackage{mathabx}
 
 \captionsetup{width=0.6\linewidth}
 
@@ -39,7 +42,7 @@
     effectiveness of two methods for numerical differentiation, namely
     Forward Euler and Velocity Verlet. Some properties of the solar system
     is studied, including escape velocity for a planet in a two body
-    system, a modified three body problem, and finally a sun-mercury system
+    system, a modified three body problem, and finally a Sun-Mercury system
     with 
     
     The Velocity Verlet method is found to be a bit 
@@ -94,7 +97,7 @@ original equation to a more manageable one.
  % \subsection{Discretizing equations and defining acceleration}
 Using Newton's second law, which states that the sum of all the forces
 equals mass times acceleration, $\sum F=ma$, we can calculate the
-acceleration of the planet in relation to the sun. Assuming circular
+acceleration of the planet in relation to the Sun. Assuming circular
 orbits, we know this acceleration to be the sentripetal acceleration, and
 the force is the gravitational force
 
@@ -124,7 +127,7 @@ astronomical unit, 1 AU. The orbit speed is one round per year, that is
 \end{equation}
 
 We can now substitute this constant and get an expression for the general
-acceleration of any object with an circular orbit around the sun
+acceleration of any object with an circular orbit around the Sun
 
 \begin{equation}
     M_Ea = GM_O\frac{M_E}{r^2}
@@ -240,20 +243,35 @@ aforementioned.
     \label{fig:XXX}
 \end{figure}
 
-\subsection{Perihelion precession}
+\subsection{Relativistic corrections}
+General relativity predicts corrections to the Newtonian force an object
+experiences in the vicinity of a massive object. For Mercury, the
+gravitational force is better approximated with the expression
+
+\begin{equation}
+    F_G =
+    \frac{GM_{\text{\Sun}}M_{\text{\Mercury}}}{r^2}\left[1+\frac{3l^2}{r^2
+    c^2}\right] 
+\end{equation},
+
+where $M_{\text{\Sun}}$ is the mass of the Sun, $M_{\text{\Mercury}}$ is the
+mass of Mercury, $l$ is the angular momentum of mercury around the sun
+center of mass and $c$ is the speed of light in vacuum.
+
 \subsection{Placeholder}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}
 
-\subsection{Two-body problem} 
+\subsection{Two-body problem $\Sun\Earth$} 
 \subsubsection{Stability analysis}
-\subsection{Three-body problem} 
-\subsubsection{Fixed sun}
-\subsubsection{Massive Jupiter}
-\subsubsection{Moving sun}
-\subsection{N-body problem - Full solar system model} 
-\subsection{Mercury perihelion precession}
+\subsection{Three-body problem $\Sun\Earth\Jupiter$} 
+\subsubsection{Fixed Sun }
+\subsubsection{Massive Jupiter }
+\subsubsection{Moving Sun }
+\subsection{N-body problem $\Sun\Mercury\Pluto\Earth\Mars\Jupiter\Saturn\Neptune\Uranus\Pluto$} 
+\subsection{Mercury perihelion precession $\Sun \Mercury$}
 \subsection{Testing and algorithm analysis}
 \subsubsection{Stability of $\Delta t$}
 \subsubsection{Energy and angular momentum conservation}

@@ -24,21 +24,6 @@ int main(int argc, char * argv[]) {
     string outFilename;
     string outInfoFilename;
 
-    arma::vec a, b;
-
-    a << 1. << 2. << 3.;
-    b << -1. << -2. << -3.;
-    cout << sizeof(a)<< endl;
-    ofstream outtest;
-    outtest.open("test.bin", ios::binary);
-
-    for (int i = 0; i < 4; i++){
-        a.save(outtest, arma::raw_binary);
-        b.save(outtest, arma::raw_binary);
-        a += 3;
-        b -= 3;
-    }
-    outtest.close();
 
     if (argc > 1){
         filename = (string) argv[1];

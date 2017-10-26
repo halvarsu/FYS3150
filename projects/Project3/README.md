@@ -31,6 +31,7 @@ An input file should be a plain text document with the following lines:
     steps per year
     Fixed main body? (0 or 1)
     Relativistic correction? (0 or 1)
+    Use Forward Euler? (0 or 1) 
     n (number of bodies)
     x y z vx vy vz m (body parameters)
 ```

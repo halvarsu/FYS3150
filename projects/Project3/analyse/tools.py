@@ -5,3 +5,10 @@ def blockPrint():
 
 def enablePrint():
     sys.stdout = sys.__stdout__
+
+def printDisable(*args):
+    enablePrint()
+    print args
+    blockPrint()
+
+

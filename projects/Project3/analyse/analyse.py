@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import tools
+import glob
 
 
 def get_args():
@@ -22,6 +23,7 @@ def get_args():
             action = 'store_true')
     parser.add_argument('-DP','--disable_plot', help='dont plot main orbit',action='store_true')
     parser.add_argument('-v','--verbose', help='1 = print all, 0 = no print',type=int, choices = [0,1], default = 1)
+    parser.add_argument('--figsize', nargs=2,type=float, default=(6,4))
     return parser.parse_args()
 
 def read_data(data_filename, args):
@@ -75,12 +77,50 @@ def plot(data, args):
             plt.scatter(planets[0,0,0],planets[0,0,1], c=(0.7, 0.7,0))
             ax.axis('equal')
             ax.grid()
-    if args.precession:
-        fig2, axes2 = plot_peri_precession(data, args)
-    # if args.energies:
-    #     plot_energies(data, args)
     plt.show()
 
+
+def plot_orbit_stability(args):
+    filenames = [f for f in glob.glob(args.folder + '/*') if f.endswith('.bin')]
+     
+    # dirty sorting
+    temp = map(lambda x : int(x.split('_N')[-1].split('.')[0]), filenames)
+    filenames = list(np.array(filenames)[np.argsort(temp)])
+
+    fig1 = plt.figure()
+    ax1 = fig1.add_subplot(211)
+    ax2 = fig1.add_subplot(212)
+    fig2 = plt.figure()
+    ax3 = fig2.add_subplot(111)
+    color = plt.cm.jet(np.linspace(0,1,len(filenames)))
+
+    for i, f in enumerate(filenames):
+        data = read_data(f, args)
+        planet = data["pos"][:,1]
+
+        time = data["time"] 
+        x, y, z = planet.T
+        r = np.sqrt(x**2 + y**2 + z**2)
+        deviation = np.sqrt((x[0]-x[-1])**2 + (y[0] - y[-1])**2 + (z[0] - z[-1])**2)
+        ax1.plot(time, r, c=color[i])
+        ax2.plot(x,y, c=color[i])
+        ax2.axis('equal')
+        ax3.scatter(data["steps_per_year"], deviation, c=color[i])
+    ax3.set_xscale('log')
+    ax3.set_yscale('log')
+    ax1.set_xlabel('time')
+    ax1.set_ylabel('position')
+    ax2.set_xlabel('x')
+    ax2.set_ylabel('y')
+    ax3.set_xlabel('N points')
+    ax3.set_ylabel('deviation in one year')
+    
+    if args.outfile:
+        outfile = args.outfile
+    else:
+        base_name = "figure{}.pdf"
+        prev_files = glob.glob(base_name.format("*"))
+        outfile = base_name.format(len(prev_files))
 
 def plot_energies(data, args):
     energies = data["energies"]
@@ -119,33 +159,18 @@ def main(args):
     if args.verbose == 0:
         tools.blockPrint()
 
+    # stability > normal plot > precession > energies
     if args.stability_analysis:
-        import glob
-        filenames = [f for f in glob.glob(args.folder + '/*') if f.endswith('.bin')]
-
-        fig, [ax1,ax2] = plt.subplots(2)
-        for f in filenames:
-            data = read_data(f, args)
-            planet = data["pos"][:,1]
-
-            time = data["time"] 
-            x, y, z = planet.T
-            r = np.sqrt(x**2 + y**2 + z**2)
-            ax1.plot(time, r)
-            ax2.plot(x,y)
-            ax2.axis('equal')
-        
-        if args.outfile:
-            outfile = args.outfile
-        else:
-            base_name = "figure{}.pdf"
-            prev_files = glob.glob(base_name.format("*"))
-            outfile = base_name.format(len(prev_files))
-        print("outfile = %s"%outfile)
-        plt.show()
-    else:
+        plot_orbit_stability(args)
+    elif not args.disable_plot:
         data = read_data(args.filename, args)
         plot(data,args)
+    if args.precession:
+        plot_peri_precession(data, args)
+    if args.energies:
+        plot_energies(data, args)
+    plt.show()
+
 
 
 if __name__ == "__main__":

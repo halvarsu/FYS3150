@@ -12,6 +12,7 @@ def get_args():
             type=int,default=1)
     parser.add_argument('-p', '--precession', help='plot perihelion precession of body 2',
             action = 'store_true')
+    parser.add_argument('-DP', '--dont_plot', help='plot orbit', action = 'store_false')
     parser.add_argument('-e','--energies', help='plot energies of system',action='store_true')
     return parser.parse_args()
 
@@ -78,19 +79,38 @@ def plot(data, args):
 
 
 def plot_peri_precession(planet,args):
+    from scipy.optimize import minimize
+    from scipy.interpolate import interp1d
     print(planet.shape)
     # Assuming two-dimensional
     x,y,z = planet.T
     r = np.sqrt(x**2 + y**2 + z**2)
-    maxima = np.r_[True, r[1:] < r[:-1]] & np.r_[r[:-1] < r[1:], True]
+    maxima = np.r_[False, r[1:] < r[:-1]] & np.r_[r[:-1] < r[1:], False]
+    dr = np.diff(r)
+    dr_min = np.r_[False, dr[1:] < dr[:-1]] & np.r_[dr[:-1] < dr[1:], False]
+    dr_max = np.r_[False, dr[1:] > dr[:-1]] & np.r_[dr[:-1] > dr[1:], False]
+
+    r_minima = []
+    theta_minima = []
+    for a,b in zip(dr_min[:-1][dr_min], dr[:-1][dr_max]):
+        r_sub = r[a:b]
+        theta_sub = theta[a:b]
+        r_func = interp1d(theta_sub,r_sub)
+        res = minimize(r_func, (theta_sub[int(theta_sub.size/2)]))
+        theta_minima.append(res.x)
+        r_minima.append(res.fun)
+        
+    # exclude endpoints
     theta = np.arctan2(y,x)
     #plt.plot(r[::args.plot_step],theta)
     fix,[ax1,ax2] = plt.subplots(2)
     ax1.plot(theta[maxima])
-    ax2.plot(x,y)
+    ax2.plot(r)
     print(np.sum(maxima))
-    ax2.scatter(x[maxima],y[maxima])
-    ax2.axis('equal')
+    ind = np.arange(len(r))
+    #ax2.scatter(x[maxima],y[maxima])
+    ax2.scatter(ind[maxima],r[maxima])
+    #ax2.axis('equal')
     plt.show()
 
 def main():

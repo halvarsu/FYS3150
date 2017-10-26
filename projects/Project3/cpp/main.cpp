@@ -20,6 +20,7 @@ int main(int argc, char * argv[]) {
     SolarSystem * system = new SolarSystem();
     int stepsPerYear;
     int years;
+    int writeEveryNthStep;
     string filename;
     string outFilename;
     string outInfoFilename;
@@ -40,6 +41,18 @@ int main(int argc, char * argv[]) {
         cout << "No arguments! Doing nothing" << endl;
         return 0;
     }
+    if (argc > 2) {
+        istringstream ss(argv[2]);
+        if (!(ss >> writeEveryNthStep)) {
+            cerr << "Invalid number " << argv[2] << "\n";
+        } else {
+            cout << writeEveryNthStep ;
+        }
+
+    } else{
+        writeEveryNthStep = 100;
+    }
+
 
     int steps = stepsPerYear*years;
     double dt = 1./stepsPerYear;
@@ -66,13 +79,12 @@ int main(int argc, char * argv[]) {
     //system->calculateForcesAndEnergy();
     for(int i = 0; i < steps; i++) {
         integrator->integrateOneStepVelocityVerlet(*system);
-        if (i % 10 == 0) {
-            if (i % (steps/100) == 0) {
-                outText = to_string(i/(steps/100));
-                cout << outText << "%" << endl;
-                cout << "\033[A" ;//string(prevLength, );
-                prevLength = outText.length() + 1;
-            }
+        if (i % writeEveryNthStep == 0) {
+            outText = to_string(i/(steps/100));
+            cout << outText << "%" << endl;
+            cout << "\033[A" ;//string(prevLength, );
+            prevLength = outText.length() + 1;
+
             system->writeToFile(outFilename);
             //energy = system->totalEnergy();
             kinetic   = system->kineticEnergy();

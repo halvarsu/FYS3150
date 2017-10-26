@@ -17,9 +17,12 @@ To setup, you need to configure your project manually.  After git clone, open Pr
 
 ## Running
 
-This project consists of a object oriented c++ program for simulating
-celestial bodies with a python framework for constructing input files and
-analysis the output files. 
+After compiling, run main program from this folder, with an input file as first argument. Second and third arguments are also possible: the second should be an int, specifing how often the program should print to file, and the third argument will, if present (can be anything), disable saving of energy to file. 
+
+Two output files are then produces in `out`, a binary file containing positions, and a text file containing information about the simulation and energies. 
+
+The analysis script `analyse/analyse.py` analyses these files with `-f` argument. See `-h` argument for more options.
+
 
 ### Input files
 An input file should be a plain text document with the following lines:
@@ -28,14 +31,16 @@ An input file should be a plain text document with the following lines:
     steps per year
     Fixed main body? (0 or 1)
     Relativistic correction? (0 or 1)
+    Use Forward Euler? (0 or 1) 
     n (number of bodies)
     x y z vx vy vz m (body parameters)
 ```
 
-where the last line is repeated n times, one for each body. The first body
+where the last line is repeated n times, one for each body. NOTE: The first body
 should be the main body (most massive/closest to origin) if Fixed main body
 or Relativistic correction is to be used
 
-- Given a vector-table produced by https://ssd.jpl.nasa.gov/horizons.cgi,
-analysis/read_horizon.py can produce the infile needed. only works for the
-sun, the 8 planets of the solar system and pluto.
+#### Creating input
+- `analysis/read_horizon.py` produces an infile, given a vector-table produced by https://ssd.jpl.nasa.gov/horizons.cgi. O
+Currently only works for the sun, the 8 planets of the solar system and pluto. See `-h` argument for more options.
+

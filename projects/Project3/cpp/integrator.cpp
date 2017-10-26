@@ -3,7 +3,10 @@
 #include "solarsystem.h"
 
 
-Integrator::Integrator(double dt) : m_dt(dt) {}
+Integrator::Integrator(double dt) :
+    m_dt(dt),
+    m_dt_squared(dt*dt)
+{}
 
 void Integrator::integrateOneStepEuler(SolarSystem &system){
     system.calculateForcesAndEnergy();
@@ -18,7 +21,7 @@ void Integrator::integrateOneStepEuler(SolarSystem &system){
 
 void Integrator::integrateOneStepVelocityVerlet(SolarSystem &system){
     for (CelestialBody &body : system.bodies()){
-        body.position += m_dt * body.velocity  + 0.5*m_dt*m_dt*(body.force / body.mass) ;
+        body.position += m_dt * body.velocity  + 0.5*m_dt_squared*(body.force / body.mass) ;
     }
 
     system.calculateForcesAndEnergy();

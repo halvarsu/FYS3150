@@ -7,6 +7,7 @@ class Integrator
 {
 public:
     double m_dt;
+    double m_dt_squared;
     Integrator(double dt);
     // many small steps with Euler == a giant step with velocityVerlet (for same accuracy)
     void integrateOneStepEuler(class SolarSystem &system);

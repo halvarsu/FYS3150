@@ -13,7 +13,8 @@ void initialize(arma::mat& pos, arma::mat& vel,
 
 void eulerChromer(arma::mat& pos, arma::mat& vel, double dt);
 int readInt(string& line, ifstream& infile, int& lineNumber);
-void initialiseSystemFromFile(string filename, SolarSystem &system, int &stepsPerYear, int &years);
+void initialiseSystemFromFile(string filename, SolarSystem &system, int &stepsPerYear, int &years,
+                            bool & useEuler);
 string getOutFilename(string filename);
 
 int main(int argc, char * argv[]) {
@@ -25,6 +26,7 @@ int main(int argc, char * argv[]) {
     string outFilename;
     string outInfoFilename;
     bool dontSaveEnergies;
+    bool useEuler;
 
 
     if (argc > 1){
@@ -33,11 +35,12 @@ int main(int argc, char * argv[]) {
         outInfoFilename = "out/" + outFnameBase + ".info.txt";
         outFilename = "out/" + outFnameBase + ".bin";
 
-        initialiseSystemFromFile(filename, *system, stepsPerYear, years);
+        initialiseSystemFromFile(filename, *system, stepsPerYear, years, useEuler);
         cout << "Initialised system" << endl;
         cout << "Number of bodies: " << system->numberOfBodies() << endl;
         cout << "Fixed sun? " << system->hasFixedSun() << endl;
         cout << "Relativistic Correction? " << system->hasRelativisticCorr() << endl;
+        cout << "using forward euler? " << useEuler << endl;
     } else {
         cout << "No arguments! Doing nothing" << endl;
         return 0;
@@ -59,7 +62,7 @@ int main(int argc, char * argv[]) {
 
     int steps = stepsPerYear*years;
     double dt = 1./stepsPerYear;
-    Integrator * integrator = new Integrator(dt);
+    Integrator * integrator = new Integrator(dt, useEuler);
 
     system->calculateForcesAndEnergy();
     std::ofstream outfile;
@@ -80,7 +83,7 @@ int main(int argc, char * argv[]) {
     string outText;
     int prevLength = 0;
     for(int i = 0; i < steps; i++) {
-        integrator->integrateOneStepVelocityVerlet(*system);
+        integrator->integrateOneStep(*system);
         if (i % writeEveryNthStep == 0) {
             if (i % (steps/100) == 0) {
                 outText = to_string(i/(steps/100));
@@ -88,7 +91,6 @@ int main(int argc, char * argv[]) {
                 cout << "\033[A" ;//string(prevLength, );
                 prevLength = outText.length() + 1;
             }
-
             system->writeToFile(outFilename);
             if (!dontSaveEnergies){
                 kinetic   = system->kineticEnergy();
@@ -106,7 +108,8 @@ int main(int argc, char * argv[]) {
     return 0;
 }
 
-void initialiseSystemFromFile(string filename, SolarSystem &system, int & stepsPerYear, int & years){
+void initialiseSystemFromFile(string filename, SolarSystem &system, int & stepsPerYear, int & years,
+                              bool & useEuler){
     try {
         ifstream infile;
         string line;
@@ -122,6 +125,7 @@ void initialiseSystemFromFile(string filename, SolarSystem &system, int & stepsP
         stepsPerYear 			= readInt(line, infile, lineNumber);
         fixedSun 				= readInt(line, infile, lineNumber);
         relativisticCorrection 	= readInt(line, infile, lineNumber);
+        useEuler			  	= (bool) readInt(line, infile, lineNumber);
         numberOfPlanets	= readInt(line, infile, lineNumber);
 
         system.setFixedSun((bool)fixedSun);

@@ -98,10 +98,18 @@
 
 \section{Introduction}
 The purpose of this project is to solve the differential equations of the
-mechanics of the solar system.
+mechanics of the solar system in an efficient way with precise results. There are several different algorithms to calculate the objects orbiting a star, each with their strengths and weaknesses. A couple of these will be showcased and compared to examine which one is preferable in our case.
+
+Our entire simulation is based on Newton's second law of montion
+\begin{equation}
+    F_G = \frac{M_\Sun M_{Earth}}{r^2}
+\end{equation}
+which turns out to be an adequate estimation for all most objects in regular solar systems. In order to create a simulation with a desirable precission, a large number of iterations is necessary. The solar system is a complex one, with many factors and interactions. So our biggest challenge is to efficiently manipulate our computer with a program that exploits all its processing power without taking too much of our time. In other words, we want to make an as simple program as possible, without losing any of its precission. Different tricks and methods for simplifying the algorithm will therefore be explained and implemented. 
+
+We will gradually complicate our system in order to make it more realistic, and finally include the effects of general relativity on objects significantly affected by it, where we prevously only used newtonian physics.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Theory/Methods}
+\section{Theory}
 \subsection{Units}
  % \subsection{Discretizing equations and defining acceleration}
 Using Newton's second law, which states that the sum of all the forces
@@ -212,7 +220,7 @@ As for the position, we use the current velocity in the second term to
 increase the accuracy.
 
 \begin{equation}
-    x_{i+1} = v_i +v_{i+1}h
+    x_{i+1} = x_i +v_{i}h
 \end{equation}
 
 With this algorithm we can calculate the position of the object at as many
@@ -285,6 +293,25 @@ gravitational force is better approximated with the expression
 where  $M_\Sun$ is the mass of the Sun, $M_\Mercury$ is the
 mass of Mercury, $l$ is the angular momentum of mercury around the sun
 center of mass and $c$ is the speed of light in vacuum.
+
+\subsection{FLOPS}
+FLOPS are floating point operations, meaning the effect of an operator on an expression. Examples are addition, multiplications etc. Every one of these operations will consume some processing power. Minimizing the total number of FLOPS is therefore essential in order to avoid a tedious program. By counting FLOPS we can attain an implication as to how much time the operations will consume.
+\subsubsection{Euler:} 
+\begin{equation}
+    \boxed{v_{i+1}=v_i+ah}\ \ , \ \ \boxed{x_{i+1}=x_i+v_ih} 
+\end{equation}
+With one iteration, that is one time step, the Euler method has 4 FLOPS.
+
+\subsubsection{Verlet:}
+\begin{align}
+    &\boxed{v_{i+1}=v_i+\frac{h}{2}\left(v_{i+1}^{(1)}+v_{i}^{(1)}\right)}\nonumber\\
+    &\boxed{x_{i+1}=x_i+hv_i + \frac{h_2}{2} v_{i}^{(1)}}
+\end{align}
+By stating a new parameter $h_2 = h^2$ and calculating it before the loop, we will save one FLOP per iteration. This might not seem significant, but if the program runs 10 years with 10.000 iterations per year, every FLOP counts. This tallies up to a total of 8 FLOPS.
+
+In conclusion, the Verlet method is slower than Euler's. 
+
+
 
 \subsection{Placeholder}
 

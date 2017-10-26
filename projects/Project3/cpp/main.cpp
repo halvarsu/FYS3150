@@ -24,6 +24,7 @@ int main(int argc, char * argv[]) {
     string filename;
     string outFilename;
     string outInfoFilename;
+    bool dontSaveEnergies;
 
 
     if (argc > 1){
@@ -53,51 +54,54 @@ int main(int argc, char * argv[]) {
         writeEveryNthStep = 100;
     }
 
+    dontSaveEnergies = argc > 3;
+
 
     int steps = stepsPerYear*years;
     double dt = 1./stepsPerYear;
     Integrator * integrator = new Integrator(dt);
 
     system->calculateForcesAndEnergy();
-//    for (CelestialBody &body : system->bodies()){
-//        cout << "--------- body ---------" << endl;
-//        body.force.print();
-//    }
     std::ofstream outfile;
     outfile.open(outInfoFilename);
-    outfile << system->numberOfBodies() << endl;
+    outfile << years << endl;
+    outfile << stepsPerYear << endl;
     outfile << system->hasFixedSun() << endl;
     outfile << system->hasRelativisticCorr() << endl;
+    outfile << system->numberOfBodies() << endl;
     outfile <<"Kinetic:    " << "Potential:    "<<"Total:"<<std::endl;
 
     double energy= system->totalEnergy();
-    double kinetic;
-    double potential;
-    double total;
+    double  kinetic   = system->kineticEnergy();
+    double  potential = system->potentialEnergy();
+    double  total = system->totalEnergy();
+    outfile <<kinetic<<"  "<< potential<<"  "<<total<<std::endl;
+
     string outText;
     int prevLength = 0;
-    //system->calculateForcesAndEnergy();
     for(int i = 0; i < steps; i++) {
         integrator->integrateOneStepVelocityVerlet(*system);
         if (i % writeEveryNthStep == 0) {
-            outText = to_string(i/(steps/100));
-            cout << outText << "%" << endl;
-            cout << "\033[A" ;//string(prevLength, );
-            prevLength = outText.length() + 1;
+            if (i % (steps/100) == 0) {
+                outText = to_string(i/(steps/100));
+                cout << outText << "%" << endl;
+                cout << "\033[A" ;//string(prevLength, );
+                prevLength = outText.length() + 1;
+            }
 
             system->writeToFile(outFilename);
-            //energy = system->totalEnergy();
-            kinetic   = system->kineticEnergy();
-            potential = system->potentialEnergy();
-            total = system->totalEnergy();
-            outfile <<kinetic<<"  "<< potential<<"  "<<total<<std::endl;
+            if (!dontSaveEnergies){
+                kinetic   = system->kineticEnergy();
+                potential = system->potentialEnergy();
+                total = system->totalEnergy();
+                outfile <<kinetic<<"  "<< potential<<"  "<<total<<std::endl;
+            }
         }
 
     }
     cout << "100% - DONE!" << endl;
     cout << "Data written to " + outFilename << " and " << outInfoFilename <<  endl;
     outfile.close();
-    cout << sizeof(arma::arma_binary);
     system->closeFile();
     return 0;
 }

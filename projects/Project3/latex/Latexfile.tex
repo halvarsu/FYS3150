@@ -16,6 +16,7 @@
 \usepackage{hyperref}
 \usepackage{tabularx}
 \usepackage{mathabx}
+\usepackage{titling}
 
 \captionsetup{width=0.6\linewidth}
 
@@ -37,6 +38,13 @@
   colorlinks = true,
 }
 
+% \pretitle{%
+%     \begin{center}
+%     \LARGE
+%     }
+% \posttitle{\end{center}}
+
+
 \begin{document}
 \title{The Solar System
 \\ Project 3
@@ -47,6 +55,12 @@
 \maketitle{\begin{center}\end{center}}
 \pagenumbering{gobble}
 \thispagestyle{empty}
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{../results/front.png}
+    \label{fig:name}
+\end{figure}
 
 \begin{abstract}
     We study a model of the solar system as gravitationally interacting
@@ -72,7 +86,7 @@
     % frequencies is reproduced.
 \end{abstract}
 
-
+\newpage
 
 
 
@@ -308,8 +322,8 @@ For only internal conservative forces, the total of kinetic and potential
 energy of a physical system is conserved.  To test the integration algorithms, 
 we calculate the energies using equations \cref{eq:energies}.
 
-\subsection{Three-body problem \texorpdfstring{$\Sun\Earth\Jupiter$}{}} 
-\subsubsection{Fixed Sun }
+\subsection{Adding Jupiter \texorpdfstring{$\Sun\Earth\Jupiter$}{}}
+
 We analyse the stability of the solar system when including Jupiter
 ($\Jupiter$) in our previous setup. The initial position of Jupiter is set to
 $\vec r_\Jupiter = -\SI{5.2}{AU}\hat e_x$, with velocity $\vec v_\Jupiter =
@@ -320,10 +334,27 @@ The masses of the objects are listed in the appendix.
 
 \subsubsection{Massive Jupiter }
 We then increase the mass of Jupiter to study the effects on the stability
-of earth. The mass is increased to $10x$ and $1000x$ the original mass of
-Jupiter.
-\subsubsection{Moving Sun }
+of the orbit of earth. The mass is increased to $10x$ and $1000x$ the
+original mass of Jupiter, but otherwise we use the same initial conditions.
+
+\subsubsection{Three-body problem} 
+Moving towards a more realistic model of the solar system, we let the Sun
+be affected by the gravitational effects of the planets. The initial
+conditions are now set from real data.
+\href{https://ssd.jpl.nasa.gov/horizons.cgi}{NASA} has an interface to
+celestial body initial conditions, which can be parsed by the preprocessor
+script \texttt{analyse/read\_horizon.py} (Ephemeris type needs to be set to
+VECTORS).  Consider that the velocities received by NASA are assumed to be
+around a common barycenter for the whole solar system; if one then excludes
+some planets, the total momentum will not be zero and the system will
+drift.  
+Correcting for this is done with the \texttt{--fix\_barycenter} argument of
+\texttt{read\_horizon.py}. It finds the total velocity of the barycenter
+and sets it to zero.
+
+
 \subsection{N-body problem \texorpdfstring{$\Sun\Mercury\Pluto\Earth\Mars\Jupiter\Saturn\Neptune\Uranus\Pluto$}{}} 
+
 \subsection{Mercury perihelion precession \texorpdfstring{$\Sun\Mercury$}{}} 
 \subsection{Testing and algorithm analysis}
 \subsubsection{Stability of \texorpdfstring{$\Delta t$}{}}

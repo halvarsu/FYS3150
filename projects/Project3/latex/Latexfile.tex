@@ -9,11 +9,12 @@
 \usepackage[parfill]{parskip}  
 \usepackage{multicol}
 \usepackage{siunitx}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{cleveref}
 \usepackage{cite}
 \usepackage{caption}
-%
-%\usepackage{wasysym}
+\usepackage{hyperref}
+\usepackage{tabularx}
 \usepackage{mathabx}
 
 \captionsetup{width=0.6\linewidth}
@@ -23,6 +24,18 @@
 \newcommand{\bigO}[1]{\mathcal{O}(#1)}
 
 \graphicspath{{../results/}}
+
+\newcommand\myshade{50}
+\colorlet{mylinkcolor}{violet}
+\colorlet{mycitecolor}{YellowOrange}
+\colorlet{myurlcolor}{Aquamarine}
+
+\hypersetup{
+  linkcolor  = mylinkcolor!\myshade!black,
+  citecolor  = mycitecolor!\myshade!black,
+  urlcolor   = myurlcolor!\myshade!black,
+  colorlinks = true,
+}
 
 \begin{document}
 \title{The Solar System
@@ -37,59 +50,41 @@
 
 \begin{abstract}
     We study a model of the solar system as gravitationally interacting
-    celestial bodies.  We implement a method to solve the differential
-    equations of the mechanics of the solar system in c++, and compare the
-    effectiveness of two methods for numerical differentiation, namely
-    Forward Euler and Velocity Verlet. Some properties of the solar system
-    is studied, including escape velocity for a planet in a two body
-    system, a modified three body problem, and finally a Sun-Mercury system
-    with 
-    
-    The Velocity Verlet method is found to be a bit 
-    % cases of one and two electrons trapped in a harmonic
-    % oscillator. Jacobi's method for finding the eigenvalues of a matrix is
+    celestial bodies.  Using an object oriented approach, we implement
+    classes in \texttt{c++} to solve the differential equations of the
+    mechanics of the solar system in \texttt{c++}. We compare the effectiveness of
+    two methods for numerical differentiation, namely Forward Euler and
+    Velocity Verlet, and discuss their stabilities in terms of energy
+    conservation. Some properties of the solar system are studied, including
+    escape velocity for a planet in a two body system, a modified three
+    body problem, and finally the phase precession of a Sun-Mercury system
+    with relativistic corrections. 
+    The Forward Euler integration method is found to be less costly per
+    iteration, but unlike the verlet method it doesn't conserve energy. 
+     
+    % cases of one and two electrons trapped in a harmonic oscillator.
+    % Jacobi's method for finding the eigenvalues of a matrix is
     % implemented, and applied to a discrete approximation of the
-    % Schr\"{o}dinger equation. The analytic energies of a single electron 
-    % is reproduced within a relative error of $\SI{e-4}{}$. Then the method
-    % is applied to two interacting electrons in the same potential, where
-    % analytic results from \cite{PhysRevA.48.3561} for certain
+    % Schr\"{o}dinger equation. The analytic energies of a single electron
+    % is reproduced within a relative error of $\SI{e-4}{}$. Then the
+    % method is applied to two interacting electrons in the same potential,
+    % where analytic results from \cite{PhysRevA.48.3561} for certain
     % frequencies is reproduced.
 \end{abstract}
 
-\tableofcontents
-
-\newpage
-\pagenumbering{arabic}
 
 
 
 
 \begin{multicols}{2}
+\tableofcontents
 
-\section{Theory of everything in our solar system}
+% \newpage
+\pagenumbering{arabic}
 
 \section{Introduction}
 The purpose of this project is to solve the differential equations of the
-mechanics of the solar system. We do this by implementing classes in 
-
-    The purpose of this project is to develop a general algorithm that
-    solves a set of linear equations by using Jacobi's method of finding
-    eigenvalues. 
-
-We're starting with a tridiagonal matrix from which we seek to find the
-eigenvalues and eigenvectors. The method we will use "rotates" the the
-matrix by a specific angle $\theta$ such that it gets closer to a diagnoal
-matrix by making all the off-diagonal elements smaller each step. In the
-end we're left with a diagonal matrix and and the corresponding eigenvalues
-and eigenvectors.
-
-We will use the program to solve a set of linear equations derived from
-Schrödringer's equation for two electrons stuck in a three-dimentional
-harmonic oscillator with and without Coloumb interaction. In order to do
-this in an effective fashion, we will show how to scale and discretize the
-original equation to a more manageable one.
-
-
+mechanics of the solar system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory/Methods}
@@ -102,19 +97,21 @@ orbits, we know this acceleration to be the sentripetal acceleration, and
 the force is the gravitational force
 
 \begin{equation}
-    F_G = M_Ea = M_E\frac{v^2}{r} = G\frac{M_OM_E}{r^2}
+    F_G = M_\Earth a = M_\Earth\frac{v^2}{r} = G\frac{M_\Sun M_\Earth}{r^2}
 \end{equation}
 
 
 
-with the earth as an example. With this in mind, we can simplify the
-equations and calculations by using astronomical units and years as unit
-lengths. So instead of using $r = 1.5\cdot10^{11}m$ and , we'll simply
-assert $r = 1AU$. With simple multiplication, the expressions for
-sentripetal force and gravitational force can be written as 
+with the earth as an example. We will be using the astronomical symbols for
+the celestial bodies; $M_\Earth$ is then the mass of the Earth and $M_\Sun$ the mass
+of the sun. With this in mind, we can simplify the equations and
+calculations by using astronomical units and years as unit lengths. So
+instead of using $r = 1.5\cdot10^{11}m$ and , we'll simply assert $r =
+1AU$. With simple multiplication, the expressions for sentripetal force and
+gravitational force can be written as 
 
-\begin{equation}
-    \Rightarrow v^2r = GM_O
+\begin{equation}\label{eq:circVel}
+    \Rightarrow v^2r = GM_\Sun
 \end{equation}
 
 and with the new unit lengths applied we can simplify it further. We know
@@ -123,20 +120,38 @@ astronomical unit, 1 AU. The orbit speed is one round per year, that is
 2$\pi$AU/year. This means
 
 \begin{equation}
-    GM_O = v^2r = 4\pi^2AU^3/year^2
+    GM_\Sun = v^2r = 4\pi^2AU^3/year^2
 \end{equation}
 
 We can now substitute this constant and get an expression for the general
 acceleration of any object with an circular orbit around the Sun
 
 \begin{equation}
-    M_Ea = GM_O\frac{M_E}{r^2}
+    M_\Earth a = GM_\Sun\frac{M_\Earth}{r^2}
 \end{equation}
 
 \begin{equation}
     a = \frac{4\pi^2}{r^2}
 \end{equation}
-with the acceleration in units $[a] = \SI{}{AU/yr^2}$.
+with the acceleration in units $[a] = \SI{}{AU/yr^2}$. 
+
+For stability analysis, we will use that the energy of these systems are given by 
+\begin{align}\label{eq:energies}
+    T &= \sum_{i=1}^N \frac{1}{2}mv_i^2 & V &= \sum_{i=1}^N \sum_{j=i+1}^N
+    -r_{i,j}|F_{i,j}|
+\end{align}
+
+where $T$ is the total kinetic energy, found by summing over the kinetic
+energies of all $N$ objects, and $V$ is the potential energies due to
+gravitational force between bodies $F_{i,j}$, given by
+
+\begin{equation}
+    F_{i,j} =  G\frac{M_iM_j}{r_{i,j}^2}
+\end{equation}
+
+with $M_i$ being the mass of object $i$ and $r_{i,j} = |\vec r_i - \vec
+r_j|$ as the distance between two objects.
+
 
 \subsection{Integration}
 As the trajectories of all the objects in the solar system is being
@@ -236,12 +251,12 @@ calculation of the trajectories. But with 9 FLOPS per time step, this
 method is way more demanding in terms of computational calculation than the
 aforementioned.
 
-\begin{figure}[htpb]
-    \centering
-    % \includegraphics[width=0.8\linewidth]{XXX.pdf}
-    \caption{XXX}
-    \label{fig:XXX}
-\end{figure}
+% \begin{figure}[htpb]
+%     \centering
+%     % \includegraphics[width=0.8\linewidth]{XXX.pdf}
+%     \caption{XXX}
+%     \label{fig:XXX}
+% \end{figure}
 
 \subsection{Relativistic corrections}
 General relativity predicts corrections to the Newtonian force an object
@@ -249,12 +264,11 @@ experiences in the vicinity of a massive object. For Mercury, the
 gravitational force is better approximated with the expression
 
 \begin{equation}
-    F_G =
-    \frac{GM_{\text{\Sun}}M_{\text{\Mercury}}}{r^2}\left[1+\frac{3l^2}{r^2
-    c^2}\right] 
-\end{equation},
+    F_G = \frac{GM_{\Sun}M_{\Mercury}}{r^2}
+    \left[1+\frac{3l^2}{r^2 c^2}\right] ,
+\end{equation}
 
-where $M_{\text{\Sun}}$ is the mass of the Sun, $M_{\text{\Mercury}}$ is the
+where  $M_\Sun$ is the mass of the Sun, $M_\Mercury$ is the
 mass of Mercury, $l$ is the angular momentum of mercury around the sun
 center of mass and $c$ is the speed of light in vacuum.
 
@@ -264,16 +278,55 @@ center of mass and $c$ is the speed of light in vacuum.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}
 
-\subsection{Two-body problem $\Sun\Earth$} 
+\subsection{An object oriented approach}
+We implement three different classes in
+\texttt{c++}; \texttt{CelestialBodies} represents the individual bodies as
+point particles, storing their physical variables. This is again stored in
+\texttt{SolarSystem}, which represents the environment and the physical
+laws. Finally, \texttt{Integrator} is responsible for propagating the
+system forward in time, using the forces and an numerical integration
+method to find the object positions in the next time step.
+
+The basis of this structure was laid by Anders Hafreager
+\href{https://github.com/andeplane/solar-system}{here}, providing a basic
+forward euler and declaration of many of the member variables and functions
+needed for the project. 
+
+
+\subsection{Two-body problem \texorpdfstring{$\Sun\Earth$}{}} 
+We assume a circular orbit of the earth around the sun, and also that the
+acceleration of the sun due to the earth is negligible. The
+Sun-Earth-system is then initialized by setting the Sun to a fixed position
+at $\vec r_\Sun = 0$, and the position of Earth to $\vec r_\Earth =
+\SI{1}{AU}\hat e_x$  with velocity $\vec v_\Earth = \SI{2\pi}{AU/yr}\hat e_y$.
+
+The solution of the orbit of Earth is found using both Forward Euler and
+Velocity Verlet. 
+
 \subsubsection{Stability analysis}
-\subsection{Three-body problem $\Sun\Earth\Jupiter$} 
+For only internal conservative forces, the total of kinetic and potential
+energy of a physical system is conserved.  To test the integration algorithms, 
+we calculate the energies using equations \cref{eq:energies}.
+
+\subsection{Three-body problem \texorpdfstring{$\Sun\Earth\Jupiter$}{}} 
 \subsubsection{Fixed Sun }
+We analyse the stability of the solar system when including Jupiter
+($\Jupiter$) in our previous setup. The initial position of Jupiter is set to
+$\vec r_\Jupiter = -\SI{5.2}{AU}\hat e_x$, with velocity $\vec v_\Jupiter =
+-\SI{1}{AU/yr}\hat e_y$, found from inserting numbers in \cref{eq:circVel}.
+The mass of Earth is now relevant, as we will be calculating the
+gravitational effects from all bodies on all the others except on the Sun.
+The masses of the objects are listed in the appendix.
+
 \subsubsection{Massive Jupiter }
+We then increase the mass of Jupiter to study the effects on the stability
+of earth. The mass is increased to $10x$ and $1000x$ the original mass of
+Jupiter.
 \subsubsection{Moving Sun }
-\subsection{N-body problem $\Sun\Mercury\Pluto\Earth\Mars\Jupiter\Saturn\Neptune\Uranus\Pluto$} 
-\subsection{Mercury perihelion precession $\Sun \Mercury$}
+\subsection{N-body problem \texorpdfstring{$\Sun\Mercury\Pluto\Earth\Mars\Jupiter\Saturn\Neptune\Uranus\Pluto$}{}} 
+\subsection{Mercury perihelion precession \texorpdfstring{$\Sun\Mercury$}{}} 
 \subsection{Testing and algorithm analysis}
-\subsubsection{Stability of $\Delta t$}
+\subsubsection{Stability of \texorpdfstring{$\Delta t$}{}}
 \subsubsection{Energy and angular momentum conservation}
 \subsubsection{FLOPS}
 
@@ -282,6 +335,31 @@ center of mass and $c$ is the speed of light in vacuum.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion and conclusions}
+\section*{Appendix}
+\begin{table}[H]
+    \caption{Masses of the bodies in the solar system}
+    \centering
+    \begin{tabular}{| c | c | c | }
+        \hline
+        Body & Mass $\SI{10e24}{kg}$ & Distance to sun in AU\\
+        \hline
+        Sun      $\Sun$   & \SI{1.989e6}{}&  0 \\
+        Mercury  $\Mercury$ & 0.3301    &  0.39 \\
+        Venus    $\Venus$   & 4.867     &  0.72 \\
+        Earth    $\Earth$   & 5.972     &  1 \\
+        Moon     $\Moon$    & 0.073     &  1 \\
+        Mars     $\Mars$    & 0.642     &  1.52 \\
+        Jupiter  $\Jupiter$ & 1898      &  5.3 \\
+        Saturn   $\Saturn$  & 568       &  9.54 \\
+        Uranus   $\Uranus$  & 86.8      & 19.19 \\
+        Neptune  $\Neptune$ & 102       & 30.06 \\
+        Pluto    $\Pluto$   & 0.0146    & 39.53 \\
+        \hline
+    \end{tabular}
+    \label{tab:CelestialMasses}
+\end{table}
+
+
 \bibliography{bib1}{}
 \bibliographystyle{plain}
 

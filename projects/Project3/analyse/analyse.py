@@ -72,14 +72,17 @@ def plot(data, args):
             ax.grid()
     if args.precession:
         fig2, axes2 = plot_peri_precession(data, args)
-    # if args.energies:
-    #     plot_energies(data, args)
+    if args.energies:
+        plot_energies(data, args)
     plt.show()
 
 
 def plot_energies(data, args):
-    energies = data["energies"]
-    return
+    kinetic, potential, total = data["energies"]
+    plt.xlabel("Point of orbit")
+    plt.ylabel("Kinetic + potential energy")
+    plt.plot(total)
+
 
 
 def plot_peri_precession(data,args):

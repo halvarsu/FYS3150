@@ -81,20 +81,21 @@ int main(int argc, char * argv[]) {
     double  potential = system->potentialEnergy();
     double  total = system->totalEnergy();
     double  angMom = system->angularMomentum();
-    if (dontSaveEnergies){
-        outfile << setprecision(16) << kinetic << " "
-                << setprecision(16) << potential << " "
-                << setprecision(16) << total <<  " "
-                << setprecision(16) << angMom <<  endl;
-    }
+
+    system->writeToFile(outFilename);
+    outfile << setprecision(16) << kinetic << " "
+            << setprecision(16) << potential << " "
+            << setprecision(16) << total <<  " "
+            << setprecision(16) << angMom <<  endl;
 
     string outText;
     int prevLength = 0;
-    for(int i = 0; i < steps; i++) {
+    cout << "STEPS: " << steps << endl;
+    for(int i = 0; i < steps-1; i++) {
         integrator->integrateOneStep(*system);
         if (i % writeEveryNthStep == 0) {
-            if (i % (steps/100) == 0) {
-                outText = to_string(i/(steps/100));
+            if ((100*i) % (steps) == 0) {
+                outText = to_string((100*i)/steps);
                 cout << outText << "%" << endl;
                 cout << "\033[A" ;//string(prevLength, );
                 prevLength = outText.length() + 1;

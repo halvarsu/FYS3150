@@ -44,7 +44,7 @@ def read_data(data_filename, args):
         data["fixed_sun"] = int(infile.readline())
         data["relativistic"] = int(infile.readline())
         data["n_planets"] = int(infile.readline())
-        _, _, _ = infile.readline().split() # headers for energies, not necessary
+        _,_, _, _ = infile.readline().split() # headers for energies, not necessary
         # in this context
 
     data["energies"] = np.loadtxt(info_filename, skiprows=6, dtype=float).T

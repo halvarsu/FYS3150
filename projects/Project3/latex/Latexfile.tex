@@ -10,10 +10,10 @@
 \usepackage{multicol}
 \usepackage{siunitx}
 \usepackage[dvipsnames]{xcolor}
+% \usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{cite}
 \usepackage{caption}
-\usepackage{hyperref}
 \usepackage{tabularx}
 \usepackage{mathabx}
 \usepackage{titling}
@@ -31,12 +31,12 @@
 \colorlet{mycitecolor}{YellowOrange}
 \colorlet{myurlcolor}{Aquamarine}
 
-\hypersetup{
-  linkcolor  = mylinkcolor!\myshade!black,
-  citecolor  = mycitecolor!\myshade!black,
-  urlcolor   = myurlcolor!\myshade!black,
-  colorlinks = true,
-}
+% \hypersetup{
+%   linkcolor  = mylinkcolor!\myshade!black,
+%   citecolor  = mycitecolor!\myshade!black,
+%   urlcolor   = myurlcolor!\myshade!black,
+%   colorlinks = true,
+% }
 
 % \pretitle{%
 %     \begin{center}
@@ -74,16 +74,8 @@
     body problem, and finally the phase precession of a Sun-Mercury system
     with relativistic corrections. 
     The Forward Euler integration method is found to be less costly per
-    iteration, but unlike the verlet method it doesn't conserve energy. 
-     
-    % cases of one and two electrons trapped in a harmonic oscillator.
-    % Jacobi's method for finding the eigenvalues of a matrix is
-    % implemented, and applied to a discrete approximation of the
-    % Schr\"{o}dinger equation. The analytic energies of a single electron
-    % is reproduced within a relative error of $\SI{e-4}{}$. Then the
-    % method is applied to two interacting electrons in the same potential,
-    % where analytic results from \cite{PhysRevA.48.3561} for certain
-    % frequencies is reproduced.
+    iteration, but unlike the verlet method it doesn't conserve energy and
+    is unstable over longer time periods (as seen in the front figure) . 
 \end{abstract}
 
 \newpage
@@ -98,15 +90,29 @@
 
 \section{Introduction}
 The purpose of this project is to solve the differential equations of the
-mechanics of the solar system in an efficient way with precise results. There are several different algorithms to calculate the objects orbiting a star, each with their strengths and weaknesses. A couple of these will be showcased and compared to examine which one is preferable in our case.
+mechanics of the solar system in an efficient way with precise results.
+There are several different algorithms to calculate the objects orbiting a
+star, each with their strengths and weaknesses. A couple of these will be
+showcased and compared to examine which one is preferable in our case.
 
 Our entire simulation is based on Newton's second law of montion
 \begin{equation}
     F_G = \frac{M_\Sun M_{Earth}}{r^2}
 \end{equation}
-which turns out to be an adequate estimation for all most objects in regular solar systems. In order to create a simulation with a desirable precission, a large number of iterations is necessary. The solar system is a complex one, with many factors and interactions. So our biggest challenge is to efficiently manipulate our computer with a program that exploits all its processing power without taking too much of our time. In other words, we want to make an as simple program as possible, without losing any of its precission. Different tricks and methods for simplifying the algorithm will therefore be explained and implemented. 
+which turns out to be an adequate estimation for all most objects in
+regular solar systems. In order to create a simulation with a desirable
+precission, a large number of iterations is necessary. The solar system is
+a complex one, with many factors and interactions. So our biggest challenge
+is to efficiently manipulate our computer with a program that exploits all
+its processing power without taking too much of our time. In other words,
+we want to make an as simple program as possible, without losing any of its
+precission. Different tricks and methods for simplifying the algorithm will
+therefore be explained and implemented. 
 
-We will gradually complicate our system in order to make it more realistic, and finally include the effects of general relativity on objects significantly affected by it, where we prevously only used newtonian physics.
+We will gradually complicate our system in order to make it more realistic,
+and finally include the effects of general relativity on objects
+significantly affected by it, where we prevously only used newtonian
+physics.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory}
@@ -125,8 +131,8 @@ the force is the gravitational force
 
 
 with the earth as an example. We will be using the astronomical symbols for
-the celestial bodies; $M_\Earth$ is then the mass of the Earth and $M_\Sun$ the mass
-of the sun. With this in mind, we can simplify the equations and
+the celestial bodies; $M_\Earth$ is then the mass of the Earth and $M_\Sun$
+the mass of the sun. With this in mind, we can simplify the equations and
 calculations by using astronomical units and years as unit lengths. So
 instead of using $r = 1.5\cdot10^{11}m$ and , we'll simply assert $r =
 1AU$. With simple multiplication, the expressions for sentripetal force and
@@ -166,7 +172,12 @@ The unit of energy is also redefined, with new units for mass, length and time:
 Please note that these are the universal units for all equations and figures in this report.
 
 \subsection{Energy calculation}
-As all the forces involved are conservative, the energy of the system should be conserved. If this is not the case, it could be an indication that out program is not stable. For stability analysis, we will therefore make sure that the sum of the systems energies is constant. The energies are given by the following equations 
+As all the forces involved are conservative, the energy of the system
+should be conserved. If this is not the case, it could be an indication
+that out program is not stable. For stability analysis, we will therefore
+make sure that the sum of the systems energies is constant. The energies
+are given by the following equations 
+
 \begin{align}\label{eq:energies}
     T &= \sum_{i=1}^N \frac{1}{2}mv_i^2 & V &= \sum_{i=1}^N \sum_{j=i+1}^N
     -r_{i,j}|F_{i,j}|
@@ -182,6 +193,9 @@ gravitational force between bodies $F_{i,j}$, given by
 
 with $M_i$ being the mass of object $i$ and $r_{i,j} = |\vec r_i - \vec
 r_j|$ as the distance between two objects.
+
+\subsubsection{Conservation of Angular Momentum}
+
 
 
 \subsection{Integration}
@@ -301,10 +315,15 @@ gravitational force is better approximated with the expression
 
 where  $M_\Sun$ is the mass of the Sun, $M_\Mercury$ is the
 mass of Mercury, $l$ is the angular momentum of mercury around the sun
-center of mass and $c$ is the speed of light in vacuum.
+center of mass and $c$ is the speed of light in vacuum. 
 
 \subsection{FLOPS}
-FLOPS are floating point operations, meaning the effect of an operator on an expression. Examples are addition, multiplications etc. Every one of these operations will consume some processing power. Minimizing the total number of FLOPS is therefore essential in order to avoid a tedious program. By counting FLOPS we can attain an implication as to how much time the operations will consume.
+FLOPS are floating point operations, meaning the effect of an operator on
+an expression. Examples are addition, multiplications etc. Every one of
+these operations will consume some processing power. Minimizing the total
+number of FLOPS is therefore essential in order to avoid a tedious program.
+By counting FLOPS we can attain an implication as to how much time the
+operations will consume.
 \subsubsection{Euler:} 
 \begin{equation}
     \boxed{v_{i+1}=v_i+ah}\ \ , \ \ \boxed{x_{i+1}=x_i+v_ih} 
@@ -316,13 +335,14 @@ With one iteration, that is one time step, the Euler method has 4 FLOPS.
     &\boxed{v_{i+1}=v_i+\frac{h}{2}\left(v_{i+1}^{(1)}+v_{i}^{(1)}\right)}\nonumber\\
     &\boxed{x_{i+1}=x_i+hv_i + \frac{h_2}{2} v_{i}^{(1)}}
 \end{align}
-By stating a new parameter $h_2 = h^2$ and calculating it before the loop, we will save one FLOP per iteration. This might not seem significant, but if the program runs 10 years with 10.000 iterations per year, every FLOP counts. This tallies up to a total of 8 FLOPS.
+By stating a new parameter $h_2 = h^2$ and calculating it before the loop,
+we will save one FLOP per iteration. This might not seem significant, but
+if the program runs 10 years with 10.000 iterations per year, every FLOP
+counts. This tallies up to a total of 8 FLOPS.
 
 In conclusion, the Verlet method is slower than Euler's. 
 
 
-
-\subsection{Placeholder}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -331,14 +351,14 @@ In conclusion, the Verlet method is slower than Euler's.
 \subsection{An object oriented approach}
 We implement three different classes in
 \texttt{c++}; \texttt{CelestialBodies} represents the individual bodies as
-point particles, storing their physical variables. This is again stored in
+point particles, storing their physical variables. These are then stored in
 \texttt{SolarSystem}, which represents the environment and the physical
 laws. Finally, \texttt{Integrator} is responsible for propagating the
 system forward in time, using the forces and an numerical integration
 method to find the object positions in the next time step.
 
 The basis of this structure was laid by Anders Hafreager
-\href{https://github.com/andeplane/solar-system}{here}, providing a basic
+https://github.com/andeplane/solar-system, providing a basic
 forward euler and declaration of many of the member variables and functions
 needed for the project. 
 
@@ -354,7 +374,12 @@ The solution of the orbit of Earth is found using both Forward Euler and
 Velocity Verlet. 
 
 \subsection{Stability analysis}
-Now that we have established a simple solar system with two bodies, we can test the stability of our algorithm. We do this by testing different time steps $\Delta t$. This is applied to our Verlet algorithm with time steps in relation to $N=20,40,80,160,320,640,1280,2560,5120,10240,20480,40960,81920$ steps per year.
+Now that we have established a simple solar system with two bodies, we can
+test the stability of our algorithm. We do this by testing different time
+steps $\Delta t$. This is applied to both our Euler and our Verlet
+algorithm with time steps in $N \in \{5 \to 5 \times 2^{19}\}$ steps per year,
+increasing with steps of power of two.
+
 
 \subsection{Adding Jupiter \texorpdfstring{$\Sun\Earth\Jupiter$}{}}
 
@@ -374,8 +399,8 @@ original mass of Jupiter, but otherwise we use the same initial conditions.
 \subsubsection{Three-body problem} 
 Moving towards a more realistic model of the solar system, we let the Sun
 be affected by the gravitational effects of the planets. The initial
-conditions are now set from real data.
-\href{https://ssd.jpl.nasa.gov/horizons.cgi}{NASA} has an interface to
+conditions are now set from real data. NASA 
+has an interface (\texttt{https://ssd.jpl.nasa.gov/horizons.cgi}) to
 celestial body initial conditions, which can be parsed by the preprocessor
 script \texttt{analyse/read\_horizon.py} (Ephemeris type needs to be set to
 VECTORS).  Consider that the velocities received by NASA are assumed to be
@@ -388,10 +413,15 @@ and sets it to zero.
 
 
 \subsection{N-body problem \texorpdfstring{$\Sun\Mercury\Pluto\Earth\Mars\Jupiter\Saturn\Neptune\Uranus\Pluto$}{}} 
-Our system now includes several objects that all interact with one another. We have made sure that our time step is a reasonable one and that the energy is conserved. The next step is adding all the other planets. We use the same strategy as with Jupiter, with the relevant data aquired from NASA. 
+Our system now includes several objects that all interact with one another.
+We have made sure that our time step is a reasonable one and that the
+energy is conserved. The next step is adding all the other planets. We use
+the same strategy as with Jupiter, with the relevant data aquired from
+NASA. 
 
 \subsection{Mercury perihelion precession \texorpdfstring{$\Sun\Mercury$}{}} 
-The final addition to our solar system is applying the non-newtonian general relativistic effects the sun has on Mercury, with equation xxx
+The final addition to our solar system is applying the non-newtonian
+general relativistic effects the sun has on Mercury, with equation xxx
 
 \subsection{Testing and algorithm analysis}
 \subsubsection{Stability of \texorpdfstring{$\Delta t$}{}}
@@ -402,19 +432,25 @@ The final addition to our solar system is applying the non-newtonian general rel
 \section{Results}
 \subsection{Two body problem}
 \subsubsection{Stability of $\Delta t$}
-As shown in the figure below, the stability of the algorithm clearly depends on the size of the time step. The plots shows how the distance of the planet gradually increases in time.  
+As shown in \cref{fig:stab_euler} below, the stability of the algorithm
+clearly depends on the size of the time step. The plots shows how the
+distance of the planet gradually increases in time.  
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{../results/stability_orbits.pdf}
-    \label{fig:name}
     \caption{Stability of the Earth's orbit with different time steps $\Delta t$. Bigger time steps give bigger deviance.}
+    \label{fig:stab_euler}
 \end{figure}
 
-The orbits are calculated for the earth over the course of one year, with the biggest time step resulting in a distance of almost $1.5AU$.
+The orbits are calculated for the earth over the course of one year, with
+the biggest time step resulting in a distance of almost $1.5AU$.
 
 \subsubsection{Energy conservation}
-By plotting the energies of the system, we expect the total energy to be constant independently of how long we run the simulation. This is confirmed by the following plot, showing the kinetic energy and the potential energy between all the objects in our system.
+By plotting the energies of the system, we expect the total energy to be
+constant independently of how long we run the simulation. This is confirmed
+by the following plot, showing the kinetic energy and the potential energy
+between all the objects in our system.
 
 \subsubsection{Escape velocity}
 
@@ -422,7 +458,9 @@ By plotting the energies of the system, we expect the total energy to be constan
 \subsubsection{Normal Jupiter}
 By adding Jupiter with the sun fixed in the centre 
 \subsubsection{Massive Jupiter}
-One we increase the mass of Jupiter to the mass of the sun, Earth immediately loses its track and gets violently tossed between the two objects
+One we increase the mass of Jupiter to the mass of the sun, Earth
+immediately loses its track and gets violently tossed between the two
+objects
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{../results/EJSx1000_1.pdf}
@@ -443,7 +481,8 @@ With all the planets inserted, our solar looks satisfyingly familiar
     \caption{All ten objects of our solar system in three dimensions.}
 \end{figure}
 
-Zooming in, we can confirm that the inner planets also follow cyclical orbits
+Zooming in, we can confirm that the inner planets also follow cyclical
+orbits
 
 
 \begin{figure}[H]
@@ -457,13 +496,17 @@ Zooming in, we can confirm that the inner planets also follow cyclical orbits
 
 
 \subsection{Mercury}
-With the relativistic effects applied to Mercury, we observe how the elliptical orbit slightly rotates around its elliptical orbit. 
+With the relativistic effects applied to Mercury, we observe how the
+elliptical orbit slightly rotates around its elliptical orbit. 
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{../results/full_system_inner.png}
     \label{fig:name}
 \end{figure}
-The change is too small to recognized on the orbit, but by calculation, we can find. As we can see on the following plot, the angle of its orbit changes linearly.
+The change is too small to recognized on the orbit, but by calculation, we
+can find. As we can see on the following plot, the angle of its orbit
+changes linearly.
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{../results/peri_precession}
@@ -474,8 +517,16 @@ The change is too small to recognized on the orbit, but by calculation, we can f
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion and conclusions}
 
+%%% COMPARE MERCURY PRECESSION TO KNOWN VALUE
+
+
+\subsection{Comparison of methods}
+
+
 \subsection{Testing of $\Delta t$}
-As seen in figure ---fig---, with sufficiently small time steps, the orbit of the planet is stable. It slightly oscillates around $1AU$, which checks out with the eccentricity of the earth being $0.0167$.
+As seen in figure \cref{}, with sufficiently small time steps, the orbit
+of the planet is stable. It slightly oscillates around $1AU$, which checks
+out with the eccentricity of the earth being $0.0167$.
 
 
 

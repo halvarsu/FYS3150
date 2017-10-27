@@ -1,6 +1,9 @@
 import sys
 import re
+import glob
 import numpy as np
+import analyse
+import tools
 
 def get_mass(body_name):
     sun_mass = 1.988544e6 # in 10e24 kg
@@ -96,14 +99,17 @@ def get_args():
     parser.add_argument('-m','--main_body',default='Sun')
     parser.add_argument('-y','--years',default=2, type=int)
     parser.add_argument('-s','--steps_per_year',default=10000, type=int)
+    parser.add_argument('-v','--verbose', help='1 = print all, 0 = no print',type=int, choices = [0,1], default = 1)
     parser.add_argument('--fix_barycentric',action='store_true')
     parser.add_argument('--fixed_sun',action='store_true')
     parser.add_argument('--relativistic',action='store_true')
+    parser.add_argument('--use_euler',action='store_true')
     args = parser.parse_args()
     return args
 
 def main(args):
-    import glob
+    if args.verbose == 0:
+        tools.blockPrint()
     if args.folder:
         files = glob.glob(args.folder+'/*')
     else:
@@ -111,12 +117,14 @@ def main(args):
     print(files)
     years = args.years
     steps_per_year = args.steps_per_year
-    n_bodies = len(files)
+    n_bodies =      len(files)
     has_fixed_sun = int(args.fixed_sun)
-    relativistic = int(args.relativistic)
-    outfile_lines = [years, steps_per_year, has_fixed_sun, relativistic, n_bodies]
+    relativistic =  int(args.relativistic)
+    use_euler =     int(args.use_euler)
+    outfile_lines = [years, steps_per_year, has_fixed_sun, relativistic,  use_euler, n_bodies]
     print ("Years:  %d   Steps per year: %d   fixed:  %d  relativistic: "\
-            "%d"%(years, steps_per_year, has_fixed_sun, relativistic))
+            "%d  Euler %d"%(years, steps_per_year, has_fixed_sun,
+                relativistic, use_euler))
     print ()
     n_info_lines = len(outfile_lines)
     # bodies = [] 

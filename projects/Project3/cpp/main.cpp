@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <armadillo>
+#include <chrono>
 #include <iomanip>
 #include "solarsystem.h"
 #include "celestialbody.h"
@@ -55,7 +56,7 @@ int main(int argc, char * argv[]) {
         }
 
     } else{
-        writeEveryNthStep = 100;
+        writeEveryNthStep = 1;
     }
 
     dontSaveEnergies = argc > 3;
@@ -91,7 +92,9 @@ int main(int argc, char * argv[]) {
     string outText;
     int prevLength = 0;
     cout << "STEPS: " << steps << endl;
-    for(int i = 0; i < steps-1; i++) {
+    auto start = chrono::system_clock::now();
+
+    for(int i = 1; i < steps; i++) {
         integrator->integrateOneStep(*system);
         if (i % writeEveryNthStep == 0) {
             if ((100*i) % (steps) == 0) {
@@ -116,7 +119,11 @@ int main(int argc, char * argv[]) {
         }
     }
 
+    auto stop = chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds = stop-start;
+
     cout << "100% - DONE!" << endl;
+    cout << "Used " << elapsed_seconds.count() << " seconds" << endl;
     cout << "Data written to " + outFilename << " and " << outInfoFilename <<  endl;
     outfile.close();
     system->closeFile();

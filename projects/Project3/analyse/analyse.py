@@ -7,21 +7,22 @@ import glob
 
 def get_args():
     import argparse
-    parser = argparse.ArgumentParser()
+
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-f', '--filename', default='out/example.bin')
-    parser.add_argument('-F', '--folder', default='')
+    parser.add_argument('-F', '--folder', default='', help = 'Only useful for stability analysis, when several simulations are compared ')
     parser.add_argument('-o', '--outfile', default='')
-    parser.add_argument('--fixed_sun', action='store_true')
+    parser.add_argument('-s', '--savefig',action='store_true')
     parser.add_argument('-dim', '--dimensions',type=int,help='plot dimension', default=2, choices=[2,3])
-    parser.add_argument('-ps', '--plot_step', help='plot every nth data point',
+    parser.add_argument('-n', '--plot_step', help='plot every nth data point',
             type=int,default=1)
-    parser.add_argument('-p', '--precession', help='plot perihelion precession of body 2',
+    parser.add_argument('--precession', help='plot perihelion precession of body 2',
             action = 'store_true')
-    parser.add_argument('-e', '--energies', help='plot energies of system',
+    parser.add_argument('--energies', help='plot energies of system',
             action = 'store_true')
-    parser.add_argument('-s', '--stability_analysis', help='plot a folder with simulations with changing dt',
+    parser.add_argument('--stability_analysis', help='plot a folder with simulations with changing dt',
             action = 'store_true')
-    parser.add_argument('-DP','--disable_plot', help='dont plot main orbit',action='store_true')
+    parser.add_argument('--no_orbit', help='dont plot orbit',action='store_true')
     parser.add_argument('-v','--verbose', help='1 = print all, 0 = no print',type=int, choices = [0,1], default = 1)
     parser.add_argument('--figsize', nargs=2,type=float, default=(6,4))
     return parser.parse_args()
@@ -59,7 +60,7 @@ def plot(data, args):
     planets = data["pos"]
     n_step = args.plot_step
 
-    if not args.disable_plot:
+    if not args.no_orbit:
         fig = plt.figure()
         if args.dimensions == 3:
             ax = fig.add_subplot(111, projection='3d')
@@ -77,6 +78,12 @@ def plot(data, args):
             plt.scatter(planets[0,0,0],planets[0,0,1], c=(0.7, 0.7,0))
             ax.axis('equal')
             ax.grid()
+    # if args.plot_file:
+    #     outfile = "results/" + args.plot_file
+    # else:
+    #     base_name = "results/figure{}.pdf"
+    #     prev_files = glob.glob(base_name.format("*"))
+    #     outfile = base_name.format(len(prev_files))
     plt.show()
 
 
@@ -114,13 +121,9 @@ def plot_orbit_stability(args):
     ax2.set_ylabel('y')
     ax3.set_xlabel('N points')
     ax3.set_ylabel('deviation in one year')
-    
-    if args.outfile:
-        outfile = args.outfile
-    else:
-        base_name = "figure{}.pdf"
-        prev_files = glob.glob(base_name.format("*"))
-        outfile = base_name.format(len(prev_files))
+
+    fig1.savefig("results/stability_orbits.pdf")
+    fig2.savefig("results/stability_deviation.pdf")
 
 def plot_energies(data, args):
     energies = data["energies"]
@@ -135,6 +138,9 @@ def plot_peri_precession(data,args):
     x,y,z = planet.T
     r = np.sqrt(x**2 + y**2 + z**2)
     minima = np.r_[False, r[1:] < r[:-1]] & np.r_[r[:-1] < r[1:], False]
+    if np.sum(minima)== 0:
+        print("Found no perihelion... Cancelling analysis")
+        return
     theta = np.arctan2(y,x)
     #plt.plot(r[::args.plot_step],theta)
     fig, axes = plt.subplots(1)
@@ -142,6 +148,7 @@ def plot_peri_precession(data,args):
     time_minima = time[minima]
     theta_minima  = theta[minima]
     arcsec_minima = (theta_minima) * 180 / np.pi * 3600
+    print(time_minima.shape, theta_minima.shape)
     # orbit_num = np.arange(arcsec_minima.size)
     p, cov= np.polyfit(time_minima, arcsec_minima, 1, cov = True)
     print(cov)
@@ -149,26 +156,34 @@ def plot_peri_precession(data,args):
     angle0 = arcsec_fitted[0]
     ax1.plot(time_minima, arcsec_minima - angle0)
     ax1.plot(time_minima, arcsec_fitted - angle0)
-    print("dtheta: %f" %(arcsec_fitted[-1] - angle0))
+    delta_angle = arcsec_fitted[-1] - angle0
+    dt = time[-1] - time[0] 
+    insecurity = dt*cov[0,0]
+    print(delta_angle)
+    print(insecurity)
     ax1.set_xlabel('Time [yr]')
     ax1.set_ylabel('Perihelion angle [arcsec]')
     ax1.legend(['Measured','Fitted'])
+    ax1.set_title('$\\Delta \\theta = %.1f \\pm %.2f [arcsec]$ ' %(delta_angle, insecurity))
+
+    fig.savefig("results/peri_precession.pdf")
     return fig, axes
 
 def main(args):
     if args.verbose == 0:
         tools.blockPrint()
 
-    # stability > normal plot > precession > energies
+    # stability > normal plot, precession, energies
     if args.stability_analysis:
         plot_orbit_stability(args)
-    elif not args.disable_plot:
+    else:
         data = read_data(args.filename, args)
-        plot(data,args)
-    if args.precession:
-        plot_peri_precession(data, args)
-    if args.energies:
-        plot_energies(data, args)
+        if not args.no_orbit:
+            plot(data,args)
+        if args.precession:
+            plot_peri_precession(data, args)
+        if args.energies:
+            plot_energies(data, args)
     plt.show()
 
 

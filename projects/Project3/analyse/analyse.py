@@ -157,7 +157,7 @@ def plot_orbit_stability(args):
 
 def plot_energies(data, args):
     plt.figure()
-    kinetic, potential, total = data["energies"][:,1:]
+    kinetic, potential, total, angular_momentum = data["energies"][:,1:]
     time = data["time"]
     plt.xlabel("Time")
     plt.ylabel("Kinetic+potential energy [$AJ$]")

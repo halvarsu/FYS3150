@@ -34,6 +34,16 @@ void SolarSystem::createCelestialBody(double x, double y, double z, double vx, d
 void SolarSystem::addCelestialBody(const CelestialBody& body){
     m_bodies.push_back( body );
 }
+void SolarSystem::calculateAngularMomentum(){
+    arma::vec angularMomVec;
+    angularMomVec << 0 << 0 << 0;
+
+
+    for(CelestialBody &body : m_bodies) {
+        angularMomVec += body.mass*arma::cross(body.position, body.velocity);
+    }
+    m_angularMomentum = arma::norm(angularMomVec);
+}
 
 void SolarSystem::calculateForcesAndEnergy()
 {
@@ -151,6 +161,11 @@ double SolarSystem::kineticEnergy() const
     return m_kineticEnergy;
 }
 
+double SolarSystem::angularMomentum() const
+{
+    return m_angularMomentum;
+}
+
 void SolarSystem::writeToFile(string filename)
 {
     if(!m_file.good() || !m_file.is_open()) {
@@ -162,13 +177,8 @@ void SolarSystem::writeToFile(string filename)
         }
     }
 
-    int i = 0;
     for (CelestialBody &body : m_bodies) {
         body.position.save(m_file, arma::raw_binary);
-//        m_file << setprecision(10) << body.position(0) << " "
-//               << setprecision(10) << body.position(1) << " "
-//               << setprecision(10) << body.position(2) << endl;
-        i++;
     }
 }
 

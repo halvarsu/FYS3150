@@ -126,8 +126,11 @@ def plot_orbit_stability(args):
     fig2.savefig("results/stability_deviation.pdf")
 
 def plot_energies(data, args):
-    energies = data["energies"]
-    return
+    kinetic, potential, total = data["energies"]
+    plt.xlabel("Point of orbit")
+    plt.ylabel("Kinetic + potential energy")
+    plt.plot(total)
+
 
 
 def plot_peri_precession(data,args):

@@ -13,6 +13,8 @@ def get_args():
     parser.add_argument('-F', '--folder', default='', help = 'Only useful for stability analysis, when several simulations are compared ')
     parser.add_argument('-o', '--outfile', default='')
     parser.add_argument('-s', '--savefig',action='store_true')
+    parser.add_argument('-l', '--set_manual_legend',action='store_true')
+    parser.add_argument('-p', '--plot_file',default='')
     parser.add_argument('-dim', '--dimensions',type=int,help='plot dimension', default=2, choices=[2,3])
     parser.add_argument('-n', '--plot_step', help='plot every nth data point',
             type=int,default=1)
@@ -60,6 +62,14 @@ def plot(data, args):
     planets = data["pos"]
     n_step = args.plot_step
 
+    distances = np.sqrt(planets[:,:,0]**2 +planets[:,:,1]**2 + planets[:,:,2]**2)
+    avg_dist = np.average(distances, axis = 0)
+    sort = np.argsort(avg_dist)
+    planets = planets[:,sort]
+    distances = distances[:,sort]
+    avg_dist = avg_dist[sort]
+
+
     if not args.no_orbit:
         fig = plt.figure()
         if args.dimensions == 3:
@@ -76,15 +86,32 @@ def plot(data, args):
             for i in range(n_planets):
                 ax.plot(planets[::n_step,i,0], planets[::n_step,i,1])
             plt.scatter(planets[0,0,0],planets[0,0,1], c=(0.7, 0.7,0))
+
             ax.axis('equal')
+            ax.set_xlabel('x [AU]')
+            ax.set_ylabel('y [AU]')
+            ax.set_title('Steps per year = %d' %data["steps_per_year"])
             ax.grid()
-    # if args.plot_file:
-    #     outfile = "results/" + args.plot_file
-    # else:
-    #     base_name = "results/figure{}.pdf"
-    #     prev_files = glob.glob(base_name.format("*"))
-    #     outfile = base_name.format(len(prev_files))
-    plt.show()
+    if args.set_manual_legend:
+        print("Manual legends enabled. Write legend for planets:")
+        legend = []
+        for r in avg_dist:
+            legend.append(raw_input('avg r = %.2f AU: ' %np.average(r)))
+        plt.legend( legend)
+    if args.savefig:
+        if args.plot_file:
+            outfile = "results/" + args.plot_file
+        else:
+            outfile =  raw_input('Write filename (or leave blank) (default folder=results/):\n') 
+            if outfile:
+                outfile = "results/" + outfile
+            else:
+                base_name = "results/figure%dD_{}.pdf" % args.dimensions
+                prev_files = glob.glob(base_name.format("*"))
+                outfile = base_name.format(len(prev_files))
+
+        print('saving to %s' %outfile )
+        fig.savefig(outfile)
 
 
 def plot_orbit_stability(args):
@@ -115,17 +142,18 @@ def plot_orbit_stability(args):
         ax3.scatter(data["steps_per_year"], deviation, c=color[i])
     ax3.set_xscale('log')
     ax3.set_yscale('log')
-    ax1.set_xlabel('time')
-    ax1.set_ylabel('position')
-    ax2.set_xlabel('x')
-    ax2.set_ylabel('y')
-    ax3.set_xlabel('N points')
-    ax3.set_ylabel('deviation in one year')
+    ax1.set_xlabel('time [yr]')
+    ax1.set_ylabel('distance to origin [AU]')
+    ax2.set_xlabel('$y$ [AU]')
+    ax2.set_ylabel('$y$ [AU]')
+    ax3.set_xlabel('$N$ [steps/yr]')
+    ax3.set_ylabel('$\Delta r/\Delta t$ [AU/yr]')
 
     fig1.savefig("results/stability_orbits.pdf")
     fig2.savefig("results/stability_deviation.pdf")
 
 def plot_energies(data, args):
+    plt.figure()
     kinetic, potential, total = data["energies"]
     plt.xlabel("Point of orbit")
     plt.ylabel("Kinetic + potential energy")

@@ -75,6 +75,15 @@
     with relativistic corrections. 
     The Forward Euler integration method is found to be less costly per
     iteration, but unlike the verlet method it doesn't conserve energy. 
+     
+    % cases of one and two electrons trapped in a harmonic oscillator.
+    % Jacobi's method for finding the eigenvalues of a matrix is
+    % implemented, and applied to a discrete approximation of the
+    % Schr\"{o}dinger equation. The analytic energies of a single electron
+    % is reproduced within a relative error of $\SI{e-4}{}$. Then the
+    % method is applied to two interacting electrons in the same potential,
+    % where analytic results from \cite{PhysRevA.48.3561} for certain
+    % frequencies is reproduced.
 \end{abstract}
 
 \newpage
@@ -148,7 +157,16 @@ acceleration of any object with an circular orbit around the Sun
 \end{equation}
 with the acceleration in units $[a] = \SI{}{AU/yr^2}$. 
 
-For stability analysis, we will use that the energy of these systems are given by 
+The unit of energy is also redefined, with new units for mass, length and time:
+\begin{align}
+    E &= mass\cdot\frac{length^2}{time^2} = M_\texorpdfstring{\Sun}{}\frac{AU^2}{year^2}\nonumber\\ 
+    &= 1.989\cdot10^{30}kg\frac{(1.4959\cdot10^{11}m)^2}{(60\cdot60\cdot24\cdot365s)^2}\nonumber\\
+    &= 4.5\cdot10^{37}J = AJ
+\end{align}
+Please note that these are the universal units for all equations and figures in this report.
+
+\subsection{Energy calculation}
+As all the forces involved are conservative, the energy of the system should be conserved. If this is not the case, it could be an indication that out program is not stable. For stability analysis, we will therefore make sure that the sum of the systems energies is constant. The energies are given by the following equations 
 \begin{align}\label{eq:energies}
     T &= \sum_{i=1}^N \frac{1}{2}mv_i^2 & V &= \sum_{i=1}^N \sum_{j=i+1}^N
     -r_{i,j}|F_{i,j}|
@@ -304,6 +322,9 @@ In conclusion, the Verlet method is slower than Euler's.
 
 
 
+\subsection{Placeholder}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}
 
@@ -332,10 +353,8 @@ at $\vec r_\Sun = 0$, and the position of Earth to $\vec r_\Earth =
 The solution of the orbit of Earth is found using both Forward Euler and
 Velocity Verlet. 
 
-\subsubsection{Stability analysis}
-For only internal conservative forces, the total of kinetic and potential
-energy of a physical system is conserved.  To test the integration algorithms, 
-we calculate the energies using equations \cref{eq:energies}.
+\subsection{Stability analysis}
+Now that we have established a simple solar system with two bodies, we can test the stability of our algorithm. We do this by testing different time steps $\Delta t$. This is applied to our Verlet algorithm with time steps in relation to $N=20,40,80,160,320,640,1280,2560,5120,10240,20480,40960,81920$ steps per year.
 
 \subsection{Adding Jupiter \texorpdfstring{$\Sun\Earth\Jupiter$}{}}
 
@@ -369,8 +388,11 @@ and sets it to zero.
 
 
 \subsection{N-body problem \texorpdfstring{$\Sun\Mercury\Pluto\Earth\Mars\Jupiter\Saturn\Neptune\Uranus\Pluto$}{}} 
+Our system now includes several objects that all interact with one another. We have made sure that our time step is a reasonable one and that the energy is conserved. The next step is adding all the other planets. We use the same strategy as with Jupiter, with the relevant data aquired from NASA. 
 
 \subsection{Mercury perihelion precession \texorpdfstring{$\Sun\Mercury$}{}} 
+The final addition to our solar system is applying the non-newtonian general relativistic effects the sun has on Mercury, with equation xxx
+
 \subsection{Testing and algorithm analysis}
 \subsubsection{Stability of \texorpdfstring{$\Delta t$}{}}
 \subsubsection{Energy and angular momentum conservation}
@@ -378,12 +400,85 @@ and sets it to zero.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
-The 
+\subsection{Two body problem}
+\subsubsection{Stability of $\Delta t$}
+As shown in the figure below, the stability of the algorithm clearly depends on the size of the time step. The plots shows how the distance of the planet gradually increases in time.  
 
-\subsection{Stability analysis}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../results/stability_orbits.pdf}
+    \label{fig:name}
+    \caption{Stability of the Earth's orbit with different time steps $\Delta t$. Bigger time steps give bigger deviance.}
+\end{figure}
+
+The orbits are calculated for the earth over the course of one year, with the biggest time step resulting in a distance of almost $1.5AU$.
+
+\subsubsection{Energy conservation}
+By plotting the energies of the system, we expect the total energy to be constant independently of how long we run the simulation. This is confirmed by the following plot, showing the kinetic energy and the potential energy between all the objects in our system.
+
+\subsubsection{Escape velocity}
+
+\subsection{Adding Jupiter}
+\subsubsection{Normal Jupiter}
+By adding Jupiter with the sun fixed in the centre 
+\subsubsection{Massive Jupiter}
+One we increase the mass of Jupiter to the mass of the sun, Earth immediately loses its track and gets violently tossed between the two objects
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../results/EJSx1000_1.pdf}
+    \label{fig:name}
+    \caption{}
+\end{figure}
+
+\subsubsection{Three-body problem}
+
+
+\subsection{N-body problem}
+With all the planets inserted, our solar looks satisfyingly familiar
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../results/full_system.pdf}
+    \label{fig:name}
+    \caption{All ten objects of our solar system in three dimensions.}
+\end{figure}
+
+Zooming in, we can confirm that the inner planets also follow cyclical orbits
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../results/full_system_inner.png}
+    \label{fig:name}
+\end{figure}
+
+
+
+
+
+\subsection{Mercury}
+With the relativistic effects applied to Mercury, we observe how the elliptical orbit slightly rotates around its elliptical orbit. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../results/full_system_inner.png}
+    \label{fig:name}
+\end{figure}
+The change is too small to recognized on the orbit, but by calculation, we can find. As we can see on the following plot, the angle of its orbit changes linearly.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../results/peri_precession}
+    \label{fig:name}
+\end{figure}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion and conclusions}
+
+\subsection{Testing of $\Delta t$}
+As seen in figure ---fig---, with sufficiently small time steps, the orbit of the planet is stable. It slightly oscillates around $1AU$, which checks out with the eccentricity of the earth being $0.0167$.
+
+
+
 \section*{Appendix}
 \begin{table}[H]
     \caption{Masses of the bodies in the solar system}

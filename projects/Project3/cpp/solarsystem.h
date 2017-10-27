@@ -27,6 +27,7 @@ public:
     // updating the internal (member) variables m_kineticEnergy and m_potentialEnergy:
     // void calculateForcesAndEnergy();
     virtual void calculateForcesAndEnergy();
+    virtual void calculateAngularMomentum();
 
     //
     void setFixedSun(bool) ;
@@ -42,6 +43,7 @@ public:
     double totalEnergy() const;
     double potentialEnergy() const;
     double kineticEnergy() const;
+    double angularMomentum() const;
 
     // Function for returning the 'list'(vectors in celestialBodies) of the bodies:
     std::vector<CelestialBody> & bodies();
@@ -63,6 +65,7 @@ protected:
     bool m_relativistic = false;
     double m_kineticEnergy;
     double m_potentialEnergy;
+    double m_angularMomentum;
     double m_G; // gravitational constant
     double m_c_0_squared;
 };

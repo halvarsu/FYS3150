@@ -44,7 +44,7 @@ def read_data(data_filename, args):
         data["fixed_sun"] = int(infile.readline())
         data["relativistic"] = int(infile.readline())
         data["n_planets"] = int(infile.readline())
-        _, _, _ = infile.readline().split() # headers for energies, not necessary
+        _,_, _, _ = infile.readline().split() # headers for energies, not necessary
         # in this context
 
     data["energies"] = np.loadtxt(info_filename, skiprows=6, dtype=float).T
@@ -157,7 +157,7 @@ def plot_orbit_stability(args):
 
 def plot_energies(data, args):
     plt.figure()
-    kinetic, potential, total = data["energies"][:,1:]
+    kinetic, potential, total, angular_momentum = data["energies"][:,1:]
     time = data["time"]
     plt.xlabel("Time")
     plt.ylabel("Kinetic+potential energy [$AJ$]")

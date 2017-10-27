@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <armadillo>
+#include <iomanip>
 #include "solarsystem.h"
 #include "celestialbody.h"
 #include "integrator.h"
@@ -65,6 +66,7 @@ int main(int argc, char * argv[]) {
     Integrator * integrator = new Integrator(dt, useEuler);
 
     system->calculateForcesAndEnergy();
+    system->calculateAngularMomentum();
     std::ofstream outfile;
     outfile.open(outInfoFilename);
     outfile << years << endl;
@@ -72,13 +74,19 @@ int main(int argc, char * argv[]) {
     outfile << system->hasFixedSun() << endl;
     outfile << system->hasRelativisticCorr() << endl;
     outfile << system->numberOfBodies() << endl;
-    outfile <<"Kinetic:    " << "Potential:    "<<"Total:"<<std::endl;
+    outfile <<"Kinetic:    Potential:    Total:    AngularMomentum:" << std::endl;
 
     double energy= system->totalEnergy();
     double  kinetic   = system->kineticEnergy();
     double  potential = system->potentialEnergy();
     double  total = system->totalEnergy();
-    outfile <<kinetic<<"  "<< potential<<"  "<<total<<std::endl;
+    double  angMom = system->angularMomentum();
+    if (dontSaveEnergies){
+        outfile << setprecision(16) << kinetic << " "
+                << setprecision(16) << potential << " "
+                << setprecision(16) << total <<  " "
+                << setprecision(16) << angMom <<  endl;
+    }
 
     string outText;
     int prevLength = 0;
@@ -93,14 +101,20 @@ int main(int argc, char * argv[]) {
             }
             system->writeToFile(outFilename);
             if (!dontSaveEnergies){
+                system->calculateAngularMomentum();
+
                 kinetic   = system->kineticEnergy();
                 potential = system->potentialEnergy();
                 total = system->totalEnergy();
-                outfile <<kinetic<<"  "<< potential<<"  "<<total<<std::endl;
+                angMom = system->angularMomentum();
+                outfile << setprecision(16) << kinetic << " "
+                        << setprecision(16) << potential << " "
+                        << setprecision(16) << total <<  " "
+                        << setprecision(16) << angMom <<  endl;
             }
         }
-
     }
+
     cout << "100% - DONE!" << endl;
     cout << "Data written to " + outFilename << " and " << outInfoFilename <<  endl;
     outfile.close();

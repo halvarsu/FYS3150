@@ -79,7 +79,10 @@ def plot(data, args):
                         zs=planets[::n_step,i,2])
             m = np.max(np.abs(planets))
             boxlen = [-m,m]
-            plt.scatter(planets[0,0,0],planets[0,0,1],zs=planets[0,0,2], c=(0.7, 0.7,0))
+            plt.scatter(planets[0,0,0],planets[0,0,1],planets[0,0,2])
+            ax.set_xlabel("X[AU]")
+            ax.set_ylabel("Y[AU]")
+            ax.set_zlabel("Z[AU]")
             ax.auto_scale_xyz(boxlen,boxlen,boxlen)
         else:
             ax = fig.add_subplot(111)
@@ -154,10 +157,13 @@ def plot_orbit_stability(args):
 
 def plot_energies(data, args):
     plt.figure()
-    kinetic, potential, total = data["energies"]
-    plt.xlabel("Point of orbit")
-    plt.ylabel("Kinetic + potential energy")
-    plt.plot(total)
+    kinetic, potential, total = data["energies"][:,1:]
+    time = data["time"]
+    plt.xlabel("Time")
+    plt.ylabel("Kinetic+potential energy [$AJ$]")
+    plt.plot(time, total)
+    plt.plot(time, kinetic)
+    plt.plot(time, potential)
 
 
 

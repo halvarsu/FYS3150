@@ -99,7 +99,7 @@ Our entire simulation is based on Newton's second law of montion
 \begin{equation}
     F_G = \frac{M_\Sun M_{Earth}}{r^2}
 \end{equation}
-which turns out to be an adequate estimation for all most objects in
+which turns out to be an adequate estimation for most objects in
 regular solar systems. In order to create a simulation with a desirable
 precission, a large number of iterations is necessary. The solar system is
 a complex one, with many factors and interactions. So our biggest challenge
@@ -110,7 +110,7 @@ precission. Different tricks and methods for simplifying the algorithm will
 therefore be explained and implemented. 
 
 We will gradually complicate our system in order to make it more realistic,
-and finally include the effects of general relativity on objects
+and finally include a correction from of general relativity on objects
 significantly affected by it, where we prevously only used newtonian
 physics.
 
@@ -167,9 +167,18 @@ The unit of energy is also redefined, with new units for mass, length and time:
 \begin{align}
     E &= mass\cdot\frac{length^2}{time^2} = M_\texorpdfstring{\Sun}{}\frac{AU^2}{year^2}\nonumber\\ 
     &= 1.989\cdot10^{30}kg\frac{(1.4959\cdot10^{11}m)^2}{(60\cdot60\cdot24\cdot365s)^2}\nonumber\\
-    &= 4.5\cdot10^{37}J = AJ
+    &\equiv J_\Sun,
 \end{align}
-Please note that these are the universal units for all equations and figures in this report.
+
+where we introduced a new energy unit, the Astrojoule $J_\Sun \approx 4.5\cdot10^{37}J  $.  Please note
+that these are the universal units for all equations and figures in this
+report.
+
+% \subsection{Bound orbits}
+% We know from Keplers laws that planetary motion takes the form of cone
+% sections. Except for a practically infeasible perfect circular orbit, 
+% an orbiting body follows the trajectory of an ellipse. The energy of these
+% We also know that the 
 
 \subsection{Energy calculation}
 As all the forces involved are conservative, the energy of the system
@@ -380,6 +389,9 @@ steps $\Delta t$. This is applied to both our Euler and our Verlet
 algorithm with time steps in $N \in \{5 \to 5 \times 2^{19}\}$ steps per year,
 increasing with steps of power of two.
 
+\subsection{Escape velocity}
+To study the conditions for a planet to be in a bound state (elliptical
+orbit), we set up different 
 
 \subsection{Adding Jupiter \texorpdfstring{$\Sun\Earth\Jupiter$}{}}
 

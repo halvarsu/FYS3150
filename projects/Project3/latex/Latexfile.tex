@@ -15,7 +15,7 @@
 \usepackage{cite}
 \usepackage{caption}
 \usepackage{tabularx}
-% \usepackage{mathabx}
+%\usepackage{mathabx}
 \usepackage{titling}
 
 \captionsetup{width=0.6\linewidth}
@@ -325,7 +325,7 @@ General relativity predicts corrections to the Newtonian force an object
 experiences in the vicinity of a massive object. For Mercury, the
 gravitational force is better approximated with the expression
 
-\begin{equation} \label{eq:relcorr}
+\begin{equation}
     F_G = \frac{GM_{\Sun}M_{\Mercury}}{r^2}
     \left[1+\frac{3l^2}{r^2 c^2}\right] ,
 \end{equation}
@@ -390,34 +390,27 @@ at $\vec r_\Sun = 0$, and the position of Earth to $\vec r_\Earth =
 The solution of the orbit of Earth is found using both Forward Euler and
 Velocity Verlet. 
 
+\subsection{}
+
 \subsection{Stability analysis}
 Now that we have established a simple solar system with two bodies, we can
 test the stability of our algorithm. We do this by testing different time
 steps $\Delta t$. This is applied to both our Euler and our Verlet
 algorithm with time steps in $N \in \{5 \to 5 \times 2^{19}\}$ steps per year,
-increasing with steps of power of two. In addition run a test on how well the
-methods conserve energy.
+increasing with steps of power of two.
 
 \subsection{Escape velocity}
-To study the conditions for a planet to be in a bound state (elliptical orbit), we plot a series of different initial velocities and integrating the force. Then we can observe on the plots what velocity is needed for the earth to leave the orbit. When this velocity is found, we can compare it to the analytical expression, given by expression -----. 
+To study the conditions for a planet to be in a bound state (elliptical orbit), we plot a series of different initial velocities and integrating the force. Then we can observe on the plots what velocity is needed for the earth to leave the orbit. When this velocity is found, we can compare it to the analytical expression, given by expression (10). 
 
 \subsection{Adding Jupiter \texorpdfstring{$\Sun\Earth\Jupiter$}{}}
-We analyse the stability of the solar system when including Jupiter
-($\Jupiter$) in our previous setup.  The initial
-conditions are now set from real data, from 17. october. NASA has an interface
-(\texttt{https://ssd.jpl.nasa.gov/horizons.cgi}) to celestial body initial
-conditions, which can be parsed by the preprocessor script
-\texttt{analyse/read\_horizon.py} (Ephemeris type needs to be set to
-VECTORS).  Consider that the velocities received by NASA are assumed to be
-around a common barycenter for the whole solar system; if one then excludes
-some planets, the total momentum will not be zero and the system will
-drift.  Correcting for this is done with the \texttt{--fix\_barycenter}
-argument of \texttt{read\_horizon.py}. It finds the total velocity of the
-barycenter and sets it to zero.
 
-The mass of Earth and Jupiter are now relevant, as we will be calculating the
-gravitational effects between planets.  The masses of the objects are
-listed in the appendix.
+We analyse the stability of the solar system when including Jupiter
+($\Jupiter$) in our previous setup. The initial position of Jupiter is set to
+$\vec r_\Jupiter = -\SI{5.2}{AU}\hat e_x$, with velocity $\vec v_\Jupiter =
+-\SI{1}{AU/yr}\hat e_y$, found from inserting numbers in \cref{eq:circVel}.
+The mass of Earth is now relevant, as we will be calculating the
+gravitational effects from all bodies on all the others except on the Sun.
+The masses of the objects are listed in the appendix.
 
 \subsubsection{Massive Jupiter }
 We then increase the mass of Jupiter to study the effects on the stability
@@ -426,25 +419,35 @@ original mass of Jupiter, but otherwise we use the same initial conditions.
 
 \subsubsection{Three-body problem} 
 Moving towards a more realistic model of the solar system, we let the Sun
-be affected by the gravitational effects of the planets. This is done by
-removing the --fixed\_sun argument when creating input files.
+be affected by the gravitational effects of the planets. The initial
+conditions are now set from real data. NASA 
+has an interface (\texttt{https://ssd.jpl.nasa.gov/horizons.cgi}) to
+celestial body initial conditions, which can be parsed by the preprocessor
+script \texttt{analyse/read\_horizon.py} (Ephemeris type needs to be set to
+VECTORS).  Consider that the velocities received by NASA are assumed to be
+around a common barycenter for the whole solar system; if one then excludes
+some planets, the total momentum will not be zero and the system will
+drift.  
+Correcting for this is done with the \texttt{--fix\_barycenter} argument of
+\texttt{read\_horizon.py}. It finds the total velocity of the barycenter
+and sets it to zero.
+
 
 \subsection{N-body problem \texorpdfstring{$\Sun\Mercury\Pluto\Earth\Mars\Jupiter\Saturn\Neptune\Uranus\Pluto$}{}} 
 Our system now includes several objects that all interact with one another.
 We have made sure that our time step is a reasonable one and that the
 energy is conserved. The next step is adding all the other planets. We use
 the same strategy as with Jupiter, with the relevant data aquired from
-NASA. The starting
+NASA. 
 
 \subsection{Mercury perihelion precession \texorpdfstring{$\Sun\Mercury$}{}} 
 The final addition to our solar system is applying the non-newtonian
-general relativistic effects the sun has on Mercury, as stated in
-\cref{eq:relcorr}. We want to reproduce only the relativistic correction to
-the newtonian gravity, and exclude the effects of the other planets by
-considering only a two body Mercury-Sun system. To get the desired
-precision, we know that the We run this system for 100
-years, with
+general relativistic effects the sun has on Mercury, with equation (19)
 
+\subsection{Testing and algorithm analysis}
+\subsubsection{Stability of \texorpdfstring{$\Delta t$}{}}
+\subsubsection{Energy and angular momentum conservation}
+\subsubsection{FLOPS}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
@@ -456,7 +459,7 @@ distance of the planet gradually increases in time.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\linewidth]{../results/stability.pdf}
+    \includegraphics[width=1.0\linewidth]{../results/stability_orbits.pdf}
     \caption{Stability of the Earth's orbit with different time steps $\Delta t$. Bigger time steps give bigger deviance.}
     \label{fig:stab_euler}
 \end{figure}
@@ -501,9 +504,7 @@ shows how Earth leaves the orbit if the initial velocity is too large.
     \label{fig:name}
     \caption{The trajectory of Earth with different initial velocities compared to the real one}
 \end{figure}
-
-The analytical escape velocity is found with equation ---- and results in
-
+The analytical escape velocity is found with equation (10) and results in
 \begin{equation}
     v_{e} = \sqrt{8\pi^2 AU^2/year^2} = \sqrt{2}2\pi AU/year \approx 1.414V_{Earth}\nonumber
 \end{equation}
@@ -511,10 +512,7 @@ The analytical escape velocity is found with equation ---- and results in
 
 \subsection{Adding Jupiter}
 \subsubsection{Normal Jupiter}
-By adding Jupiter with the sun fixed in the centre, the orbit of the earth
-is largely unchanged. \Cref{fig}
-
-
+By adding Jupiter with the sun fixed in the centre 
 \subsubsection{Massive Jupiter}
 One we increase the mass of Jupiter to the mass of the sun, Earth
 immediately loses its track and gets violently tossed between the two
@@ -601,7 +599,7 @@ expected result of around 43 arcseconds.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\linewidth]{../results/full_system_inner.png}
+    \includegraphics[width=1.0\linewidth]{../results/MercuryOrbit.pdf}
     \label{fig:name}
 \end{figure}
 
@@ -621,22 +619,34 @@ changes linearly.
 
 %%% COMPARE MERCURY PRECESSION TO KNOWN VALUE
 
-
 \subsection{Comparison of methods}
-
-\subsection{Escape velocity}
-As figure --- shows, the planet will remain in orbit for all initial velocities less than some value $v_e \in [1.409,1.432]v_{Earth}$. This checks out with the analytical value we calculated to be $v_e = 1.414\cdot v_{Earth}$.
-
-
-
+As we predicted, the Verlet method produces far more precise results than Euler. With the Verlet method we were able to calculate the case of Mercury with $10^8$ time steps in 173.48 seconds. The program crashes due to overflow if it's run with Euler's method.
 \subsection{Testing of $\Delta t$}
 As seen in figure \cref{}, with sufficiently small time steps, the orbit
 of the planet is stable. It slightly oscillates around $1AU$, which checks
 out with the eccentricity of the earth being $0.0167$.
 
+\subsection{Two-body system}
+\subsubsection{Escape velocity}
+As figure --- shows, the planet will remain in orbit for all initial velocities less than some value $v_e \in [1.409,1.432]v_{Earth}$. This checks out with the analytical value we calculated to be $v_e = 1.414\cdot v_{Earth}$.
+
+\subsection{Three-body system}
+\subsubsection{Massive Jupiter}
+As we increased the mass of Jupiter, the Earth loses it's circular orbit as it starts getting pulled in different directions by the two massive objects. This is as expected as we have increased its mass to that of the sun, effectively making it a binary star system, except for the fact that the sun is fixed in the origin. 
+
+
+\subsection{N-body system}
+With all the initial conditions collected from NASA, our solar system takes form. As we have have modelled our system in all three dimensions, it appears that not all planets move in the same plane. And sure enough, Pluto's $17^O$ inclination reveals itself.
+
+
+
 
 
 \section*{Appendix}
+See https://github.com/halvarsu/FYS3150/ for code.
+
+From \cite{lectureNotes}:
+
 \begin{table}[H]
     \caption{Masses of the bodies in the solar system}
     \centering

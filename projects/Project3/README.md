@@ -1,5 +1,9 @@
 # Project 3
 
+![?][image]
+
+[image]: https://github.com/halvarsu/FYS3150/blob/master/projects/Project3/results/front.png "Forward Euler is bad"
+
 ## Setup
 
 This project uses [Qt creator](https://www1.qt.io/download/ "Qt creator download") for project management and building.

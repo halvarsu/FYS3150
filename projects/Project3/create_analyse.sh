@@ -1,21 +1,27 @@
 #!/bin/bash
 
-N=20
+N=5
 
-mkdir -p in/stability_analysis/
-mkdir -p out/stability_analysis/
+FOLDER_EULER=stability_analysis_euler/
+FOLDER_VERLET=stability_analysis_verlet/
+mkdir -p in/$FOLDER_EULER
+mkdir -p out/$FOLDER_EULER
+mkdir -p in/$FOLDER_VERLET
+mkdir -p out/$FOLDER_VERLET
 rm in/stability_analysis/*
 rm out/stability_analysis/*
 
-while [ $N -lt 100000 ]; do
-    echo "================ n/yr = $N =================="
-    INFOLDER=EarthSun
-    INFILE=in/stability_analysis/EarthSun_N${N}.txt
-    OUTFILE=out/stability_analysis/EarthSun_N${N}.txt
-    echo $OUTFILE
+while [ $N -lt 4000000 ]; do
+    PLANETSFOLDER=planet_data/EarthSunIdealized
+    INFILE1=in/$FOLDER_EULER/EarthSun_N${N}.txt
+    INFILE2=in/$FOLDER_VERLET/EarthSun_N${N}.txt
+    echo "================ EULER n/yr = $N =================="
+    python analyse/read_horizon.py -F $PLANETSFOLDER -o $INFILE1 -y 1 -s $N --use_euler --fixed_sun
+    ./build/Project3 $INFILE1 1 NO_ENERGIES
+    echo "================ VERLET n/yr = $N =================="
+    python analyse/read_horizon.py -F $PLANETSFOLDER -o $INFILE2 -y 1 -s $N --fixed_sun
+    ./build/Project3 $INFILE2 1 NO_ENERGIES
     let N=$N*2
-    python analyse/read_horizon.py -F planet_data/$INFOLDER -o $INFILE -y 1 -s $N --use_euler
-    ./build/Project3 $INFILE 1 NO_ENERGIES
 done
 
 # python analyse/analyse.py -F out/stability_analysis

@@ -131,18 +131,30 @@ def plot_orbit_stability(args):
     ax3 = fig2.add_subplot(111)
     color = plt.cm.jet(np.linspace(0,1,len(filenames)))
 
+    # sm = plt.cm.ScalarMappable(cmap=cmap,
+    #         norm=plt.normalize(vmin=rho_vals[0], vmax=rho_vals[-1]))
+    # sm.set_array([])
+    # cb = fig1.colorbar(sm, ax=ax1)
+    # cb.set_label('$\\rho$ max')
+
+    n_values = []
+
     for i, f in enumerate(filenames):
         data = read_data(f, args)
         planet = data["pos"][:,1]
+        n_values.append(data["steps_per_year"])
 
         time = data["time"] 
         x, y, z = planet.T
         r = np.sqrt(x**2 + y**2 + z**2)
         deviation = np.sqrt((x[0]-x[-1])**2 + (y[0] - y[-1])**2 + (z[0] - z[-1])**2)
+    
         ax1.plot(time, r, c=color[i])
-        ax2.plot(x,y, c=color[i])
+        ax2.plot(x,y, c=color[i], label = data["steps_per_year"])
         ax2.axis('equal')
         ax3.scatter(data["steps_per_year"], deviation, c=color[i])
+
+    ax2.legend()
     ax3.set_xscale('log')
     ax3.set_yscale('log')
     ax1.set_xlabel('time [yr]')
@@ -191,7 +203,7 @@ def plot_peri_precession(data,args):
     print(cov)
     arcsec_fitted = time_minima*p[0] + p[1]
     angle0 = arcsec_fitted[0]
-    ax1.plot(time_minima, arcsec_minima - angle0)
+    ax1.scatter(time_minima, arcsec_minima - angle0)
     ax1.plot(time_minima, arcsec_fitted - angle0)
     delta_angle = arcsec_fitted[-1] - angle0
     dt = time[-1] - time[0] 

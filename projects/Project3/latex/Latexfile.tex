@@ -56,7 +56,7 @@
 \pagenumbering{gobble}
 \thispagestyle{empty}
 
-\begin{figure}[htpb]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{../results/front.png}
     \label{fig:name}
@@ -313,7 +313,7 @@ calculation of the trajectories. But with 9 FLOPS per time step, this
 method is way more demanding in terms of computational calculation than the
 aforementioned.
 
-% \begin{figure}[htpb]
+% \begin{figure}[H]
 %     \centering
 %     % \includegraphics[width=0.8\linewidth]{XXX.pdf}
 %     \caption{XXX}
@@ -472,7 +472,7 @@ showing the energies and the angular momentum of the Earth.
 \Cref{fig:energy_euler} shows the corresponding calculation for the Forward
 Euler method.
 
-\begin{figure}[htpb]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{energy_conservation_verlet.pdf}
     \caption{Conservation with the Verlet method. The energies and
@@ -519,24 +519,55 @@ is largely unchanged. \Cref{fig}
 One we increase the mass of Jupiter to the mass of the sun, Earth
 immediately loses its track and gets violently tossed between the two
 objects (\cref{fig:jupiter1000x}). The energy is still conserved though,
-as seen in \cref{fig:energyEarthJupiter}. 
+as seen in \cref{fig:energyEarthJupiter}. Changing the time step to a
+smaller one, we get the movement in \cref{fig:jupiter1000x2}, showing an
+unstable system.
 
-\begin{figure}[htpb]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{energyEarthJupiter.pdf}
-    \caption{Energy of earth while jupiter is present, with a jupiter of  }
-    \label{fig:energy_earthJupiter}
+    \caption{Energy of earth while jupiter is present, different masses for
+        the planet jupiter, with a fixed sun.  }
+    \label{fig:energyEarthJupiter}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{../results/EJSx1000_1.pdf}
+    \caption{The Earth-Jupiter-Sun system where the mass of jupiter is
+    increased by a factor 1000, with the Sun held in position}
     \label{fig:jupiter1000x}
-    \caption{}
 \end{figure}
 
 \subsubsection{Three-body problem}
+Letting the sun move as well, we get a plot similar to the one before in
+\cref{fig:energyEarthJupiter2}. The corresponding orbits are shown in
+\cref{fig:EJSx1000_moving}, showing a binary system with a planet getting
+slung around.
 
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{energyEarthJupiter1.pdf}
+    \caption{Energy of earth while jupiter is present, different masses for
+        the planet jupiter, with a moving sun.  }
+    \label{fig:energyEarthJupiter2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../results/EJSx1000_2.pdf}
+    \caption{The Earth-Jupiter-Sun system where the mass of jupiter is
+    increased by a factor 1000, with the Sun held in position}
+    \label{fig:jupiter1000x2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../results/EJSx1000_moving.pdf}
+    \caption{The Earth-Jupiter-Sun system where the mass of jupiter is
+    increased by a factor 1000, with a moving Sun.}
+    \label{fig:jupiter1000x2}
+\end{figure}
 
 \subsection{N-body problem}
 With all the planets inserted, our solar looks satisfyingly familiar
@@ -564,16 +595,20 @@ orbits
 
 \subsection{Mercury}
 With the relativistic effects applied to Mercury, we observe how the
-elliptical orbit slightly rotates around its elliptical orbit. 
+elliptical orbit slightly rotates around its elliptical orbit. The orbit
+precesses 44.5 arcseconds in 100 years, which isnt very far from the
+expected result of around 43 arcseconds.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{../results/full_system_inner.png}
     \label{fig:name}
 \end{figure}
+
 The change is too small to recognized on the orbit, but by calculation, we
 can find. As we can see on the following plot, the angle of its orbit
 changes linearly.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{../results/peri_precession}

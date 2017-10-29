@@ -5,31 +5,36 @@ import tools
 import glob
 
 
-def get_args():
+def get_args(args=None):
     import argparse
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-f', '--filename', default='out/example.bin')
-    parser.add_argument('-F', '--folder', default='', help = 'Only useful for stability analysis, when several simulations are compared ')
+    parser.add_argument('-F', '--folder', default='', 
+            help='Only useful for stability analysis, when several simulations are compared ')
     parser.add_argument('-o', '--outfile', default='')
     parser.add_argument('-s', '--savefig',action='store_true')
     parser.add_argument('-l', '--set_manual_legend',action='store_true')
     parser.add_argument('-p', '--plot_file',default='')
-    parser.add_argument('-dim', '--dimensions',type=int,help='plot dimension', default=2, choices=[2,3])
+    parser.add_argument('-dim', '--dimensions',type=int,
+            help='plot dimension', default=2, choices=[2,3])
     parser.add_argument('-n', '--plot_step', help='plot every nth data point',
             type=int,default=1)
-    parser.add_argument('--precession', help='plot perihelion precession of body 2',
-            action = 'store_true')
-    parser.add_argument('--energies', help='plot energies of system',
-            action = 'store_true')
-    parser.add_argument('--stability_analysis', help='plot a folder with simulations with changing dt',
-            action = 'store_true')
+    parser.add_argument('--precession',         action = 'store_true',
+            help='plot perihelion precession of body 2')
+    parser.add_argument('--energies',           action = 'store_true',
+            help='plot energies of system')
+    parser.add_argument('--stability_analysis', action = 'store_true',
+            help='plot a folder with simulations with changing dt')
     parser.add_argument('--no_orbit', help='dont plot orbit',action='store_true')
     parser.add_argument('-v','--verbose', help='1 = print all, 0 = no print',type=int, choices = [0,1], default = 1)
     parser.add_argument('--figsize', nargs=2,type=float, default=(6,4))
-    return parser.parse_args()
+    if args is None:
+        return parser.parse_args()
+    else:
+        return parser.parse_args(args)
 
-def read_data(data_filename, args):
+def read_data(data_filename, args=None):
     # Finds number of planets from first line, and reads the rest of the
     # data. 
     temp = data_filename.split('.')[:-1]
@@ -121,7 +126,7 @@ def plot_orbit_stability(args):
     filenames = [f for f in glob.glob(args.folder + '/*') if f.endswith('.bin')]
      
     # dirty sorting
-    temp = map(lambda x : int(x.split('_N')[-1].split('.')[0]), filenames)
+    temp = [int(f.split('_N')[-1].split('.')[0]) for f in filenames]
     filenames = list(np.array(filenames)[np.argsort(temp)])
 
     fig1 = plt.figure()
@@ -162,7 +167,7 @@ def plot_orbit_stability(args):
     ax2.set_xlabel('$y$ [AU]')
     ax2.set_ylabel('$y$ [AU]')
     ax3.set_xlabel('$N$ [steps/yr]')
-    ax3.set_ylabel('$\Delta r/\Delta t$ [AU/yr]')
+    ax3.set_ylabel('$|\Delta \\vec r|/\Delta t$ [AU/yr]')
 
     fig1.savefig("results/stability_orbits.pdf")
     fig2.savefig("results/stability_deviation.pdf")

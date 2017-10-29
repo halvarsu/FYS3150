@@ -15,7 +15,7 @@
 \usepackage{cite}
 \usepackage{caption}
 \usepackage{tabularx}
-% \usepackage{mathabx}
+\usepackage{mathabx}
 \usepackage{titling}
 
 \captionsetup{width=0.6\linewidth}
@@ -202,6 +202,14 @@ gravitational force between bodies $F_{i,j}$, given by
 
 with $M_i$ being the mass of object $i$ and $r_{i,j} = |\vec r_i - \vec
 r_j|$ as the distance between two objects.
+
+\subsubsection{Escape velocity}
+The escape velocity of an object in orbit is achieved when the kinetic energy equals the potential, in this case the gravitational potential;
+\begin{align}
+    \frac{1}{2}M_\Earth v_e^2 &= GM_\Sun\frac{M_\Earth}{r}\nonumber\\
+    v_e &= \sqrt{ \frac{GM_\Sun }{r} }
+\end{align}
+
 
 \subsubsection{Conservation of Angular Momentum}
 
@@ -390,8 +398,7 @@ algorithm with time steps in $N \in \{5 \to 5 \times 2^{19}\}$ steps per year,
 increasing with steps of power of two.
 
 \subsection{Escape velocity}
-To study the conditions for a planet to be in a bound state (elliptical
-orbit), we set up different 
+To study the conditions for a planet to be in a bound state (elliptical orbit), we plot a series of different initial velocities and integrating the force. Then we can observe on the plots what velocity is needed for the earth to leave the orbit. When this velocity is found, we can compare it to the analytical expression, given by expression -----. 
 
 \subsection{Adding Jupiter \texorpdfstring{$\Sun\Earth\Jupiter$}{}}
 
@@ -444,30 +451,15 @@ general relativistic effects the sun has on Mercury, with equation xxx
 \section{Results}
 \subsection{Two body problem}
 \subsubsection{Stability of $\Delta t$}
-
-As shown in \cref{fig:stability} below, the stability of the algorithm
+As shown in \cref{fig:stab_euler} below, the stability of the algorithm
 clearly depends on the size of the time step. The plots shows how the
-distance of the planet gradually increases in time, but also illustrates
-the difference between the two methods. For $N > 10^3$, Forward Euler
-deviates $17.8$ times as much as Velocity Verlet after one
-orbit (\textbf{A}), and while the radius steadily increases with the former
-(\textbf{B}), the latter returns to a distance of
-$1$ AU after a year (\textbf{D}). This is a consequence of the conservation
-of energy in the Velocity Verlet algorithm as can be seen in
-\cref{fig:energy_stab}. 
+distance of the planet gradually increases in time.  
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\linewidth]{../results/stability.pdf}
-    \caption{Stability of the Earth's orbit over one year with different
-    time steps $\Delta t = 1/N$, where $N$ is steps per year. \textbf{A:}
-    Deviation from the starting position after one year in AU per year. The
-    difference between the two.
-    \textbf{B:} Radial distance from the sun $r$ minus $1$ AU with Forward Euler for 
-    different values of $N$ in AU, over one year. \textbf{C:} The orbit for
-    the different values of $N$ with Forward Euler. \textbf{D and E:} As B
-    and C, but with Velocity Verlet. }
-    \label{fig:stability}
+    \includegraphics[width=1.0\linewidth]{../results/stability_orbits.pdf}
+    \caption{Stability of the Earth's orbit with different time steps $\Delta t$. Bigger time steps give bigger deviance.}
+    \label{fig:stab_euler}
 \end{figure}
 
 The orbits are calculated for the earth over the course of one year, with
@@ -475,33 +467,24 @@ the biggest time step resulting in a distance of almost $1.5AU$.
 
 \subsubsection{Energy conservation}
 By plotting the energies of the system, we expect the total energy to be
-constant independently of how long we run the simulation.
-\Cref{fig:energy_verlet}
-confirms this with the velocity verlet method, showing the energies and the
-angular momentum of the Earth. \Cref{fig:energy_euler} shows the
-corresponding calculation for the Forward Euler method.
-
-\begin{figure}[htpb]
-    \centering
-    \includegraphics[width=0.8\linewidth]{energy_conservation_verlet.pdf}
-    \caption{Energy conservation with the Verlet method. The energies and angular
-        momentum of a two body system (the
-    Earth and the Sun) in the reference frame of the largest object is
-plotted.}
-    \label{fig:energy_verlet}
-\end{figure}
-
-\begin{figure}[htpb]
-    \centering
-    \includegraphics[width=0.8\linewidth]{energy_conservation_euler.pdf}
-    \caption{Energy conservation with the Euler method. The energies and angular
-        momentum of a two body system (the
-    Earth and the Sun) in the reference frame of the largest object is
-plotted.}
-    \label{fig:energy_verlet}
-\end{figure}
+constant independently of how long we run the simulation. This is confirmed
+by the following plot, showing the kinetic energy and the potential energy
+between all the objects in our system.
 
 \subsubsection{Escape velocity}
+The following figure
+shows how Earth leaves the orbit if the initial velocity is too large.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../results/Esacpe_vel.png}
+    \label{fig:name}
+    \caption{The trajectory of Earth with different initial velocities compared to the real one}
+\end{figure}
+The analytical escape velocity is found with equation ---- and results in
+\begin{equation}
+    v_{e} = \sqrt{8\pi^2 AU^2/year^2} = \sqrt{2}2\pi AU/year \approx 1.414V_{Earth}\nonumber
+\end{equation}
+
 
 \subsection{Adding Jupiter}
 \subsubsection{Normal Jupiter}
@@ -570,6 +553,10 @@ changes linearly.
 
 
 \subsection{Comparison of methods}
+
+\subsection{Escape velocity}
+As figure --- shows, the planet will remain in orbit for all initial velocities less than some value $v_e \in [1.409,1.432]v_{Earth}$. This checks out with the analytical value we calculated to be $v_e = 1.414\cdot v_{Earth}$.
+
 
 
 \subsection{Testing of $\Delta t$}

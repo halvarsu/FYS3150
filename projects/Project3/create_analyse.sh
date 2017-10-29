@@ -1,15 +1,17 @@
 #!/bin/bash
 
-N=5
+N=40
 
-FOLDER_EULER=stability_analysis_euler/
-FOLDER_VERLET=stability_analysis_verlet/
+FOLDER_EULER=stability_analysis_euler
+FOLDER_VERLET=stability_analysis_verlet
 mkdir -p in/$FOLDER_EULER
 mkdir -p out/$FOLDER_EULER
 mkdir -p in/$FOLDER_VERLET
 mkdir -p out/$FOLDER_VERLET
-rm in/stability_analysis/*
-rm out/stability_analysis/*
+rm in/$FOLDER_EULER/*
+rm out/$FOLDER_EULER/*
+rm in/$FOLDER_VERLET/*
+rm out/$FOLDER_VERLET/*
 
 while [ $N -lt 4000000 ]; do
     PLANETSFOLDER=planet_data/EarthSunIdealized

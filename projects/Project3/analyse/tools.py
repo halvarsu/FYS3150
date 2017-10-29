@@ -8,7 +8,7 @@ def enablePrint():
 
 def printDisable(*args):
     enablePrint()
-    print args
+    print(args)
     blockPrint()
 
 

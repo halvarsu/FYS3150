@@ -75,7 +75,9 @@ int main(int argc, char * argv[]) {
     outfile << system->hasFixedSun() << endl;
     outfile << system->hasRelativisticCorr() << endl;
     outfile << system->numberOfBodies() << endl;
-    outfile <<"Kinetic:    Potential:    Total:    AngularMomentum:" << std::endl;
+    // had to change this unnecessary line
+    // outfile <<"Kinetic:    Potential:    Total:    AngularMomentum:" << std::endl;
+    outfile << useEuler << endl;
 
     double energy= system->totalEnergy();
     double  kinetic   = system->kineticEnergy();

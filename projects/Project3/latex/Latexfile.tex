@@ -454,7 +454,7 @@ orbit (\textbf{A}), and while the radius steadily increases with the former
 (\textbf{B}), the latter returns to a distance of
 $1$ AU after a year (\textbf{D}). This is a consequence of the conservation
 of energy in the Velocity Verlet algorithm as can be seen in
-\cref{fig:energy_stab}.  $\odot$
+\cref{fig:energy_stab}. 
 
 \begin{figure}[H]
     \centering
@@ -475,9 +475,31 @@ the biggest time step resulting in a distance of almost $1.5AU$.
 
 \subsubsection{Energy conservation}
 By plotting the energies of the system, we expect the total energy to be
-constant independently of how long we run the simulation. This is confirmed
-by the following plot, showing the kinetic energy and the potential energy
-between all the objects in our system.
+constant independently of how long we run the simulation.
+\Cref{fig:energy_verlet}
+confirms this with the velocity verlet method, showing the energies and the
+angular momentum of the Earth. \Cref{fig:energy_euler} shows the
+corresponding calculation for the Forward Euler method.
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{energy_conservation_verlet.pdf}
+    \caption{Energy conservation with the Verlet method. The energies and angular
+        momentum of a two body system (the
+    Earth and the Sun) in the reference frame of the largest object is
+plotted.}
+    \label{fig:energy_verlet}
+\end{figure}
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{energy_conservation_euler.pdf}
+    \caption{Energy conservation with the Euler method. The energies and angular
+        momentum of a two body system (the
+    Earth and the Sun) in the reference frame of the largest object is
+plotted.}
+    \label{fig:energy_verlet}
+\end{figure}
 
 \subsubsection{Escape velocity}
 

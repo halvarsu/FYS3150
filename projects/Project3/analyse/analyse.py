@@ -51,7 +51,10 @@ def read_data(data_filename, args=None):
         data["n_planets"] = int(infile.readline())
         #_,_, _, _ = infile.readline().split() # headers for energies, not necessary
         # in this context NOTE Changed for something more useful:
-        data["use_euler"] = int(infile.readline())
+        try:
+            data["use_euler"] = int(infile.readline())
+        except ValueError:
+            data['use_euler'] = 0
 
     data["energies"] = np.loadtxt(info_filename, skiprows=6, dtype=float).T
 
@@ -131,8 +134,8 @@ def plot_orbit_stability(args):
     filenames = [f for f in glob.glob(args.folder + '/*') if f.endswith('.bin')]
      
     # dirty sorting
-    temp = [int(f.split('_N')[-1].split('.')[0]) for f in filenames]
-    filenames = list(np.array(filenames)[np.argsort(temp)])
+    # temp = [int(f.split('_N')[-1].split('.')[0]) for f in filenames]
+    # filenames = list(np.array(filenames)[np.argsort(temp)])
 
     fig1 = plt.figure()
     ax1 = fig1.add_subplot(211)

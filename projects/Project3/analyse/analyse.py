@@ -49,8 +49,9 @@ def read_data(data_filename, args=None):
         data["fixed_sun"] = int(infile.readline())
         data["relativistic"] = int(infile.readline())
         data["n_planets"] = int(infile.readline())
-        _,_, _, _ = infile.readline().split() # headers for energies, not necessary
-        # in this context
+        #_,_, _, _ = infile.readline().split() # headers for energies, not necessary
+        # in this context NOTE Changed for something more useful:
+        data["use_euler"] = int(infile.readline())
 
     data["energies"] = np.loadtxt(info_filename, skiprows=6, dtype=float).T
 
@@ -110,7 +111,11 @@ def plot(data, args):
         if args.plot_file:
             outfile = "results/" + args.plot_file
         else:
-            outfile =  raw_input('Write filename (or leave blank) (default folder=results/):\n') 
+            msg = 'Write filename (or leave blank) (in folder=results/):\n'
+            try:
+                outfile =  raw_input(msg) 
+            except NameError:
+                outfile = input(msg)
             if outfile:
                 outfile = "results/" + outfile
             else:
@@ -173,14 +178,47 @@ def plot_orbit_stability(args):
     fig2.savefig("results/stability_deviation.pdf")
 
 def plot_energies(data, args):
-    plt.figure()
-    kinetic, potential, total, angular_momentum = data["energies"][:,1:]
-    time = data["time"]
-    plt.xlabel("Time")
-    plt.ylabel("Kinetic+potential energy [$AJ$]")
-    plt.plot(time, total)
-    plt.plot(time, kinetic)
-    plt.plot(time, potential)
+    fig, [ax1,ax2] = plt.subplots(2, sharex=True, figsize=(6,4))
+
+    AU = 149597870700
+    year = 31556926
+    sun_mass = 1.99e30
+    Astrojoule = (AU/year)**2 * sun_mass
+    Astroangmom = (AU/year)*AU*sun_mass
+    time = data["time"][2:]
+    kinetic, potential, total, angular_momentum = data["energies"][:,2:]
+    for E in (total,kinetic,potential ):
+        E *= Astrojoule
+    angular_momentum *= Astroangmom
+    avg = np.average(total[2:])
+    std = np.std(total[2:])
+    print("Total energy: %g +- %g %%" %(avg,np.abs(100*std/avg)))
+    avgmom = np.average(angular_momentum[2:])
+    stdmom = np.std(angular_momentum[2:])
+    print("Total angular momentum: %g +- %g %%" %(avgmom,np.abs(100*stdmom/avgmom)))
+    ax1.plot(time, total, label = 'Total')
+    #ax1.plot(time, kinetic, label = 'Kinetic')
+    #ax1.plot(time, potential, label = 'Total')
+    ax2.plot(time, angular_momentum, label = 'Angular Momentum')
+
+
+    ax1.legend() 
+    ax1.set_ylabel("Energy [Joule]")
+    ax2.legend() 
+    if std/avg < 0.01:
+        ax1.axis([time[0],time[-1],(avg)*0.99,(avg)*1.01])
+    if stdmom / avgmom < 0.01:
+        ax2.axis([time[0],time[-1],(avgmom)*0.99,(avgmom)*1.01])
+    ax2.set_ylabel('Angular Momentum [kg m$^2$/s]')
+    ax2.set_xlabel("Time [yr]")
+    plt.tight_layout()
+
+    
+    method = 'euler' if data["use_euler"] else 'verlet'
+    fname = 'results/energy_conservation_%s.pdf' % method
+    print("saving to %s" %fname)
+    fig.savefig(fname)
+
 
 
 

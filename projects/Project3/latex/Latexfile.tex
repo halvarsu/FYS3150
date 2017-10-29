@@ -15,7 +15,7 @@
 \usepackage{cite}
 \usepackage{caption}
 \usepackage{tabularx}
-\usepackage{mathabx}
+% \usepackage{mathabx}
 \usepackage{titling}
 
 \captionsetup{width=0.6\linewidth}
@@ -444,15 +444,30 @@ general relativistic effects the sun has on Mercury, with equation xxx
 \section{Results}
 \subsection{Two body problem}
 \subsubsection{Stability of $\Delta t$}
-As shown in \cref{fig:stab_euler} below, the stability of the algorithm
+
+As shown in \cref{fig:stability} below, the stability of the algorithm
 clearly depends on the size of the time step. The plots shows how the
-distance of the planet gradually increases in time.  
+distance of the planet gradually increases in time, but also illustrates
+the difference between the two methods. For $N > 10^3$, Forward Euler
+deviates $17.8$ times as much as Velocity Verlet after one
+orbit (\textbf{A}), and while the radius steadily increases with the former
+(\textbf{B}), the latter returns to a distance of
+$1$ AU after a year (\textbf{D}). This is a consequence of the conservation
+of energy in the Velocity Verlet algorithm as can be seen in
+\cref{fig:energy_stab}.  $\odot$
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\linewidth]{../results/stability_orbits.pdf}
-    \caption{Stability of the Earth's orbit with different time steps $\Delta t$. Bigger time steps give bigger deviance.}
-    \label{fig:stab_euler}
+    \includegraphics[width=1.0\linewidth]{../results/stability.pdf}
+    \caption{Stability of the Earth's orbit over one year with different
+    time steps $\Delta t = 1/N$, where $N$ is steps per year. \textbf{A:}
+    Deviation from the starting position after one year in AU per year. The
+    difference between the two.
+    \textbf{B:} Radial distance from the sun $r$ minus $1$ AU with Forward Euler for 
+    different values of $N$ in AU, over one year. \textbf{C:} The orbit for
+    the different values of $N$ with Forward Euler. \textbf{D and E:} As B
+    and C, but with Velocity Verlet. }
+    \label{fig:stability}
 \end{figure}
 
 The orbits are calculated for the earth over the course of one year, with

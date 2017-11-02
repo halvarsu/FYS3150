@@ -44,6 +44,7 @@ void MetropolisSolver::run(arma::mat &spin_matrix, double & E, double &M, arma::
             spin_matrix(iy,periodic(ix,m_n_spins,1)) +
             spin_matrix(periodic(iy,m_n_spins,1),ix));
             // Here we perform the Metropolis test
+            std::cout << ix << " " << iy << " " << deltaE << " " << deltaE/4 + 2 << std::endl;
             if ( MetropolisSolver::rand() <= w(deltaE/4+2) ) {
                 spin_matrix(iy,ix) *= -1; // flip one spin and accept new spin config
                 // update energy and magnetization

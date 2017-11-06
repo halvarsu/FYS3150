@@ -27,8 +27,28 @@ int main(int argc, char * argv[]) {
 
     arma::mat spin_matrix = - arma::ones<arma::mat>(spins,spins);
     spin_matrix.print();
-    double E = 8;
-    double M = -4;
+
+    // handling boundry conditions
+    int idx(int i){
+        if i == N;
+            return 0;
+        if i == -1;
+            return N-1;
+        else;
+            return i;
+    }
+    int S(int a,int b){
+        return
+    }
+
+    for (i=1; i<spins+1; i++){
+        for (i=1; i<spins+1; i++){
+            double E += (spins_matrix[i,idx(j+1)]+spins_matrix[i,idx(j-1)]+spin_matrix[idx(i+1),j]+spin_matrix[idx(i-1),j])*spin_matrix[i,j]
+        }
+    }
+    double M = arma::sum(spin_matrix)
+
+
 
     arma::vec deltaE;
     arma::vec w;

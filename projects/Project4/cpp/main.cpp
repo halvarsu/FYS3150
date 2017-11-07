@@ -18,35 +18,32 @@ int main(int argc, char * argv[]) {
 //    std::uniform_real_distribution<> dist(0.,1.);
 //    cout << dist(gen) << endl;
 
-    int spins = 2;
+    int N = 2;
+    int NMC = 100000;
     // int seed = 0;
-    MetropolisSolver solver(spins);//, seed);
+    MetropolisSolver solver(N);//, seed);
 
     // Generate spin matrix with random values of either -1 or 1:
-    // arma::mat spin_matrix = 2*arma::randi<arma::mat>(spins,spins,arma::distr_param(0,1)) - 1;
+    // arma::mat spin_matrix = 2*arma::randi<arma::mat>(N,N,arma::distr_param(0,1)) - 1;
 
-    arma::mat spin_matrix = - arma::ones<arma::mat>(spins,spins);
+    arma::mat spin_matrix = - arma::ones<arma::mat>(N,N);
     spin_matrix.print();
 
     // handling boundry conditions
-    int idx(int i){
-        if i == N;
-            return 0;
-        if i == -1;
-            return N-1;
-        else;
-            return i;
-    }
-    int S(int a,int b){
-        return
-    }
+    double E = 0;
 
-    for (i=1; i<spins+1; i++){
-        for (i=1; i<spins+1; i++){
-            double E += (spins_matrix[i,idx(j+1)]+spins_matrix[i,idx(j-1)]+spin_matrix[idx(i+1),j]+spin_matrix[idx(i-1),j])*spin_matrix[i,j]
+    for (int i=0; i<N; i++){
+        for (int j=0; j<N; j++){
+            E += - spin_matrix(i,j)*
+                (spin_matrix(i,periodic(j,N,1))+
+                 spin_matrix(periodic(i,N,1),j));//+
+                 //spin_matrix(i,periodic(j,N,-1))+
+                 //spin_matrix(periodic(i,N,-1),j));
         }
     }
-    double M = arma::sum(spin_matrix)
+    cout << E << endl;
+
+    double M = arma::accu(spin_matrix);
 
 
 
@@ -59,7 +56,14 @@ int main(int argc, char * argv[]) {
     w = arma::exp(- beta * deltaE);
 
     w.print();
-    solver.run(spin_matrix, E, M, w);
-    spin_matrix.print();
-    cout << E << " " << M << endl;
+    double avgE = E;
+    double avgM = M;
+    for (int i = 0; i < NMC; i++) {
+        solver.run(spin_matrix, E, M, w);
+        avgE += E;
+        avgM += M;
+    }
+    avgE /= (double) NMC;
+    avgM /= (double) NMC;
+    cout << avgE << " " << avgM << endl;
 }

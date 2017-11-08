@@ -6,21 +6,21 @@
 #include <cmath>
 #include "metropolis.h"
 #include "tools.h"
+#include <string>
 
 using namespace std;
 
-
-
 int main(int soetpotet, char * argv[]) {
-    int N = 2;
-    int NMC = 1000000;
 
-    if(soetpotet == 1){
-        cout << "Give me your number of montecarlo simulations!" << endl;
-        cin >> NMC;
-    } else {
-        NMC = atoi(argv[1]);
-    }
+    int NMC;
+    double T;
+    int L;
+    bool parallel;
+    bool time_it;
+    bool save_to_file;
+    bool orderedSpinConfig;
+    readData("in/test.txt", NMC,T,L,parallel,time_it,save_to_file,orderedSpinConfig);
+
 
 //    std::random_device rd;
 //    std::mt19937 gen(rd());
@@ -28,22 +28,22 @@ int main(int soetpotet, char * argv[]) {
 //    cout << dist(gen) << endl;
 
     // int seed = 0;
-    MetropolisSolver solver(N);//, seed);
+    MetropolisSolver solver(L);//, seed);
 
     // Generate spin matrix with random values of either -1 or 1:
-    arma::mat spin_matrix = 2*arma::randi<arma::mat>(N,N,arma::distr_param(0,1)) - 1;
-    // arma::mat spin_matrix = - arma::ones<arma::mat>(N,N);
+    arma::mat spin_matrix = 2*arma::randi<arma::mat>(L,L,arma::distr_param(0,1)) - 1;
+    // arma::mat spin_matrix = - arma::ones<arma::mat>(L,L);
 
     // handling boundry conditions
     double E = 0;
 
-    for (int i=0; i<N; i++){
-        for (int j=0; j<N; j++){
+    for (int i=0; i<L; i++){
+        for (int j=0; j<L; j++){
             E += - spin_matrix(i,j)*
-                (spin_matrix(i,periodic(j,N,1))+
-                 spin_matrix(periodic(i,N,1),j));//+
-                 //spin_matrix(i,periodic(j,N,-1))+
-                 //spin_matrix(periodic(i,N,-1),j));
+                (spin_matrix(i,periodic(j,L,1))+
+                 spin_matrix(periodic(i,L,1),j));//+
+                 //spin_matrix(i,periodic(j,L,-1))+
+                 //spin_matrix(periodic(i,L,-1),j));
         }
     }
 
@@ -55,7 +55,6 @@ int main(int soetpotet, char * argv[]) {
     arma::vec w;
     deltaE << -8 << -4 << 0 << 4 << 8;
 
-    double T = 1.0;
     double beta = 1./T;
     w = arma::exp(- beta * deltaE);
 

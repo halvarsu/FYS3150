@@ -6,28 +6,49 @@
 #include <cmath>
 #include "metropolis.h"
 #include "tools.h"
+#include <string>
 
 using namespace std;
 
-
 int main(int argc, char * argv[]) {
-    int L = 2;
     int NMC;
     double T;
+    int L;
+    string filename;
+    bool parallel;
+    bool time_it;
+    bool save_to_file;
+    bool orderedSpinConfig;
 
-    if(argc < 2){
+    if (argc == 1){
         cout << "Give me your number of montecarlo simulations!" << endl;
         cin >> NMC;
-    } else {
+        cout << "Give me a temperature as well!" << endl;
+        cin >> T;
+    } else if(argc == 2){
+        filename = argv[1];
+        readData(filename, NMC,T,L,parallel,time_it,save_to_file,orderedSpinConfig);
+    } else if (argc == 3){
         NMC = atoi(argv[1]);
+        T = atof(argv[2]);
+        L = 2;
+        parallel = false;
+        time_it = false;
+        save_to_file = false;
+        orderedSpinConfig = false;
+    } else if (argc == 4){
+        NMC = atoi(argv[1]);
+        T = atof(argv[2]);
+        L = atoi(argv[3]);
+        parallel = false;
+        time_it = false;
+        save_to_file = false;
+        orderedSpinConfig = false;
+    } else {
+        cout << "Wrong number of arguments! Must be < 5" << endl;
+        return 1;
     }
 
-    if(argc < 3){
-        cout << "Give me a temperature!" << endl;
-        cin >> T;
-    } else {
-        T = atof(argv[2]);
-    }
 
     //    std::random_device rd;
     //    std::mt19937 gen(rd());
@@ -62,7 +83,6 @@ int main(int argc, char * argv[]) {
     arma::vec w;
     deltaE << -8 << -4 << 0 << 4 << 8;
 
-    // double T = 1.0;
     double beta = 1./T;
     w = arma::exp(- beta * deltaE);
 

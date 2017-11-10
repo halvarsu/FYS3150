@@ -7,6 +7,8 @@
 #include "metropolis.h"
 #include "tools.h"
 #include <string>
+// #include <studio.h>
+#include <ctime>
 
 using namespace std;
 
@@ -104,6 +106,7 @@ int main(int argc, char * argv[]) {
 
     if (time_it){
         // start clock
+        clock_t begin = clock();
     }
     if (parallel){
         // start subprocesses
@@ -121,7 +124,8 @@ int main(int argc, char * argv[]) {
         }
     }
     if (time_it){
-        // stop clock
+        clock_t end = clock();
+        double time_elapsed = double(end-begin)/CLOCKS_PER_SEC;
         // print clock
     }
 
@@ -139,7 +143,14 @@ int main(int argc, char * argv[]) {
          << susceptibility << endl;
 
     if (save_to_file){
-        // close file
+        outfile.open(out/filename);
+        outfile << avgE << endl;
+        outfile << avgM << endl;
+        outfile << avgEsquared << endl;
+        outfile << avgMsquared << endl;
+        outfile << specific_heat << endl;
+        outfile << susceptibility << endl;
+        outfile.close()
     }
 }
 

@@ -23,11 +23,17 @@ int main(int argc, char * argv[]) {
     if (argc == 1){
         cout << "Give me your number of montecarlo simulations!" << endl;
         cin >> NMC;
-        cout << "Give me a temperature as well!" << endl;
+        cout << "Please give me a temperature as well" << endl;
         cin >> T;
+        cout << "Would you mind passing me a lattice size?" << endl;
+        cin >> L;
     } else if(argc == 2){
         filename = argv[1];
-        readData(filename, NMC,T,L,parallel,time_it,save_to_file,orderedSpinConfig);
+        int result = readData(filename, NMC,T,L,parallel,time_it,save_to_file,orderedSpinConfig);
+        if (result != 0){
+            cout << "Error in file at line " << result << endl;
+            return 1;
+        }
     } else if (argc == 3){
         NMC = atoi(argv[1]);
         T = atof(argv[2]);
@@ -45,7 +51,7 @@ int main(int argc, char * argv[]) {
         save_to_file = false;
         orderedSpinConfig = false;
     } else {
-        cout << "Wrong number of arguments! Must be < 5" << endl;
+        cout << "Wrong number of arguments! Must be < 4" << endl;
         return 1;
     }
 
@@ -56,28 +62,29 @@ int main(int argc, char * argv[]) {
     //    cout << dist(gen) << endl;
 
     // int seed = 0;
-    MetropolisSolver solver(L);//, seed);
+    MetropolisSolver solver(L); // can also accept a seed for its random number generators.
 
     // Generate spin matrix with random values of either -1 or 1:
-    arma::mat spin_matrix = 2*arma::randi<arma::mat>(L,L,arma::distr_param(0,1)) - 1;
-    // arma::mat spin_matrix = - arma::ones<arma::mat>(L,L);
+    arma::mat spin_matrix;
 
-    // handling boundry conditions
+    if (orderedSpinConfig){
+        spin_matrix= 2*arma::randi<arma::mat>(L,L,arma::distr_param(0,1)) - 1;
+    } else {
+        spin_matrix = - arma::ones<arma::mat>(L,L);
+    }
+
     double E = 0;
 
+    // handling boundry conditions
     for (int i=0; i<L; i++){
         for (int j=0; j<L; j++){
             E += - spin_matrix(i,j)*
                 (spin_matrix(i,periodic(j,L,1))+
-                 spin_matrix(periodic(i,L,1),j));//+
-                 //spin_matrix(i,periodic(j,L,-1))+
-                 //spin_matrix(periodic(i,L,-1),j));
+                 spin_matrix(periodic(i,L,1),j));
         }
     }
 
     double M = arma::accu(spin_matrix);
-
-
 
     arma::vec deltaE;
     arma::vec w;
@@ -90,13 +97,34 @@ int main(int argc, char * argv[]) {
     double avgEsquared = E*E;
     double avgM = M;
     double avgMsquared = M*M;
+
+    if (save_to_file){
+        // open file
+    }
+
+    if (time_it){
+        // start clock
+    }
+    if (parallel){
+        // start subprocesses
+    }
+
+    // where the magic happens
     for (int i = 0; i < NMC; i++) {
         solver.run(spin_matrix, E, M, w);
         avgE += E;
         avgEsquared += E*E;
         avgM += M;
         avgMsquared += M*M;
+        if (save_to_file){
+            // need a file to save to
+        }
     }
+    if (time_it){
+        // stop clock
+        // print clock
+    }
+
     avgE /= (double) NMC;
     avgEsquared /= (double) NMC;
     avgM /= (double) NMC;
@@ -109,6 +137,10 @@ int main(int argc, char * argv[]) {
          << avgMsquared << " "
          << specific_heat << " "
          << susceptibility << endl;
+
+    if (save_to_file){
+        // close file
+    }
 }
 
 

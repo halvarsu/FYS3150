@@ -9,6 +9,8 @@
 #include <string>
 // #include <studio.h>
 #include <ctime>
+#include <mpi.h>
+#include <random>
 
 using namespace std;
 
@@ -17,45 +19,62 @@ int main(int argc, char * argv[]) {
     double T;
     int L;
     string filename;
-    bool parallel;
     bool time_it;
     bool save_to_file;
     bool orderedSpinConfig;
+    int numProcs;
+    int localRank;
 
-    if (argc == 1){
-        cout << "Give me your number of montecarlo simulations!" << endl;
-        cin >> NMC;
-        cout << "Please give me a temperature as well" << endl;
-        cin >> T;
-        cout << "Would you mind passing me a lattice size?" << endl;
-        cin >> L;
-    } else if(argc == 2){
-        filename = argv[1];
-        int result = readData(filename, NMC,T,L,parallel,time_it,save_to_file,orderedSpinConfig);
-        if (result != 0){
-            cout << "Error in file at line " << result << endl;
+    MPI_Init (&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &localRank);
+
+    // Root process (localRank == 0) Gathers input data
+    if (localRank == 0){
+        if (argc == 1){
+            cout << "Give me your number of montecarlo simulations!" << endl;
+            cin >> NMC;
+            cout << "Please give me a temperature as well" << endl;
+            cin >> T;
+            cout << "Would you mind passing me a lattice size?" << endl;
+            cin >> L;
+            orderedSpinConfig = true;
+            time_it = false;
+            save_to_file = false;
+        } else if(argc == 2){
+            filename = argv[1];
+            int result = readData(filename, NMC,T,L,time_it,save_to_file,orderedSpinConfig);
+            if (result != 0){
+                cout << "Error in file at line " << result << endl;
+                return 1;
+            }
+        } else if (argc == 3){
+            NMC = atoi(argv[1]);
+            T = atof(argv[2]);
+            L = 2;
+            time_it = false;
+            save_to_file = false;
+            orderedSpinConfig = false;
+        } else if (argc == 4){
+            NMC = atoi(argv[1]);
+            T = atof(argv[2]);
+            L = atoi(argv[3]);
+            time_it = false;
+            save_to_file = false;
+            orderedSpinConfig = false;
+        } else {
+            cout << "Wrong number of arguments! Must be < 4" << endl;
             return 1;
         }
-    } else if (argc == 3){
-        NMC = atoi(argv[1]);
-        T = atof(argv[2]);
-        L = 2;
-        parallel = false;
-        time_it = false;
-        save_to_file = false;
-        orderedSpinConfig = false;
-    } else if (argc == 4){
-        NMC = atoi(argv[1]);
-        T = atof(argv[2]);
-        L = atoi(argv[3]);
-        parallel = false;
-        time_it = false;
-        save_to_file = false;
-        orderedSpinConfig = false;
     } else {
-        cout << "Wrong number of arguments! Must be < 4" << endl;
-        return 1;
+        time_it = false;
+        save_to_file = false;
     }
+
+    MPI_Bcast(&NMC, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&T, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&L, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&orderedSpinConfig, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 
     //    std::random_device rd;
@@ -63,16 +82,17 @@ int main(int argc, char * argv[]) {
     //    std::uniform_real_distribution<> dist(0.,1.);
     //    cout << dist(gen) << endl;
 
-    // int seed = 0;
-    MetropolisSolver solver(L); // can also accept a seed for its random number generators.
+    int seed = time(NULL) + localRank;
+    MetropolisSolver solver(L, seed); // can also accept a seed for its random number generators.
+
+    arma::arma_rng::set_seed(seed);
 
     // Generate spin matrix with random values of either -1 or 1:
     arma::mat spin_matrix;
-
     if (orderedSpinConfig){
-        spin_matrix= 2*arma::randi<arma::mat>(L,L,arma::distr_param(0,1)) - 1;
-    } else {
         spin_matrix = - arma::ones<arma::mat>(L,L);
+    } else {
+        spin_matrix= 2*arma::randi<arma::mat>(L,L,arma::distr_param(0,1)) - 1;
     }
 
     double E = 0;
@@ -107,9 +127,6 @@ int main(int argc, char * argv[]) {
     if (time_it){
         // start clock
         clock_t begin = clock();
-    }
-    if (parallel){
-        // start subprocesses
     }
 
     // where the magic happens
@@ -152,7 +169,9 @@ int main(int argc, char * argv[]) {
         outfile << susceptibility << endl;
         outfile.close()
     }
+    MPI_Finalize();
 }
+
 
 
 

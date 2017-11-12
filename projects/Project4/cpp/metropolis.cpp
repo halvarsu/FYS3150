@@ -2,12 +2,11 @@
 #include <random>
 #include "tools.h"
 
-std::random_device rd;
 
 MetropolisSolver::MetropolisSolver(int latticeLength, int seed) :
     m_latticeLength(latticeLength),
     m_n_spins(latticeLength*latticeLength),
-    m_rng(rd()),
+    m_rng(m_rd()),
     m_latticeDistribution(0,latticeLength-1),
     m_realDistribution(0.,1.)
 {
@@ -17,7 +16,7 @@ MetropolisSolver::MetropolisSolver(int latticeLength, int seed) :
 MetropolisSolver::MetropolisSolver(int latticeLength) :
     m_latticeLength(latticeLength),
     m_n_spins(latticeLength*latticeLength),
-    m_rng(rd()),
+    m_rng(m_rd()),
     m_latticeDistribution(0,latticeLength-1),
     m_realDistribution(0.,1.)
 {

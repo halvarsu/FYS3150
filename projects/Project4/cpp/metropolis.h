@@ -3,7 +3,6 @@
 
 #include <random>
 #include <armadillo>
-#include <omp.h>
 
 class MetropolisSolver
 {
@@ -19,6 +18,7 @@ private:
     int m_latticeLength;
     int m_n_spins;      // = latticeLength^2
     std::mt19937 m_rng;
+    std::random_device m_rd;
     std::uniform_int_distribution<> m_latticeDistribution;
     std::uniform_real_distribution<> m_realDistribution;
 };

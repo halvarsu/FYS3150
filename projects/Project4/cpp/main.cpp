@@ -13,7 +13,7 @@
 #include <random>
 
 using namespace std;
-void initialize(double T, arma::mat &spin_matrix, double &E, double &M, arma::vec &w, bool orderedSpinConfig);
+void initialize(double T, arma::mat &spin_matrix,int L, double &E, double &M, arma::vec &w, bool orderedSpinConfig);
 
 int main(int argc, char * argv[]) {
     int NMC;
@@ -32,6 +32,8 @@ int main(int argc, char * argv[]) {
     MPI_Init (&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &nodeCount);
     MPI_Comm_rank(MPI_COMM_WORLD, &localRank);
+
+    string me = "(Process " + to_string(localRank) + ") ";
 
     // Root process (localRank == 0) Gathers input data
     L = 2;
@@ -66,10 +68,10 @@ int main(int argc, char * argv[]) {
         if (argc == 3){
             Tstart = atof(argv[3]);;
             Tstop = Tstart + 1;
-            Tstep = 1
+            Tstep = 1;
         }
         if (argc == 4){
-            cout << "Wrong number of arguments! Can't be 5 (must define only Tstart or all three of Tstart, Tstop and Tstep)."
+            cout << "Wrong number of arguments! Can't be 5 (must define only Tstart or all three of Tstart, Tstop and Tstep).";
             return 1;
         }
         if (argc > 4){
@@ -110,19 +112,23 @@ int main(int argc, char * argv[]) {
     int displacements[nodeCount];
     int expPerNodeBase = nTemps / nodeCount;
     int expRest = nTemps / nodeCount;
+
+    // int localExperimentCount = expPerNodeBase + (int) (localRank < expRest);
+
     for (int i = 0; i < nodeCount; i ++){
         experimentsPerNode[i] = expPerNodeBase + (int) (i < expRest);
         displacements[i] = sum;
         sum += experimentsPerNode[i];
     }
 
-    double localTemps[experimentsPerNode[localRank]];
+    int localExperiments = experimentsPerNode[localRank];
+    double localTemps[localExperiments];
 
-    MPI_Scatterv(&temperatures, &experimentsPerNode, &displacements, MPI_DOUBLE,&localTemps ,1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    cout << me << localExperiments<< endl;
+    MPI_Scatterv(&temperatures, experimentsPerNode, displacements, MPI_DOUBLE,&localTemps ,localExperiments, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&NMC, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&L, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&orderedSpinConfig, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
 
     //    std::random_device rd;
     //    std::mt19937 gen(rd());
@@ -137,78 +143,96 @@ int main(int argc, char * argv[]) {
     arma::mat spin_matrix;
     double E;
     double M;
+    double T;
     arma::vec w;
     // Loop over local temperatures
-    for(int j; j < experimentsPerNode[localRank]; j ++){
+    double avgE[localExperiments];
+    double avgEsquared[localExperiments];
+    double avgM[localExperiments];
+    double avgMsquared[localExperiments];
+    if (localRank == 0  && time_it) {
+        startTime = MPI_Wtime();
+    }
+    for (int j; j < localExperiments; j ++){
         T = localTemps[j];
-    }
-    //	Initialize spins, energies, magnetization and transfer probabilities for a given T
-    initialize(T, &spin_matrix, &E, &M, &w, orderedSpinConfig);
-    double avgE = E;
-    double avgEsquared = E*E;
-    double avgM = M;
-    double avgMsquared = M*M;
+        //	Initialize spins, energies, magnetization and transfer probabilities for a given T
+        initialize(T, spin_matrix, L, E, M, w, orderedSpinConfig);
 
-    if (localRank == 0 ){
-        if (save_to_file)	{ outfile.open("out/"+filename); 	}
-        if (time_it) 		{ startTime = MPI_Wtime(); 			}
-    }
-
-    // where the magic happens
-    for (int i = 0; i < NMC; i++) {
-        solver.run(spin_matrix, E, M, w);
-        avgE += E;
-        avgEsquared += E*E;
-        avgM += M;
-        avgMsquared += M*M;
-        if (localRank == 0 && save_to_file){
-            outfile << i << " " << T << " " << avgE << " " << avgM <<" "
-            << avgEsquared << " " << avgMsquared << endl;
+        // where the magic happens
+        for (int i = 0; i < NMC; i++) {
+            solver.run(spin_matrix, E, M, w);
+            avgE[j] += E;
+            avgEsquared[j] += E*E;
+            avgM[j] += M;
+            avgMsquared[j] += M*M;
         }
+        avgE[j] 	   /= (double) NMC;
+        avgEsquared[j] /= (double) NMC;
+        avgM[j] 	   /= (double) NMC;
+        avgMsquared[j] /= (double) NMC;
     }
+
+
     if (localRank == 0 && time_it){
         end = clock();
         double time_elapsed = double(end-begin)/CLOCKS_PER_SEC;
         cout << "TIMEUSED: " << time_elapsed << endl;
     }
 
-    avgE /= (double) NMC;
-    avgEsquared /= (double) NMC;
-    avgM /= (double) NMC;
-    avgMsquared /= (double) NMC;
-
-    double energies[nodeCount];
-    double magnetization[nodeCount];
-    double energiesSquared[nodeCount];
-    double magnetizationSquared[nodeCount];
+    double energies[nTemps];
+    double magnetization[nTemps];
+    double energiesSquared[nTemps];
+    double magnetizationSquared[nTemps];
 
     // Gather results to one thread for printing (and timing (need to know when every thread is done))
-    MPI_Gather(&avgE, 1, MPI_DOUBLE, &energies,1,MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Gather(&avgM, 1, MPI_DOUBLE, &magnetization,1,MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Gather(&avgEsquared, 1, MPI_DOUBLE, &energiesSquared,1,MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Gather(&avgMsquared, 1, MPI_DOUBLE, &magnetizationSquared,1,MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    //////////////////////////////////////////////////////////////
+    cout << nTemps << endl;
+    for (int i = 0; i < localExperiments; i ++ ){
+        cout << me << "avgE["<<i<<"] = " << avgE[i] << endl;
+    }
+    MPI_Gatherv(&avgE, localExperiments, MPI_DOUBLE, &energies, experimentsPerNode, displacements,
+                MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gatherv(&avgM, localExperiments, MPI_DOUBLE, &magnetization, experimentsPerNode, displacements,
+                MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gatherv(&avgEsquared, localExperiments, MPI_DOUBLE, &energiesSquared, experimentsPerNode,
+                displacements, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gatherv(&avgMsquared, localExperiments, MPI_DOUBLE, &magnetizationSquared, experimentsPerNode,
+                displacements, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     if (localRank == 0){
         double specific_heat;
         double susceptibility;
-
-        for  (int i = 0; i < nodeCount; i++){
-            avgE = energies[i];
-            avgM = magnetization[i];
-            avgEsquared = energiesSquared[i];
-            avgMsquared = magnetizationSquared[i];
-
-            specific_heat = 1/(T*T)*(avgEsquared - avgE*avgE);
-            susceptibility = (1/T)*(avgMsquared - avgM*avgM);
-            cout << avgE << " "
-                 << avgM << " "
-                 << avgEsquared << " "
-                 << avgMsquared << " "
-                 << specific_heat << " "
-                 << susceptibility << endl;
+        if(save_to_file){
+            outfile.open("out/"+filename);
         }
 
-        if (save_to_file){
+        double EforPrinting;
+        double MforPrinting;
+        double ESquaredforPrinting;
+        double MSquaredforPrinting;
+
+        for  (int i = 0; i < nTemps; i++){
+            EforPrinting = energies[i];
+            MforPrinting = magnetization[i];
+            ESquaredforPrinting= energiesSquared[i];
+            MSquaredforPrinting= magnetizationSquared[i];
+            specific_heat = 1/(T*T)*(ESquaredforPrinting - EforPrinting*EforPrinting);
+            susceptibility = (1/T)*(MSquaredforPrinting - MforPrinting*MforPrinting);
+
+            cout << EforPrinting << " "
+                 << MforPrinting << " "
+                 << ESquaredforPrinting<< " "
+                 << MSquaredforPrinting<< " "
+                 << specific_heat << " "
+                 << susceptibility << endl;
+
+            if (save_to_file){
+                outfile << i << " " << T << " " << avgE << " " << avgM <<" "
+                << avgEsquared << " " << avgMsquared << endl;
+            }
+        }
+
+        if (save_to_file)	{
             outfile.close();
         }
     }
@@ -216,7 +240,7 @@ int main(int argc, char * argv[]) {
 }
 
 
-void initialize(double T, arma::mat &spin_matrix, double &E, double &M, arma::vec &w, bool orderedSpinConfig){
+void initialize(double T, arma::mat &spin_matrix, int L, double &E, double &M, arma::vec &w, bool orderedSpinConfig){
     if (orderedSpinConfig){
         spin_matrix = - arma::ones<arma::mat>(L,L);
     } else {
@@ -234,7 +258,8 @@ void initialize(double T, arma::mat &spin_matrix, double &E, double &M, arma::ve
     }
 
     M = arma::accu(spin_matrix);
-    arma::vec deltaE << -8 << -4 << 0 << 4 << 8;
+    arma::vec deltaE;
+    deltaE << -8 << -4 << 0 << 4 << 8;
     w = arma::exp(- deltaE/T);
 }
 

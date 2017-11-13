@@ -8,9 +8,9 @@ int readData(string filename, int& NMC, double & Tstart, double& Tstop, double& 
     int temp;
     if(!(infile >> NMC)) { return 1;};
 
-    if(!(infile >> Tstart >> Tstop >> Tstep)) { return 3;};
+    if(!(infile >> Tstart >> Tstop >> Tstep)) { return 2;};
 
-    if(!(infile >> L)) { return 2;};
+    if(!(infile >> L)) { return 3;};
 
     if(!(infile >> temp)) { return 4;};
     timeit = (bool) temp;

@@ -31,6 +31,10 @@ int main(int argc, char * argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &localRank);
 
     // Root process (localRank == 0) Gathers input data
+    L = 2;
+    time_it = false;
+    save_to_file = false;
+    orderedSpinConfig = false;
     if (localRank == 0){
         if (argc == 1){
             cout << "Give me your number of montecarlo simulations!" << endl;
@@ -40,8 +44,6 @@ int main(int argc, char * argv[]) {
             cout << "Would you mind passing me a lattice size?" << endl;
             cin >> L;
             orderedSpinConfig = true;
-            time_it = false;
-            save_to_file = false;
         } else if(argc == 2){
             filename = argv[1];
             int result = readData(filename, NMC,T,L,time_it,save_to_file,orderedSpinConfig);
@@ -49,22 +51,25 @@ int main(int argc, char * argv[]) {
                 cout << "Error in file at line " << result << endl;
                 return 1;
             }
-        } else if (argc == 3){
+        }
+        if (argc > 2){
             NMC = atoi(argv[1]);
             T = atof(argv[2]);
-            L = 2;
-            time_it = false;
-            save_to_file = false;
-            orderedSpinConfig = false;
-        } else if (argc == 4){
-            NMC = atoi(argv[1]);
-            T = atof(argv[2]);
+        }
+        if (argc > 3){
             L = atoi(argv[3]);
-            time_it = false;
-            save_to_file = false;
-            orderedSpinConfig = false;
-        } else {
-            cout << "Wrong number of arguments! Must be < 4" << endl;
+        }
+        if (argc > 4){
+            time_it = (bool) atoi(argv[4]);
+        }
+        if (argc > 5){
+            save_to_file = (bool) atoi(argv[5]);
+        }
+        if (argc > 6){
+            orderedSpinConfig = (bool) atoi(argv[6]);
+        }
+        if (argc > 7){
+            cout << "Wrong number of arguments! Must be < 7" << endl;
             return 1;
         }
     } else {

@@ -24,6 +24,7 @@ int main(int argc, char * argv[]) {
     bool orderedSpinConfig;
     int numProcs;
     int localRank;
+    ofstream outfile;
 
     MPI_Init (&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
@@ -119,14 +120,17 @@ int main(int argc, char * argv[]) {
     double avgEsquared = E*E;
     double avgM = M;
     double avgMsquared = M*M;
+    clock_t begin, end;
 
-    if (save_to_file){
-        // open file
+    if (localRank == 0 && save_to_file){
+        cout << filename << endl;
+        outfile.open("out/"+filename);
     }
 
-    if (time_it){
+    if (localRank == 0 && time_it){
         // start clock
-        clock_t begin = clock();
+        double start = MPI_Wtime();
+        begin = clock();
     }
 
     // where the magic happens
@@ -136,38 +140,56 @@ int main(int argc, char * argv[]) {
         avgEsquared += E*E;
         avgM += M;
         avgMsquared += M*M;
-        if (save_to_file){
-            // need a file to save to
+        if (localRank == 0 && save_to_file){
+            outfile << i << " " << T << " " << avgE << " " << avgM <<" "
+            << avgEsquared << " " << avgMsquared << endl;
         }
-    }
-    if (time_it){
-        clock_t end = clock();
-        double time_elapsed = double(end-begin)/CLOCKS_PER_SEC;
-        // print clock
     }
 
     avgE /= (double) NMC;
     avgEsquared /= (double) NMC;
     avgM /= (double) NMC;
     avgMsquared /= (double) NMC;
-    double specific_heat = 1/(T*T)*(avgEsquared - avgE*avgE);
-    double susceptibility = (1/T)*(avgMsquared - avgM*avgM);
-    cout << avgE << " "
-         << avgM << " "
-         << avgEsquared << " "
-         << avgMsquared << " "
-         << specific_heat << " "
-         << susceptibility << endl;
 
-    if (save_to_file){
-        outfile.open(out/filename);
-        outfile << avgE << endl;
-        outfile << avgM << endl;
-        outfile << avgEsquared << endl;
-        outfile << avgMsquared << endl;
-        outfile << specific_heat << endl;
-        outfile << susceptibility << endl;
-        outfile.close()
+    double energies[numProcs];
+    double magnetization[numProcs];
+    double energiesSquared[numProcs];
+    double magnetizationSquared[numProcs];
+
+    // Gather results to one thread for printing (and timing (need to know when every thread is done))
+    MPI_Gather(&avgE, 1, MPI_DOUBLE, &energies,1,MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gather(&avgM, 1, MPI_DOUBLE, &magnetization,1,MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gather(&avgEsquared, 1, MPI_DOUBLE, &energiesSquared,1,MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gather(&avgMsquared, 1, MPI_DOUBLE, &magnetizationSquared,1,MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+    if (localRank == 0){
+        if (time_it){
+            end = clock();
+            double time_elapsed = double(end-begin)/CLOCKS_PER_SEC;
+            cout << "TIMEUSED: " << time_elapsed << endl;
+        }
+        double specific_heat;
+
+        double susceptibility;
+        for  (int i = 0; i < numProcs; i++){
+            avgE = energies[i];
+            avgM = magnetization[i];
+            avgEsquared = energiesSquared[i];
+            avgMsquared = magnetizationSquared[i];
+
+            specific_heat = 1/(T*T)*(avgEsquared - avgE*avgE);
+            susceptibility = (1/T)*(avgMsquared - avgM*avgM);
+            cout << avgE << " "
+                 << avgM << " "
+                 << avgEsquared << " "
+                 << avgMsquared << " "
+                 << specific_heat << " "
+                 << susceptibility << endl;
+        }
+
+        if (save_to_file){
+            outfile.close();
+        }
     }
     MPI_Finalize();
 }

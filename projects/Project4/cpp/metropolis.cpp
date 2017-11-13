@@ -3,7 +3,7 @@
 #include "tools.h"
 
 
-MetropolisSolver::MetropolisSolver(int latticeLength, int seed) :
+MetropolisSolver::MetropolisSolver(int latticeLength, double seed) :
     m_latticeLength(latticeLength),
     m_n_spins(latticeLength*latticeLength),
     m_rng(m_rd()),

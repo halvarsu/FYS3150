@@ -7,7 +7,7 @@
 class MetropolisSolver
 {
 public:
-    MetropolisSolver(int n_spins, int seed);
+    MetropolisSolver(int n_spins, double seed);
     MetropolisSolver(int n_spins);
 
     //void run(arma::mat & spin_matrix, double & E, double &M, arma::vec w, bool parallel);

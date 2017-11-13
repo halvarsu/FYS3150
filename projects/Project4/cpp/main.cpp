@@ -83,13 +83,14 @@ int main(int argc, char * argv[]) {
     //    std::uniform_real_distribution<> dist(0.,1.);
     //    cout << dist(gen) << endl;
 
-    int seed = time(NULL) + localRank;
-    MetropolisSolver solver(L, seed); // can also accept a seed for its random number generators.
+    double seed = (- MPI_Wtime() - localRank) * 1e9;
 
+    MetropolisSolver solver(L, seed); // can also accept a seed for its random number generators.
     arma::arma_rng::set_seed(seed);
 
     // Generate spin matrix with random values of either -1 or 1:
     arma::mat spin_matrix;
+
     if (orderedSpinConfig){
         spin_matrix = - arma::ones<arma::mat>(L,L);
     } else {

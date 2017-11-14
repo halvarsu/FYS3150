@@ -64,10 +64,10 @@ int main(int argc, char * argv[]) {
         }
         if (argc > 2){
             NMC = atoi(argv[1]);
+            Tstart = atof(argv[2]);;
         }
         if (argc == 3){
-            Tstart = atof(argv[3]);;
-            Tstop = Tstart + 1;
+            Tstop = Tstart;
             Tstep = 1;
         }
         if (argc == 4){
@@ -75,21 +75,21 @@ int main(int argc, char * argv[]) {
             return 1;
         }
         if (argc > 4){
-            Tstart = atof(argv[3]);
-            Tstop = atof(argv[4]);
-            Tstep = atof(argv[5]);
+            Tstart = atof(argv[2]);
+            Tstop = atof(argv[3]);
+            Tstep = atof(argv[4]);
         }
         if (argc > 5){
-            L = atoi(argv[3]);
+            L = atoi(argv[5]);
         }
         if (argc > 6){
-            time_it = (bool) atoi(argv[4]);
+            time_it = (bool) atoi(argv[6]);
         }
         if (argc > 7){
-            save_to_file = (bool) atoi(argv[5]);
+            save_to_file = (bool) atoi(argv[7]);
         }
         if (argc > 8){
-            orderedSpinConfig = (bool) atoi(argv[6]);
+            orderedSpinConfig = (bool) atoi(argv[8]);
         }
         if (argc > 9){
             cout << "Wrong number of arguments! Must be <= 8" << endl;
@@ -100,18 +100,26 @@ int main(int argc, char * argv[]) {
         save_to_file = false;
     }
 
+    MPI_Bcast(&Tstop, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&Tstart, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&Tstep, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&NMC, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&L, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&orderedSpinConfig, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
     // Initialize temperatures
-    int nTemps = (int)((Tstop-Tstart)/Tstep);
+    int nTemps = (int) ceil((Tstop-Tstart)/Tstep) + 1;
     double temperatures[nTemps];
     for(int i = 0; i < nTemps; i++){
         temperatures[i] = Tstart + Tstep*i;
     }
 
+    // cout << me << " NMC: " << NMC << " nt: " << nTemps << endl;
     int sum = 0;
     int experimentsPerNode[nodeCount];
     int displacements[nodeCount];
     int expPerNodeBase = nTemps / nodeCount;
-    int expRest = nTemps / nodeCount;
+    int expRest = nTemps % nodeCount;
 
     // int localExperimentCount = expPerNodeBase + (int) (localRank < expRest);
 
@@ -124,11 +132,7 @@ int main(int argc, char * argv[]) {
     int localExperiments = experimentsPerNode[localRank];
     double localTemps[localExperiments];
 
-    cout << me << localExperiments<< endl;
     MPI_Scatterv(&temperatures, experimentsPerNode, displacements, MPI_DOUBLE,&localTemps ,localExperiments, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&NMC, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&L, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&orderedSpinConfig, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     //    std::random_device rd;
     //    std::mt19937 gen(rd());
@@ -157,6 +161,10 @@ int main(int argc, char * argv[]) {
         T = localTemps[j];
         //	Initialize spins, energies, magnetization and transfer probabilities for a given T
         initialize(T, spin_matrix, L, E, M, w, orderedSpinConfig);
+        avgE[j] 	   =0;
+        avgEsquared[j] = 0;
+        avgM[j] 	   =0;
+        avgMsquared[j] = 0;
 
         // where the magic happens
         for (int i = 0; i < NMC; i++) {
@@ -166,10 +174,10 @@ int main(int argc, char * argv[]) {
             avgM[j] += M;
             avgMsquared[j] += M*M;
         }
-        avgE[j] 	   /= (double) NMC;
-        avgEsquared[j] /= (double) NMC;
-        avgM[j] 	   /= (double) NMC;
-        avgMsquared[j] /= (double) NMC;
+        avgE[j] 	   =  avgE[j]/ (double) NMC;
+        avgEsquared[j] =  avgEsquared[j] / (double) NMC;
+        avgM[j] 	   =  avgM[j] 	   / (double) NMC;
+        avgMsquared[j] =  avgMsquared[j] / (double) NMC;
     }
 
 
@@ -186,10 +194,12 @@ int main(int argc, char * argv[]) {
 
     // Gather results to one thread for printing (and timing (need to know when every thread is done))
     //////////////////////////////////////////////////////////////
-    cout << nTemps << endl;
-    for (int i = 0; i < localExperiments; i ++ ){
-        cout << me << "avgE["<<i<<"] = " << avgE[i] << endl;
-    }
+//    for (int i = 0; i < localExperiments; i ++ ){
+//        cout << me << "avgE["<<i<<"] = " << avgE[i] << endl;
+//        cout << me << "avgM["<<i<<"] = " << avgM[i] << endl;
+//        cout << me << "avgE^2["<<i<<"] = " << avgEsquared[i] << endl;
+//        cout << me << "avgM^2["<<i<<"] = " << avgMsquared[i] << endl;
+//    }
     MPI_Gatherv(&avgE, localExperiments, MPI_DOUBLE, &energies, experimentsPerNode, displacements,
                 MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Gatherv(&avgM, localExperiments, MPI_DOUBLE, &magnetization, experimentsPerNode, displacements,

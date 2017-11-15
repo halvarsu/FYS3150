@@ -29,6 +29,7 @@ int main(int argc, char * argv[]) {
     int localRank;
     ofstream outfile;
     clock_t begin, end;
+    int verbose;
 
     MPI_Init (&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &nodeCount);
@@ -95,7 +96,10 @@ int main(int argc, char * argv[]) {
             save_to_file = true;
         }
         if (argc > 9){
-            cout << "Wrong number of arguments! Must be <= 8" << endl;
+            verbose = true;
+        }
+        if (argc > 10){
+            cout << "Wrong number of arguments! Must be <= 9" << endl;
             return 1;
         }
     } else {
@@ -122,7 +126,7 @@ int main(int argc, char * argv[]) {
 
     double temperatures[nTemps];
     for(int i = 0; i < nTemps; i++){
-        temperatures[i] = Tstart + dT;
+        temperatures[i] = Tstart + dT*i;
     }
 
     int sum = 0;
@@ -187,6 +191,9 @@ int main(int argc, char * argv[]) {
         avgM[j] 	   =  avgM[j] 	   / (double) NMC;
         avgMsquared[j] =  avgMsquared[j] / (double) NMC;
         localAcceptedPerRun[j] = accepted;
+        if (verbose){
+            cout << me << "T = " << T << " done";
+        }
     }
 
 

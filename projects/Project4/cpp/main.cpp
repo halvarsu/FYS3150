@@ -89,11 +89,11 @@ int main(int argc, char * argv[]) {
             time_it = (bool) atoi(argv[6]);
         }
         if (argc > 7){
-            inFilename = (string) argv[7];
-            save_to_file = true;
+            orderedSpinConfig = (bool) atoi(argv[8]);
         }
         if (argc > 8){
-            orderedSpinConfig = (bool) atoi(argv[8]);
+            inFilename = (string) argv[7];
+            save_to_file = true;
         }
         if (argc > 9){
             cout << "Wrong number of arguments! Must be <= 8" << endl;

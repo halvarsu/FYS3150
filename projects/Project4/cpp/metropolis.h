@@ -11,7 +11,7 @@ public:
     MetropolisSolver(int n_spins);
 
     //void run(arma::mat & spin_matrix, double & E, double &M, arma::vec w, bool parallel);
-    void run(arma::mat &spin_matrix, double & E, double &M, arma::vec w);
+    void run(arma::mat &spin_matrix, double & E, double &M, arma::vec w, int&totalAccepted);
     int rand_coord();
     double rand();
 private:

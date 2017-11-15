@@ -3,12 +3,12 @@
 
 using namespace std;
 
-int readData(string filename, int& NMC, double & Tstart, double& Tstop, double& Tstep, int &L, bool & timeit, bool & saveToFile, bool & orderedSpinConfig){
+int readData(string filename, int& NMC, double & Tstart, double& Tstop,int& nTemps, int &L, bool & timeit, bool & saveToFile, bool & orderedSpinConfig){
     std::ifstream infile(filename);
     int temp;
     if(!(infile >> NMC)) { return 1;};
 
-    if(!(infile >> Tstart >> Tstop >> Tstep)) { return 2;};
+    if(!(infile >> Tstart >> Tstop >> nTemps)) { return 2;};
 
     if(!(infile >> L)) { return 3;};
 

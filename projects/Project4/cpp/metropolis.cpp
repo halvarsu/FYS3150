@@ -32,7 +32,7 @@ double MetropolisSolver::rand(){
     return m_realDistribution(m_rng);
 }
 
-void MetropolisSolver::run(arma::mat &spin_matrix, double & E, double &M, arma::vec w){
+void MetropolisSolver::run(arma::mat &spin_matrix, double & E, double &M, arma::vec w, int&accepted){
     // loop over all spin
     for (int i= 0; i < m_n_spins; i++){
         // Find random position
@@ -50,6 +50,7 @@ void MetropolisSolver::run(arma::mat &spin_matrix, double & E, double &M, arma::
             // update energy and magnetization
             M += (double) 2*spin_matrix(iy,ix);
             E += (double) deltaE;
+            accepted+=1;
         }
     }
 //    M = M/(m_n_spins*m_n_spins);

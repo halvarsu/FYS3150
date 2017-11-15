@@ -14,13 +14,15 @@
 
 using namespace std;
 void initialize(double T, arma::mat &spin_matrix,int L, double &E, double &M, arma::vec &w, bool orderedSpinConfig);
+string getFilenameBase(string filename);
 
 int main(int argc, char * argv[]) {
     int NMC;
     double Tstart, Tstop, Tstep;
     double startTime, stopTime;
     int L;
-    string filename;
+    string inFilename = "in/PLACEHOLDER.txt";
+    string outFilename;
     bool time_it;
     bool save_to_file;
     bool orderedSpinConfig;
@@ -44,19 +46,20 @@ int main(int argc, char * argv[]) {
         if (argc == 1){
             cout << "Give me your number of montecarlo simulations!" << endl;
             cin >> NMC;
-            cout << "Please give me temperature start, stop and step as well" << endl;
+            cout << "Give me temperature start, stop and step as well!" << endl;
             cout << "Start: ";
             cin >> Tstart;
             cout << "Stop: ";
             cin >> Tstop;
             cout << "Step: ";
             cin >> Tstep;
-            cout << "Would you mind passing me a lattice size?" << endl;
+            cout << "Thank you! Sorry for being rude. Would you mind passing me a lattice size?" << endl;
             cin >> L;
+            cout << "Again thank you. Have a beautful phase transitioning day!" << endl;
             orderedSpinConfig = true;
         } else if(argc == 2){
-            filename = argv[1];
-            int result = readData(filename, NMC,Tstart, Tstop, Tstep,L,time_it,save_to_file,orderedSpinConfig);
+            inFilename = argv[1];
+            int result = readData(inFilename, NMC,Tstart, Tstop, Tstep,L,time_it,save_to_file,orderedSpinConfig);
             if (result != 0){
                 cout << "Error in file at line " << result << endl;
                 return 1;
@@ -71,7 +74,7 @@ int main(int argc, char * argv[]) {
             Tstep = 1;
         }
         if (argc == 4){
-            cout << "Wrong number of arguments! Can't be 5 (must define only Tstart or all three of Tstart, Tstop and Tstep).";
+            cout << "Wrong number of arguments! Can't be 3 (must define only Tstart or all three of Tstart, Tstop and Tstep).";
             return 1;
         }
         if (argc > 4){
@@ -86,7 +89,8 @@ int main(int argc, char * argv[]) {
             time_it = (bool) atoi(argv[6]);
         }
         if (argc > 7){
-            save_to_file = (bool) atoi(argv[7]);
+            inFilename = (string) argv[7];
+            save_to_file = true;
         }
         if (argc > 8){
             orderedSpinConfig = (bool) atoi(argv[8]);
@@ -99,6 +103,8 @@ int main(int argc, char * argv[]) {
         time_it = false;
         save_to_file = false;
     }
+
+    outFilename = "out/" + getFilenameBase(inFilename) + ".dat";
 
     MPI_Bcast(&Tstop, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&Tstart, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -134,11 +140,6 @@ int main(int argc, char * argv[]) {
 
     MPI_Scatterv(&temperatures, experimentsPerNode, displacements, MPI_DOUBLE,&localTemps ,localExperiments, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    //    std::random_device rd;
-    //    std::mt19937 gen(rd());
-    //    std::uniform_real_distribution<> dist(0.,1.);
-    //    cout << dist(gen) << endl;
-
     double seed = (- MPI_Wtime() - localRank) * 1e9;
     MetropolisSolver solver(L, seed); // can also accept a seed for its random number generators.
     arma::arma_rng::set_seed(seed);
@@ -154,6 +155,8 @@ int main(int argc, char * argv[]) {
     double avgEsquared[localExperiments];
     double avgM[localExperiments];
     double avgMsquared[localExperiments];
+    int localAcceptedPerRun[localExperiments];
+    int accepted;
     if (localRank == 0  && time_it) {
         startTime = MPI_Wtime();
     }
@@ -165,10 +168,11 @@ int main(int argc, char * argv[]) {
         avgEsquared[j] = 0;
         avgM[j] 	   =0;
         avgMsquared[j] = 0;
+        accepted = 0;
 
         // where the magic happens
         for (int i = 0; i < NMC; i++) {
-            solver.run(spin_matrix, E, M, w);
+            solver.run(spin_matrix, E, M, w, accepted);
             avgE[j] += E;
             avgEsquared[j] += E*E;
             avgM[j] += M;
@@ -178,6 +182,7 @@ int main(int argc, char * argv[]) {
         avgEsquared[j] =  avgEsquared[j] / (double) NMC;
         avgM[j] 	   =  avgM[j] 	   / (double) NMC;
         avgMsquared[j] =  avgMsquared[j] / (double) NMC;
+        localAcceptedPerRun[j] = accepted;
     }
 
 
@@ -187,19 +192,15 @@ int main(int argc, char * argv[]) {
         cout << "TIMEUSED: " << time_elapsed << endl;
     }
 
+    // Global lists, only relevant for node 0
     double energies[nTemps];
     double magnetization[nTemps];
     double energiesSquared[nTemps];
     double magnetizationSquared[nTemps];
+    double TValues[nTemps];
+    int acceptedValues[nTemps];
 
     // Gather results to one thread for printing (and timing (need to know when every thread is done))
-    //////////////////////////////////////////////////////////////
-//    for (int i = 0; i < localExperiments; i ++ ){
-//        cout << me << "avgE["<<i<<"] = " << avgE[i] << endl;
-//        cout << me << "avgM["<<i<<"] = " << avgM[i] << endl;
-//        cout << me << "avgE^2["<<i<<"] = " << avgEsquared[i] << endl;
-//        cout << me << "avgM^2["<<i<<"] = " << avgMsquared[i] << endl;
-//    }
     MPI_Gatherv(&avgE, localExperiments, MPI_DOUBLE, &energies, experimentsPerNode, displacements,
                 MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Gatherv(&avgM, localExperiments, MPI_DOUBLE, &magnetization, experimentsPerNode, displacements,
@@ -208,26 +209,32 @@ int main(int argc, char * argv[]) {
                 displacements, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Gatherv(&avgMsquared, localExperiments, MPI_DOUBLE, &magnetizationSquared, experimentsPerNode,
                 displacements, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gatherv(&localTemps, localExperiments, MPI_DOUBLE, &TValues, experimentsPerNode,
+                displacements, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gatherv(&localAcceptedPerRun, localExperiments, MPI_INT, &acceptedValues, experimentsPerNode,
+                displacements, MPI_INT, 0, MPI_COMM_WORLD);
 
     if (localRank == 0){
-        double specific_heat;
-        double susceptibility;
         if(save_to_file){
-            outfile.open("out/"+filename);
+            outfile.open(outFilename, ios::binary);
         }
 
+        double specific_heat;
+        double susceptibility;
         double EforPrinting;
         double MforPrinting;
         double ESquaredforPrinting;
         double MSquaredforPrinting;
 
         for  (int i = 0; i < nTemps; i++){
+            T = TValues[i];
             EforPrinting = energies[i];
             MforPrinting = magnetization[i];
             ESquaredforPrinting= energiesSquared[i];
             MSquaredforPrinting= magnetizationSquared[i];
             specific_heat = 1/(T*T)*(ESquaredforPrinting - EforPrinting*EforPrinting);
             susceptibility = (1/T)*(MSquaredforPrinting - MforPrinting*MforPrinting);
+            accepted = acceptedValues[i];
 
             cout << EforPrinting << " "
                  << MforPrinting << " "
@@ -237,16 +244,28 @@ int main(int argc, char * argv[]) {
                  << susceptibility << endl;
 
             if (save_to_file){
-                outfile << i << " " << T << " " << avgE << " " << avgM <<" "
-                << avgEsquared << " " << avgMsquared << endl;
+                outfile << i << " " << T << " " << EforPrinting << " " << MforPrinting <<" "
+                << ESquaredforPrinting << " " << MSquaredforPrinting << " " << specific_heat << " "
+                << susceptibility << " " << accepted << endl;
             }
         }
 
         if (save_to_file)	{
             outfile.close();
+            cout << "Data written to " << outFilename << endl;
         }
     }
     MPI_Finalize();
+}
+
+string getFilenameBase(string filename){
+    // Exchanges in/ with out/ and removes .txt. If no in/, just prepends an out/
+    // this works because if no delimiter found (aka no in/), we want (and get) pos=0, else we want s.find()+3
+    int start = filename.find("in/") + 1;
+    int stop = filename.find(".txt");
+    if (start != 0) { start += 2; }
+    if (stop != -1) { stop -= start; }
+    return filename.substr(start, stop);
 }
 
 
@@ -272,6 +291,7 @@ void initialize(double T, arma::mat &spin_matrix, int L, double &E, double &M, a
     deltaE << -8 << -4 << 0 << 4 << 8;
     w = arma::exp(- deltaE/T);
 }
+
 
 
 

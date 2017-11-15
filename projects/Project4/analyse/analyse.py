@@ -105,7 +105,7 @@ def process_data(data):
     return np.array(sim_data).swapaxes(0,1).swapaxes(1,2)
 
 def simulate4c(args):
-    montecarlosims = np.logspace(3,6,200)
+    montecarlosims = np.logspace(3,4,2)
     # data = np.zeros((6,len(montecarlosims)))
     string_data = []
     width = 40
@@ -114,9 +114,10 @@ def simulate4c(args):
     Tstop = 2.4
     nStep = 2
     Tstep = (Tstop-Tstart)/(nStep - 1) if nStep > 1 else 0
+    temperatures = np.linspace(Tstart, Tstop, nStep)
     L = 20
 
-    run_cmd = "mpirun -np {}".format(args.nodes) if args.mpi else ""
+    run_cmd = "mpirun -np {} ".format(args.nodes) if args.mpi else ""
     run_cmd += "build/Project4 {} {} {} {} {}".format("{}",
             Tstart, Tstop, Tstep, L)
 
@@ -128,18 +129,20 @@ def simulate4c(args):
         print("time used: ", time.time() - prev)
         string_data.append(out)
     data = process_data(string_data)
-    return data
+    return data, temperatures 
 
 def graphical(args):
     if args.load:
-        data = np.load("analyse/4c.npy")
+        data= np.load("analyse/4c.npy")
     else:
-        data = simulate4c(args)
-        np.save("analyse/4c")
+        
+        data, temperatures  = simulate4c(args)
+        np.save("analyse/4c",data)
+        np.save("analyse/4cTemperatures",temperatures)
 
     fig1, [ax1,ax2,ax3,ax4] = plt.subplots(4)
     fig2, [ax5,ax6] = plt.subplots(2,sharex=True)
-    for T, temperated_data in zip(np.linspace(Tstart, Tstop, nStep),data):
+    for T, temperated_data in zip(temperatures,data):
         ax1.scatter(montecarlosims,temperated_data[2],s=5, label=r'$T = %.2f$' %T)
         ax2.scatter(montecarlosims,temperated_data[3],s=5, label=r'$T = %.2f$' %T)
         ax3.scatter(montecarlosims,temperated_data[4],s=5, label=r'$T = %.2f$' %T)

@@ -88,10 +88,10 @@ int main(int argc, char * argv[]) {
             time_it = (bool) atoi(argv[6]);
         }
         if (argc > 7){
-            orderedSpinConfig = (bool) atoi(argv[8]);
+            orderedSpinConfig = (bool) atoi(argv[7]);
         }
         if (argc > 8){
-            inFilename = (string) argv[7];
+            inFilename = (string) argv[8];
             save_to_file = true;
         }
         if (argc > 9){
@@ -125,7 +125,6 @@ int main(int argc, char * argv[]) {
         temperatures[i] = Tstart + dT;
     }
 
-    // cout << me << " NMC: " << NMC << " nt: " << nTemps << endl;
     int sum = 0;
     int experimentsPerNode[nodeCount];
     int displacements[nodeCount];

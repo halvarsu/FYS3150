@@ -245,7 +245,8 @@ int main(int argc, char * argv[]) {
                  << ESquaredforPrinting<< " "
                  << MSquaredforPrinting<< " "
                  << specific_heat << " "
-                 << susceptibility << endl;
+                 << susceptibility <<" "
+                 << accepted << endl;
 
             if (save_to_file){
                 outfile << i << " " << T << " " << EforPrinting << " " << MforPrinting <<" "

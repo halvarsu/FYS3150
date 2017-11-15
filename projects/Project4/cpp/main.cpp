@@ -24,6 +24,7 @@ int main(int argc, char * argv[]) {
     string outFilename;
     bool time_it;
     bool save_to_file;
+    bool saveEnergies = true;
     bool orderedSpinConfig;
     int nodeCount;
     int localRank;
@@ -164,6 +165,10 @@ int main(int argc, char * argv[]) {
     if (localRank == 0  && time_it) {
         startTime = MPI_Wtime();
     }
+    if (localRank == 0 && saveEnergies) {
+        ofstream energiesOutfile;
+        energiesOutfile.open("out/energies.dat", ios::binary);
+    }
     for (int j; j < localExperiments; j ++){
         T = localTemps[j];
         //	Initialize spins, energies, magnetization and transfer probabilities for a given T
@@ -181,6 +186,9 @@ int main(int argc, char * argv[]) {
             avgEsquared[j] += E*E;
             avgM[j] += M;
             avgMsquared[j] += M*M;
+            if (saveEnergies) {
+                energiesOutfile << E << endl;
+            }
         }
         avgE[j] 	   =  avgE[j]/ (double) NMC;
         avgEsquared[j] =  avgEsquared[j] / (double) NMC;
@@ -258,6 +266,9 @@ int main(int argc, char * argv[]) {
         if (save_to_file)	{
             outfile.close();
             cout << "Data written to " << outFilename << endl;
+        }
+        if (saveEnergies) {
+            energiesOutfile.close();
         }
     }
     MPI_Finalize();

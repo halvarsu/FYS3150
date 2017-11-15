@@ -29,6 +29,7 @@ int main(int argc, char * argv[]) {
     int nodeCount;
     int localRank;
     ofstream outfile;
+    ofstream energiesOutfile;
     clock_t begin, end;
 
     MPI_Init (&argc, &argv);
@@ -166,7 +167,6 @@ int main(int argc, char * argv[]) {
         startTime = MPI_Wtime();
     }
     if (localRank == 0 && saveEnergies) {
-        ofstream energiesOutfile;
         energiesOutfile.open("out/energies.dat", ios::binary);
     }
     for (int j; j < localExperiments; j ++){
@@ -186,7 +186,7 @@ int main(int argc, char * argv[]) {
             avgEsquared[j] += E*E;
             avgM[j] += M;
             avgMsquared[j] += M*M;
-            if (saveEnergies) {
+            if (localRank ==0 && saveEnergies && i > 50000) {
                 energiesOutfile << E << endl;
             }
         }

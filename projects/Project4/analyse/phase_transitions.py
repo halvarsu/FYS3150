@@ -34,7 +34,7 @@ def calculate_phase_transitions(args):
     return
 
 def plot_phase_transition(args):
-    L_values = [40,60,80]
+    L_values = [40,60,80,100]
     for L in L_values:
         data = np.zeros((0,9))
         for sub in range(1,9):

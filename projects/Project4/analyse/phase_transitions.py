@@ -35,9 +35,13 @@ def calculate_phase_transitions(args):
 
 def plot_phase_transition(args):
     L_values = [40,60,80,100]
-    for L in L_values:
-        data = np.loadtxt("out/phasetransL{}.dat".format(L))
-        plt.plot(data[:,7])
+    fig, [ax1,ax2] = plt.subplots(2)
+    for i,L in enumerate(L_values):
+        data = np.loadtxt("out/phase_transitions/pt_sub1_L{}.dat".format(L))
+        dataTest = np.loadtxt("out/phase_transitions/test_nofor{}.dat".format(L))
+
+        ax1.scatter(data[:,1], data[:,6]/L**2,c=plt.cm.jet(i/3.))
+        ax2.scatter(dataTest[:,1], dataTest[:,6],c=plt.cm.jet(i/3.))
     plt.show()
 
 

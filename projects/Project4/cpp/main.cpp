@@ -197,11 +197,6 @@ int main(int argc, char * argv[]) {
     }
 
 
-    if (localRank == 0 && time_it){
-        stopTime = MPI_Wtime();
-        double time_elapsed = stopTime - startTime;
-        cout << "TIMEUSED: " << time_elapsed << endl;
-    }
 
     // Global lists, only relevant for node 0
     double energies[nTemps];
@@ -225,7 +220,13 @@ int main(int argc, char * argv[]) {
     MPI_Gatherv(&localAcceptedPerRun, localExperiments, MPI_INT, &acceptedValues, experimentsPerNode,
                 displacements, MPI_INT, 0, MPI_COMM_WORLD);
 
+
     if (localRank == 0){
+        if (time_it){
+            stopTime = MPI_Wtime();
+            double time_elapsed = stopTime - startTime;
+            cout << "TIMEUSED: " << time_elapsed << endl;
+        }
         if(save_to_file){
             outfile.open(outFilename, ios::binary);
         }

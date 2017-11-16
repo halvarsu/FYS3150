@@ -29,7 +29,7 @@ int main(int argc, char * argv[]) {
     int localRank;
     ofstream outfile;
     clock_t begin, end;
-    int verbose;
+    bool verbose = false;
 
     MPI_Init (&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &nodeCount);
@@ -192,7 +192,7 @@ int main(int argc, char * argv[]) {
         avgMsquared[j] =  avgMsquared[j] / (double) NMC;
         localAcceptedPerRun[j] = accepted;
         if (verbose){
-            cout << me << "T = " << T << " done";
+            cout << me << " T = " << T << " done";
         }
     }
 

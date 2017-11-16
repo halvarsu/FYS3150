@@ -115,6 +115,7 @@ int main(int argc, char * argv[]) {
     MPI_Bcast(&NMC, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&L, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&orderedSpinConfig, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&verbose, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     // Initialize temperatures
     double dT;

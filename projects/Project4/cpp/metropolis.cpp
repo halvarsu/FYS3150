@@ -6,7 +6,6 @@
 MetropolisSolver::MetropolisSolver(int latticeLength, double seed) :
     m_latticeLength(latticeLength),
     m_n_spins(latticeLength*latticeLength),
-    m_rng(m_rd()),
     m_latticeDistribution(0,latticeLength-1),
     m_realDistribution(0.,1.)
 {
@@ -16,10 +15,10 @@ MetropolisSolver::MetropolisSolver(int latticeLength, double seed) :
 MetropolisSolver::MetropolisSolver(int latticeLength) :
     m_latticeLength(latticeLength),
     m_n_spins(latticeLength*latticeLength),
-    m_rng(m_rd()),
     m_latticeDistribution(0,latticeLength-1),
     m_realDistribution(0.,1.)
 {
+    m_rng.seed(m_rd());
 }
 
 int MetropolisSolver::rand_coord(){

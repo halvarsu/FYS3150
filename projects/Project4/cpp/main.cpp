@@ -148,9 +148,9 @@ int main(int argc, char * argv[]) {
 
     MPI_Scatterv(&temperatures, experimentsPerNode, displacements, MPI_DOUBLE,&localTemps ,localExperiments, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    double seed = (- MPI_Wtime()* 1e9 - localRank) ;
+    // double seed = (- MPI_Wtime()* 1e9 - localRank) ;
     MetropolisSolver solver(L); // can also accept a seed for its random number generators.
-    arma::arma_rng::set_seed(seed);
+    // arma::arma_rng::set_seed(seed);
 
     // Generate spin matrix with random values of either -1 or 1:
     arma::mat spin_matrix;

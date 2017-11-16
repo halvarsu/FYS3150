@@ -9,7 +9,7 @@ def linear_print(text, i, width, end=100):
         "*{1:=^{0}}*".format(int((width-len(text)-2)*i/end+len(text)),text)))
 
 
-def process_data(data):
+def process_data(data, return_two = False):
     sim_data = []
     for simulation in data:
         line_data = []
@@ -19,5 +19,14 @@ def process_data(data):
             if out:
                 line_data.append(out)
         sim_data.append(line_data)
-    return np.array(sim_data).swapaxes(0,1).swapaxes(1,2)
+    data = np.array(sim_data).swapaxes(0,1).swapaxes(1,2)
+    if return_two:
+        return data[:,:,0::2], data[:,:,1::2]
+    else:
+        return data
 
+def add_letter_label(ax,num, letter='', pos = [0.02,0.95]):
+    if not letter:
+        letter = str(unichr(65+num))
+    ax.text(pos[0], pos[1],  letter, transform=ax.transAxes,
+        fontsize=16, fontweight='bold', va='top')

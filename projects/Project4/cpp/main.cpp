@@ -17,10 +17,9 @@ void initialize(double T, arma::mat &spin_matrix,int L, double &E, double &M, ar
 string getFilenameBase(string filename);
 
 int main(int argc, char * argv[]) {
-    int NMC;
-    double Tstart, Tstop, Tstep;
+    int NMC, nTemps, L;
+    double Tstart, Tstop;
     double startTime, stopTime;
-    int L;
     string inFilename = "in/PLACEHOLDER.txt";
     string outFilename;
     bool time_it;
@@ -30,6 +29,7 @@ int main(int argc, char * argv[]) {
     int localRank;
     ofstream outfile;
     clock_t begin, end;
+    int verbose;
 
     MPI_Init (&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &nodeCount);
@@ -46,20 +46,20 @@ int main(int argc, char * argv[]) {
         if (argc == 1){
             cout << "Give me your number of montecarlo simulations!" << endl;
             cin >> NMC;
-            cout << "Give me temperature start, stop and step as well!" << endl;
+            cout << "Give me temperature start, stop and number of steps as well!" << endl;
             cout << "Start: ";
             cin >> Tstart;
             cout << "Stop: ";
             cin >> Tstop;
-            cout << "Step: ";
-            cin >> Tstep;
+            cout << "Number of steps: ";
+            cin >> nTemps;
             cout << "Thank you! Sorry for being rude. Would you mind passing me a lattice size?" << endl;
             cin >> L;
             cout << "Again thank you. Have a beautful phase transitioning day!" << endl;
             orderedSpinConfig = true;
         } else if(argc == 2){
             inFilename = argv[1];
-            int result = readData(inFilename, NMC,Tstart, Tstop, Tstep,L,time_it,save_to_file,orderedSpinConfig);
+            int result = readData(inFilename, NMC,Tstart, Tstop, nTemps,L,time_it,save_to_file,orderedSpinConfig);
             if (result != 0){
                 cout << "Error in file at line " << result << endl;
                 return 1;
@@ -71,16 +71,16 @@ int main(int argc, char * argv[]) {
         }
         if (argc == 3){
             Tstop = Tstart;
-            Tstep = 1;
+            nTemps = 1;
         }
         if (argc == 4){
-            cout << "Wrong number of arguments! Can't be 3 (must define only Tstart or all three of Tstart, Tstop and Tstep).";
+            cout << "Wrong number of arguments! Can't be 3 (must define only Tstart or all three of Tstart, Tstop and nTemps).";
             return 1;
         }
         if (argc > 4){
             Tstart = atof(argv[2]);
             Tstop = atof(argv[3]);
-            Tstep = atof(argv[4]);
+            nTemps = atoi(argv[4]);
         }
         if (argc > 5){
             L = atoi(argv[5]);
@@ -89,14 +89,17 @@ int main(int argc, char * argv[]) {
             time_it = (bool) atoi(argv[6]);
         }
         if (argc > 7){
-            inFilename = (string) argv[7];
-            save_to_file = true;
+            orderedSpinConfig = (bool) atoi(argv[7]);
         }
         if (argc > 8){
-            orderedSpinConfig = (bool) atoi(argv[8]);
+            inFilename = (string) argv[8];
+            save_to_file = true;
         }
         if (argc > 9){
-            cout << "Wrong number of arguments! Must be <= 8" << endl;
+            verbose = true;
+        }
+        if (argc > 10){
+            cout << "Wrong number of arguments! Must be <= 9" << endl;
             return 1;
         }
     } else {
@@ -108,19 +111,24 @@ int main(int argc, char * argv[]) {
 
     MPI_Bcast(&Tstop, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&Tstart, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&Tstep, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&nTemps, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&NMC, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&L, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&orderedSpinConfig, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     // Initialize temperatures
-    int nTemps = (int) ceil((Tstop-Tstart)/Tstep) + 1;
-    double temperatures[nTemps];
-    for(int i = 0; i < nTemps; i++){
-        temperatures[i] = Tstart + Tstep*i;
+    double dT;
+    if (nTemps < 2){
+        dT = 0;
+    } else {
+        dT = (Tstop - Tstart)/(nTemps - 1);
     }
 
-    // cout << me << " NMC: " << NMC << " nt: " << nTemps << endl;
+    double temperatures[nTemps];
+    for(int i = 0; i < nTemps; i++){
+        temperatures[i] = Tstart + dT*i;
+    }
+
     int sum = 0;
     int experimentsPerNode[nodeCount];
     int displacements[nodeCount];
@@ -183,12 +191,15 @@ int main(int argc, char * argv[]) {
         avgM[j] 	   =  avgM[j] 	   / (double) NMC;
         avgMsquared[j] =  avgMsquared[j] / (double) NMC;
         localAcceptedPerRun[j] = accepted;
+        if (verbose){
+            cout << me << "T = " << T << " done";
+        }
     }
 
 
     if (localRank == 0 && time_it){
-        end = clock();
-        double time_elapsed = double(end-begin)/CLOCKS_PER_SEC;
+        stopTime = MPI_Wtime();
+        double time_elapsed = stopTime - startTime;
         cout << "TIMEUSED: " << time_elapsed << endl;
     }
 
@@ -241,7 +252,8 @@ int main(int argc, char * argv[]) {
                  << ESquaredforPrinting<< " "
                  << MSquaredforPrinting<< " "
                  << specific_heat << " "
-                 << susceptibility << endl;
+                 << susceptibility <<" "
+                 << accepted << endl;
 
             if (save_to_file){
                 outfile << i << " " << T << " " << EforPrinting << " " << MforPrinting <<" "

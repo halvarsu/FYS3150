@@ -184,7 +184,7 @@ int main(int argc, char * argv[]) {
             solver.run(spin_matrix, E, M, w, accepted);
             avgE[j] += E;
             avgEsquared[j] += E*E;
-            avgM[j] += M;
+            avgM[j] += abs(M);
             avgMsquared[j] += M*M;
         }
         avgE[j] 	   =  avgE[j]/ (double) NMC;

@@ -192,7 +192,7 @@ int main(int argc, char * argv[]) {
         avgMsquared[j] =  avgMsquared[j] / (double) NMC;
         localAcceptedPerRun[j] = accepted;
         if (verbose){
-            cout << me << " T = " << T << " done";
+            cout << me << " T = " << T << " done" << endl;
         }
     }
 

@@ -35,18 +35,23 @@ def calculate_phase_transitions(args):
 
 def plot_phase_transition(args):
     L_values = [40,60,80,100]
+    fig1, [ax1,ax2] = plt.subplots(2)
     for L in L_values:
         data = np.zeros((0,9))
         for sub in range(1,9):
             sub_data = np.loadtxt("out_gather/pt_sub{}_L{}.dat".format(sub,L))
             print(data.shape,sub_data.shape)
             data = np.concatenate((data,sub_data))
-        plt.scatter(data[:,1],data[:,6]/L**2,alpha=0.5,
+        ax1.scatter(data[:,1],data[:,6]/L**2,alpha=0.5,
                 label='L = {}'.format(L),c = plt.cm.jet((L-40)/60.))
-    plt.xlabel('Temperature')
-    plt.ylabel('$C_V$')
-    plt.legend()
-    plt.savefig('temp/fig2.png')
+        ax2.scatter(data[:,1],data[:,7]/L**2,alpha=0.5,
+                label='L = {}'.format(L),c = plt.cm.jet((L-40)/60.))
+    ax1.set_xlabel('Temperature')
+    ax2.set_xlabel('Temperature')
+    ax1.set_ylabel('$C_V$')
+    ax2.set_ylabel('$xi$')
+    [ax.legend() for ax in [ax1,ax2]]
+    plt.savefig('temp/fig3.png')
     plt.show()
 
 

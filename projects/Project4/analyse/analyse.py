@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import shutil 
 import time
 import argparse
-from tools import sine_print, linear_print, process_data
+from tools import sine_print, linear_print, process_data, add_letter_label
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -12,6 +12,7 @@ def get_args():
     parser.add_argument('-p', '--part', choices=list("Xbcde"),default="X")
     parser.add_argument('-m', '--mpi', action="store_true")
     parser.add_argument('-n', '--nodes', type=int, default=2)
+    parser.add_argument('--figsize', type=int,nargs=2,default=[4,4])
     return parser.parse_args()
 
 
@@ -59,7 +60,7 @@ def compare_analytical(args):
     np.save("analyse/4b",data )
 
     Z = 12 + 4*np.cosh(8/T)
-    evE = 32*np.sinh(8/T)/Z
+    evE = - 32*np.sinh(8/T)/Z
     evM = 0
     evEsquared = 256*np.cosh(8/T)/Z
     evMsquared = ( 32 + 32*np.exp(8/T) )/Z
@@ -68,16 +69,16 @@ def compare_analytical(args):
 
     expected_values = [evE, evM, evEsquared, evMsquared, specific_heat,
             susceptibility]
-    ylabels = [r'$\langle E \rangle$',
+    ylabels = [r'$\langle E \rangle$ [ $J$ ]',
             r'$\langle M \rangle$',
-            r'$\langle E^2 \rangle$',
+            r'$\langle E^2 \rangle$ [ $J^2$ ]',
             r'$\langle M^2 \rangle$',
-            r'$C_V$',
-            r'$\chi$']
+            r'$C_V$ [ $k_B$ ]',
+            r'$\chi$ [ $J/k_B^2$ ]']
     print(data[:,-1])
     print(expected_values)
-    fig1, [ax1,ax2,ax3,ax4] = plt.subplots(4)
-    fig2, [ax5,ax6] = plt.subplots(2,sharex=True)
+    fig1, [[ax1,ax2],[ax3,ax4]] = plt.subplots(2,2,figsize = [8,4])
+    fig2, [ax5,ax6] = plt.subplots(2,figsize=args.figsize,sharex=True)
 
     ax1.scatter(montecarlosims,data[0],s=5)
     ax2.scatter(montecarlosims,data[1],s=5)
@@ -86,8 +87,14 @@ def compare_analytical(args):
     ax5.scatter(montecarlosims,data[4],s=5)
     ax6.scatter(montecarlosims,data[5],s=5)
 
+    ax1.set_xlabel('Number of Monte Carlo Cycles')
+    ax2.set_xlabel('Number of Monte Carlo Cycles')
+    ax3.set_xlabel('Number of Monte Carlo Cycles')
     ax4.set_xlabel('Number of Monte Carlo Cycles')
     ax6.set_xlabel('Number of Monte Carlo Cycles')
+
+    [add_letter_label(ax,i) for i,ax in enumerate([ax5,ax6])]
+    [add_letter_label(ax,i) for i,ax in enumerate([ax1,ax2,ax3,ax4])]
 
     for i,ax in enumerate([ax1,ax2,ax3,ax4,ax5,ax6]):
         ax.set_xscale('log')

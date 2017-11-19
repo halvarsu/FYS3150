@@ -4,17 +4,21 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from tools import add_letter_label
 
 def main(args):
     """Either runs all parts or just one"""
-    parts = {1:plot_timing}
+    parts = {1:plot_timing,2:create_results}
     if args.part == 0:
         plot_timing(args)
+        create_results(args)
     else:
-        parts[args.part]()
+        parts[args.part](args)
 
 
 def timing(args):
+    """Runs the metropolis solver with the inbuilt timer, catching the
+    result and plotting a nice graph."""
     NMC = args.NMC
     Tstart = 2
     Tstop = 2
@@ -63,6 +67,40 @@ def plot_timing(args):
     plt.savefig('results/timingNMC%d.pdf' %args.NMC)
     #plt.show()
     return
+
+def create_results(args):
+    time1 = np.load('results/time_no_parNMC%d.npy' %1000)
+    time_parallel1 = np.load('results/time_parNMC%d.npy' %1000)
+    time2 = np.load('results/time_no_parNMC%d.npy' %10000)
+    time_parallel2 = np.load('results/time_parNMC%d.npy' %10000)
+    avg1 = np.average(time1) 
+    avgP1 = np.average(time_parallel1) 
+    avg2 = np.average(time2) 
+    avgP2 = np.average(time_parallel2) 
+    ratio1 = avg1 / avgP1
+    ratio2 = avg2 / avgP2
+    
+    print('avg1: {} avgP1: {}'.format(avg1, avgP1))
+    print('avg2: {} avgP2: {}'.format(avg2, avgP2))
+    print('Ratio 1: {}'.format(ratio1))
+    print('Ratio 2: {}'.format(ratio2))
+    fig1, [ax1,ax2] = plt.subplots(2,figsize = [4,4])
+    trials = np.arange(time1.size)
+    print(time1.shape, time2.shape, time_parallel1.shape,time_parallel2.shape)
+    ax1.scatter(trials, time1)#, c = 'b')
+    ax2.scatter(trials, time2)#, c = 'b')
+    ax1.scatter(trials, time_parallel1)#, c = 'g')
+    ax2.scatter(trials, time_parallel2)#, c = 'g')
+    for i,[ax,t] in enumerate(zip([ax1,ax2], [time1,time2])):
+        ax.set_xlabel('Trial number')
+        ax.set_ylabel('Time used $[s]$')
+        ax.legend(['1 prosessor', '4 prosessors'])
+        #ax.axis([-1,trials.size + 1, 0, 1.5*np.median(t)])
+        add_letter_label(ax,i)
+    fig1.tight_layout()
+    fig1.savefig('results/timingResults.pdf' )
+    plt.show()
+
     
 
 def get_args():

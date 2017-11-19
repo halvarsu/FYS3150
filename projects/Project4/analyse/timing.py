@@ -7,15 +7,15 @@ import matplotlib.pyplot as plt
 
 def main(args):
     """Either runs all parts or just one"""
-    parts = {1:timing}
+    parts = {1:plot_timing}
     if args.part == 0:
-        timing(args)
+        plot_timing(args)
     else:
         parts[args.part]()
 
 
 def timing(args):
-    NMC = 1000
+    NMC = args.NMC
     Tstart = 2
     Tstop = 2
     nTemp = 24
@@ -37,10 +37,22 @@ def timing(args):
         print(t, tp)
         time.append(t)
         time_parallel.append(tp)
+    time = np.array(time)
+    time_parallel = np.array(time_parallel)
+    np.save('results/time_no_parNMC%d'%NMC,time)
+    np.save('results/time_parNMC%d'%NMC,time_parallel)
+    return  time, time_parallel
+
+def plot_timing(args):
+    if args.load:
+        time = np.load('results/time_no_parNMC%d.npy' %args.NMC)
+        time_parallel = np.load('results/time_parNMC%d.npy' %args.NMC)
+    else:
+        time,time_parallel = timing(args)
+    trials = np.arange(time.size)
     avg_time = np.average(time)
     avg_time_parallel = np.average(time_parallel)
-    np.save('time_no_parNMC%d'%NMC,np.array(avg_time))
-    np.save('time_parNMC%d'%NMC,np.array(avg_time_parallel))
+
     print('Average time used 1 prosessor: {}s'.format(avg_time))
     print('Average time used 4 prosessors: {}s'.format(avg_time_parallel))
     plt.scatter(trials, time, c = 'b')
@@ -48,7 +60,7 @@ def timing(args):
     plt.xlabel('Trial number')
     plt.ylabel('Time used $[s]$')
     plt.legend(['1 prosessor', '4 prosessors'])
-    plt.savefig('results/timing.pdf')
+    plt.savefig('results/timingNMC%d.pdf' %args.NMC)
     #plt.show()
     return
     
@@ -58,6 +70,8 @@ def get_args():
 
     parser.add_argument('-p','--part', type=int,default=0, 
                         choices = [0,1,2,3])
+    parser.add_argument('-N','--NMC', type=int,default=1000 )
+    parser.add_argument('-l','--load' ,action='store_true')
     return parser.parse_args()
 
 if __name__=='__main__':

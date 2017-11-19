@@ -32,28 +32,26 @@ double MetropolisSolver::rand(){
 }
 
 void MetropolisSolver::run(arma::mat &spin_matrix, double & E, double &M, arma::vec w, int&accepted){
-    // loop over all spin
+    // loop over all spin, to make one cycle proportional to the lattice size
     for (int i= 0; i < m_n_spins; i++){
         // Find random position
         int ix = MetropolisSolver::rand_coord();
         int iy = MetropolisSolver::rand_coord();
+        // get energy change due to spin flip
         int deltaE = 2*spin_matrix(iy,ix)*
                         (spin_matrix(iy,periodic(ix,m_latticeLength,-1))+
                          spin_matrix(periodic(iy,m_latticeLength,-1),ix) +
                          spin_matrix(iy,periodic(ix,m_latticeLength,1)) +
                          spin_matrix(periodic(iy,m_latticeLength,1),ix));
-        // std::cout << ix << " " << iy << " " << deltaE << " " << deltaE/4 + 2 << std::endl;
         // the Metropolis test
-        if ( MetropolisSolver::rand() <= w(deltaE/4+2) ) {
-            spin_matrix(iy,ix) *= -1; // flip one spin and accept new spin config
+        if ( MetropolisSolver::rand() <= w(deltaE/4+2) ) { // The morten way reduces number of FLOPS by two, should have done that instead.
+            spin_matrix(iy,ix) *= -1; // flip spin and accept new spin config
             // update energy and magnetization
             M += (double) 2*spin_matrix(iy,ix);
             E += (double) deltaE;
             accepted+=1;
         }
     }
-//    M = M/(m_n_spins*m_n_spins);
-//    E = E/(m_n_spins*m_n_spins);
 }
 
 

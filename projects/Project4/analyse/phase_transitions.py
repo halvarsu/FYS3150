@@ -36,10 +36,15 @@ def calculate_phase_transitions(args):
     return
 
 def plot_phase_transition(args):
+    """
+    loads preproduces phase precession data and calculates the critical
+    temperature, along with making a plot.
+    """
     L_values = [40,60,80,100]
     fig1, [[ax1,ax2],[ax3,ax4]] = plt.subplots(2,2,
             figsize=args.figsize)
     # fig2, ax2 = plt.subplots(1, figsize=args.figsize)
+    TC_values = []
     for L in L_values:
         data = np.zeros((0,9))
         for sub in range(1,9):
@@ -55,15 +60,25 @@ def plot_phase_transition(args):
                 label='L = {}'.format(L),c = plt.cm.jet((L-40)/60.))
         C_V_smooth = savitzky_golay(data[:,6], 15, 2)
         ax3.plot(data[:,1],C_V_smooth/L**2, '--')
-        T_c = data[[np.argmax(C_V_smooth)],1]
-        print(T_c)
+        T_c = data[[np.argmax(C_V_smooth)],1][0]
+        TC_values.append(T_c)
+        print("T(L={}) = {}".format(L,T_c))
+    from scipy import optimize
+
+    TC_values = np.array(TC_values)
+    def T_Cfunc(L, T_Cinfty, a):
+        return T_Cinfty + a/L
+
+    popt, pcov = optimize.curve_fit(T_Cfunc, L_values, TC_values)
+    print("Calculated value of T_C(L=infty): {} with a = {}".format(*popt))
+
     #ax1.set_xlabel('$T$ [ $k_B/J$ ]')
     ax1.set_xlabel('$T$ [ $k_B/J$ ]')
     ax2.set_xlabel('$T$ [ $k_B/J$ ]')
     ax3.set_xlabel('$T$ [ $k_B/J$ ]')
     ax4.set_xlabel('$T$ [ $k_B/J$ ]')
     ax1.set_ylabel(r'$\langle E \rangle $ [ $J$ ]')
-    ax2.set_ylabel(r'$\langle |M| \rangle $ [ UNKNOWN ]')
+    ax2.set_ylabel(r'$\langle |M| \rangle $ ')
     ax3.set_ylabel(r'$c_V$ [ $k_B$ ]')
     ax4.set_ylabel(r'$\chi$ [ $J/k_B^2$ ]')
     [add_letter_label(ax,i) for i,ax in enumerate([ax1,ax2,ax3,ax4])]

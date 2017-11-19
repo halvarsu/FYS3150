@@ -42,6 +42,7 @@ int main(int argc, char * argv[]) {
     time_it = false;
     save_to_file = false;
     orderedSpinConfig = false;
+    // Input from command line, is handled by root node
     if (localRank == 0){
         if (argc == 1){
             cout << "Give me your number of montecarlo simulations!" << endl;
@@ -109,6 +110,7 @@ int main(int argc, char * argv[]) {
 
     outFilename = "out/" + getFilenameBase(inFilename) + ".dat";
 
+    // Broadcasting of variables from input to all nodes
     MPI_Bcast(&Tstop, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&Tstart, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nTemps, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -130,9 +132,11 @@ int main(int argc, char * argv[]) {
         temperatures[i] = Tstart + dT*i;
     }
 
+    // Find the number of experiments per node in case number of
+    // temperatures is not divisible by nodeCont
     int sum = 0;
     int experimentsPerNode[nodeCount];
-    int displacements[nodeCount];
+    int displacements[nodeCount]; // Where in the initial temperature array should each node get its temperatures?
     int expPerNodeBase = nTemps / nodeCount;
     int expRest = nTemps % nodeCount;
 
@@ -147,13 +151,12 @@ int main(int argc, char * argv[]) {
     int localExperiments = experimentsPerNode[localRank];
     double localTemps[localExperiments];
 
+    // Scatter the temperatures from the root node to all children
     MPI_Scatterv(&temperatures, experimentsPerNode, displacements, MPI_DOUBLE,&localTemps ,localExperiments, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    // double seed = (- MPI_Wtime()* 1e9 - localRank) ;
+    // The class responsible for running the Metropolis algorithm, and storing random number generators.
     MetropolisSolver solver(L); // can also accept a seed for its random number generators.
-    // arma::arma_rng::set_seed(seed);
 
-    // Generate spin matrix with random values of either -1 or 1:
     arma::mat spin_matrix;
     double E;
     double M;
@@ -172,16 +175,16 @@ int main(int argc, char * argv[]) {
     }
     for (int j; j < localExperiments; j ++){
         T = localTemps[j];
-        //	Initialize spins, energies, magnetization and transfer probabilities for a given T
+        //	Initialize spins, energies, magnetization for a given L and transfer probabilities w for a given T.
         initialize(T, spin_matrix, L, E, M, w, orderedSpinConfig);
-        avgE[j] 	   =0;
+        avgE[j] 	   = 0;
         avgEsquared[j] = 0;
-        avgM[j] 	   =0;
-        avgMabs[j] 	   =0;
+        avgM[j] 	   = 0;
+        avgMabs[j] 	   = 0;
         avgMsquared[j] = 0;
-        accepted = 0;
+        accepted       = 0;
 
-        // where the magic happens
+        // where the magic happens.
         for (int i = 0; i < NMC; i++) {
             solver.run(spin_matrix, E, M, w, accepted);
             avgE[j] += E;
@@ -190,6 +193,7 @@ int main(int argc, char * argv[]) {
             avgMabs[j] += abs(M);
             avgMsquared[j] += M*M;
         }
+        // divide by number of cycles to get the average.
         avgE[j] 	   =  avgE[j]/ (double) NMC;
         avgEsquared[j] =  avgEsquared[j] / (double) NMC;
         avgM[j] 	   =  avgM[j] 	   / (double) NMC;
@@ -229,6 +233,7 @@ int main(int argc, char * argv[]) {
                 displacements, MPI_INT, 0, MPI_COMM_WORLD);
 
 
+    // Only root node does output
     if (localRank == 0){
         if (time_it){
             stopTime = MPI_Wtime();
@@ -293,6 +298,7 @@ string getFilenameBase(string filename){
 
 
 void initialize(double T, arma::mat &spin_matrix, int L, double &E, double &M, arma::vec &w, bool orderedSpinConfig){
+    // Initialize a matrix with either random or ordered spin configuration
     if (orderedSpinConfig){
         spin_matrix = - arma::ones<arma::mat>(L,L);
     } else {
@@ -300,7 +306,7 @@ void initialize(double T, arma::mat &spin_matrix, int L, double &E, double &M, a
     }
     E = 0;
 
-    // handling boundry conditions
+    // handling boundary conditions
     for (int i=0; i<L; i++){
         for (int j=0; j<L; j++){
             E += - spin_matrix(i,j)*
@@ -309,9 +315,11 @@ void initialize(double T, arma::mat &spin_matrix, int L, double &E, double &M, a
         }
     }
 
+    // Sum over all spins
     M = arma::accu(spin_matrix);
     arma::vec deltaE;
     deltaE << -8 << -4 << 0 << 4 << 8;
+    // Transition probabilities for given deltaE
     w = arma::exp(- deltaE/T);
 }
 

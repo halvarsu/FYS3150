@@ -1,15 +1,19 @@
 import numpy as np
 
 def sine_print(text, i, width=60, freq=10):
+    """Prints with a fill in the form of a sinus wave"""
     print("{1: ^{0}}".format(width,
         "*{1:=^{0}}*".format(int((width-len(text)-1)/2*(1+np.sin(i/10.))+len(text)),text)))
 
 def linear_print(text, i, width, end=100):
+    """Prints with a linearly increasing fill"""
     print("{1: ^{0}}".format(width,
         "*{1:=^{0}}*".format(int((width-len(text)-2)*i/end+len(text)),text)))
 
 
 def process_data(data, return_two = False):
+    """Reads lists of strings with lines and columns, and writes to a numpy
+    array. Use return_two if every second element is of one category."""
     sim_data = []
     for simulation in data:
         line_data = []
@@ -26,17 +30,19 @@ def process_data(data, return_two = False):
         return data
 
 def add_letter_label(ax,num, letter='', pos = [0.02,0.95]):
+    """Adds a nice letter to the top of a matplotlib ax"""
     if not letter:
         letter = str(chr(65+num))
     ax.text(pos[0], pos[1],  letter, transform=ax.transAxes,
         fontsize=16, fontweight='bold', va='top')
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
-    r"""Smooth (and optionally differentiate) data with a Savitzky-Golay filter.
-    The Savitzky-Golay filter removes high frequency noise from data.
-    It has the advantage of preserving the original shape and
-    features of the signal better than other types of filtering
-    approaches, such as moving averages techniques.
+    r"""From the internet, see http://scipy-cookbook.readthedocs.io/items/SavitzkyGolay.html. Smooth (and optionally differentiate) data with
+    a Savitzky-Golay filter.  The Savitzky-Golay filter removes high
+    frequency noise from data.  It has the advantage of preserving the
+    original shape and features of the signal better than other types of
+    filtering approaches, such as moving averages techniques.
+
     Parameters
     ----------
     y : array_like, shape (N,)

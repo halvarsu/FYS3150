@@ -17,6 +17,7 @@ def get_args():
 
 
 def main():
+    """Chooses a part based on args.part. if 0, runs all parts defined."""
     args = get_args()
     parts = {"b":compare_analytical,"c":graphical}
     if args.part == "X":
@@ -28,6 +29,11 @@ def main():
 
 
 def compare_analytical(args):
+    """
+    Runs a 2x2 lattice simulation in parallel by starting several
+    subprocesses all running the CPP code at the same time. Compares to
+    analytical values.
+    """
     montecarlosims = np.logspace(1,6,500)
     data = np.zeros((7,len(montecarlosims)))
     width = shutil.get_terminal_size((80,20)).columns
@@ -108,6 +114,10 @@ def compare_analytical(args):
     plt.show()
 
 def simulate4c(args):
+    """
+    Returns simulated values for the 20x20 lattice, for two temperatures
+    T=1 and T=2.4. Run CPP in parallel, if args.mpi is True.
+    """
     montecarlosims = np.logspace(2,5,250)
     string_data = []
     width = 40
@@ -141,6 +151,7 @@ def simulate4c(args):
     return data,dataOrdered, temperatures, montecarlosims
 
 def graphical(args):
+    """Creates the graphical solution of 4c"""
     if args.load:
         data = np.load("analyse/4cData.npy")
         dataOrdered = np.load("analyse/4cDataOrdered.npy")

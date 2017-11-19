@@ -164,22 +164,29 @@ def graphical(args):
         np.save("analyse/4cTemps",temperatures)
         np.save("analyse/4cNMC",montecarlosims)
 
-    fig1, [ax1,ax2] = plt.subplots(2,sharex=True)
+    fig1, [[ax1,ax2],[ax1b,ax2b]] = plt.subplots(2,2,figsize=(6,6))
     fig2, ax3 = plt.subplots(1)
 
     print( data.shape, dataOrdered.shape, montecarlosims.shape)
 
-    for T, td, tdOrdered in zip(temperatures,data, dataOrdered):
-        for d, l in zip([td, tdOrdered], ["Random", "Ordered"]):
-            v1 = np.abs(d[0]) 
-            v2 = np.abs(d[1])
-            v3 = d[-1] 
-            ax1.scatter(montecarlosims, v1, s=5, label=r'$T = %.2f$, %s' %(T,l))
-            ax2.scatter(montecarlosims, v2, s=5, label=r'$T = %.2f$, %s' %(T,l))
-            ax3.scatter(montecarlosims, v3, s=5, label=r'$T = %.2f$, %s' %(T,l))
+    for T, tempData, tempDataOrdered in zip(temperatures,data, dataOrdered):
+        for [axE, axM], data, label in zip([[ax1,ax2],[ax1b,ax2b]],[tempData, tempDataOrdered], ["Random", "Ordered"]):
+            energy = np.abs(data[0]) 
+            magnet = np.abs(data[1])
+            accept = data[-1] 
+            axE.set_title(label)
+            axM.set_title(label)
+            axE.scatter(montecarlosims, energy, s=3,
+                    label=r'$T = %.2f$'%(T),alpha = 0.5)
+            axM.scatter(montecarlosims, magnet, s=3,
+                    label=r'$T = %.2f$ '%(T),alpha = 0.5)
+            ax3.loglog(montecarlosims, accept, 'o', markersize=3, label=r'$T = %.2f$, %s'
+                    %(T,label),alpha = 0.5)
 
-    ax3.axis('equal')
-    ax1.set_xlabel('Number of Monte Carlo Cycles')
+    ax1.set_xlabel('NMC')
+    ax2.set_xlabel('NMC')
+    ax1b.set_xlabel('NMC')
+    ax2b.set_xlabel('NMC')
     ax3.set_xlabel('Number of Monte Carlo Cycles')
 
     ylabels = [ r'$\langle |E| \rangle$',
@@ -189,12 +196,17 @@ def graphical(args):
     for i,ax in enumerate([ax1,ax2,ax3]):
         ax.set_ylabel(ylabels[i])
         ax.legend()
-        ax.set_xscale('log') 
+    for i,ax in enumerate([ax1b,ax2b]):
+        ax.set_ylabel(ylabels[i])
+    #ax1.set_xscale('log') 
+    ax3.axis('equal')
+    ax3.grid()
+    #ax2.set_xscale('log') 
 
     fig1.tight_layout()
     fig2.tight_layout()
-    fig1.savefig('results/graphical.pdf')
-    fig2.savefig('results/graphicalAccepted.pdf')
+    fig1.savefig('results/equilibrium.pdf')
+    fig2.savefig('results/accepted.pdf')
     plt.show()
 
 if __name__ == "__main__":

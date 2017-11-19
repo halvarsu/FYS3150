@@ -1,6 +1,8 @@
 import subprocess
 import argparse
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 def main(args):
@@ -16,15 +18,15 @@ def timing(args):
     NMC = 10
     Tstart = 2
     Tstop = 2
-    nTemp = 1000
+    nTemp = 100
     L = 40
 
     nTrials = 100
     trials = np.arange(nTrials)
     time = []
     time_parallel = []
-    run = "mpirun -np 1 ./build/Project4 {} {} {} {} {} 1"
-    run_parallel = "mpirun -np 4 ./build/Project4 {} {} {} {} {} 1"
+    run = "/usr/lib64/openmpi/bin/mpirun -np 1 ./build/Project4 {} {} {} {} {} 1"
+    run_parallel = "/usr/lib64/openmpi/bin/mpirun -np 4 ./build/Project4 {} {} {} {} {} 1"
     for i in trials:
         out_parallel = subprocess.check_output(run_parallel.format( 
             NMC, Tstart, Tstop, nTemp, L), shell = True)

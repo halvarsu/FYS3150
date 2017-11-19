@@ -163,6 +163,7 @@ int main(int argc, char * argv[]) {
     double avgE[localExperiments];
     double avgEsquared[localExperiments];
     double avgM[localExperiments];
+    double avgMabs[localExperiments];
     double avgMsquared[localExperiments];
     int localAcceptedPerRun[localExperiments];
     int accepted;
@@ -176,6 +177,7 @@ int main(int argc, char * argv[]) {
         avgE[j] 	   =0;
         avgEsquared[j] = 0;
         avgM[j] 	   =0;
+        avgMabs[j] 	   =0;
         avgMsquared[j] = 0;
         accepted = 0;
 
@@ -184,16 +186,18 @@ int main(int argc, char * argv[]) {
             solver.run(spin_matrix, E, M, w, accepted);
             avgE[j] += E;
             avgEsquared[j] += E*E;
-            avgM[j] += abs(M);
+            avgM[j] += M;
+            avgMabs[j] += abs(M);
             avgMsquared[j] += M*M;
         }
         avgE[j] 	   =  avgE[j]/ (double) NMC;
         avgEsquared[j] =  avgEsquared[j] / (double) NMC;
         avgM[j] 	   =  avgM[j] 	   / (double) NMC;
+        avgMabs[j] 	   =  avgMabs[j] 	   / (double) NMC;
         avgMsquared[j] =  avgMsquared[j] / (double) NMC;
         localAcceptedPerRun[j] = accepted;
         if (verbose){
-            cout << me << " T = " << T << " done" << endl;
+            cout << me << " T = " << T << " done, E = " << avgE[j] << endl;
         }
     }
 
@@ -202,6 +206,7 @@ int main(int argc, char * argv[]) {
     // Global lists, only relevant for node 0
     double energies[nTemps];
     double magnetization[nTemps];
+    double magnetizationAbs[nTemps];
     double energiesSquared[nTemps];
     double magnetizationSquared[nTemps];
     double TValues[nTemps];
@@ -211,6 +216,8 @@ int main(int argc, char * argv[]) {
     MPI_Gatherv(&avgE, localExperiments, MPI_DOUBLE, &energies, experimentsPerNode, displacements,
                 MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Gatherv(&avgM, localExperiments, MPI_DOUBLE, &magnetization, experimentsPerNode, displacements,
+                MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gatherv(&avgMabs, localExperiments, MPI_DOUBLE, &magnetizationAbs, experimentsPerNode, displacements,
                 MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Gatherv(&avgEsquared, localExperiments, MPI_DOUBLE, &energiesSquared, experimentsPerNode,
                 displacements, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -236,6 +243,7 @@ int main(int argc, char * argv[]) {
         double susceptibility;
         double EforPrinting;
         double MforPrinting;
+        double MAbsforPrinting;
         double ESquaredforPrinting;
         double MSquaredforPrinting;
 
@@ -243,6 +251,7 @@ int main(int argc, char * argv[]) {
             T = TValues[i];
             EforPrinting = energies[i];
             MforPrinting = magnetization[i];
+            MAbsforPrinting = magnetizationAbs[i];
             ESquaredforPrinting= energiesSquared[i];
             MSquaredforPrinting= magnetizationSquared[i];
             specific_heat = 1/(T*T)*(ESquaredforPrinting - EforPrinting*EforPrinting);
@@ -260,7 +269,7 @@ int main(int argc, char * argv[]) {
             if (save_to_file){
                 outfile << i << " " << T << " " << EforPrinting << " " << MforPrinting <<" "
                 << ESquaredforPrinting << " " << MSquaredforPrinting << " " << specific_heat << " "
-                << susceptibility << " " << accepted << endl;
+                << susceptibility << " " << accepted << " " << MAbsforPrinting << endl;
             }
         }
 

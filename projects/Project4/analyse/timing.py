@@ -15,13 +15,13 @@ def main(args):
 
 
 def timing(args):
-    NMC = 10
+    NMC = 1000
     Tstart = 2
     Tstop = 2
-    nTemp = 100
+    nTemp = 24
     L = 40
 
-    nTrials = 100
+    nTrials = 20
     trials = np.arange(nTrials)
     time = []
     time_parallel = []
@@ -39,8 +39,8 @@ def timing(args):
         time_parallel.append(tp)
     avg_time = np.average(time)
     avg_time_parallel = np.average(time_parallel)
-    np.save('time_no_par',np.array(avg_time))
-    np.save('time_par',np.array(avg_time_parallel))
+    np.save('time_no_parNMC%d'%NMC,np.array(avg_time))
+    np.save('time_parNMC%d'%NMC,np.array(avg_time_parallel))
     print('Average time used 1 prosessor: {}s'.format(avg_time))
     print('Average time used 4 prosessors: {}s'.format(avg_time_parallel))
     plt.scatter(trials, time, c = 'b')

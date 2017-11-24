@@ -39,8 +39,10 @@ void StatisticsSampler::sample(System &system)
 void StatisticsSampler::sampleKineticEnergy(System &system)
 {
     m_kineticEnergy = 0; // Remember to reset the value from the previous timestep
+    double speedSquared;
     for(Atom *atom : system.atoms()) {
-
+        speedSquared = (atom->velocity[0]*atom->velocity[0]+atom->velocity[1]*atom->velocity[1]+atom->velocity[2]*atom->velocity[2]);
+        m_kineticEnergy += speedSquared*atom->mass()*0.5;
     }
 }
 

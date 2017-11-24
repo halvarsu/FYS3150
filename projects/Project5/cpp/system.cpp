@@ -20,7 +20,7 @@ System::~System()
 
 void System::applyPeriodicBoundaryConditions() {
     for (Atom *atom : m_atoms) {
-        atom->position.mod(m_systemSize);
+        atom->position.modEquals(m_systemSize);
     }
         // Read here: http://en.wikipedia.org/wiki/Periodic_boundary_conditions#Practical_implementation:_continuity_and_the_minimum_image_convention
 }

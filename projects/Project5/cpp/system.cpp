@@ -26,6 +26,17 @@ void System::applyPeriodicBoundaryConditions() {
 }
 
 void System::removeTotalMomentum() {
+    vec3 totalMomentum;
+    double totalMass;
+    for(Atom *atom : m_atoms){
+        totalMomentum += atom->velocity * atom->mass();
+    }
+    for(Atom *atom : m_atoms){
+        totalMass += atom->mass();
+    }
+    for(Atom *atom : m_atoms){
+        atom->velocity -= totalMomentum/totalMass;
+    }
     // Find the total momentum and remove momentum equally on each atom so the total momentum becomes zero.
 }
 

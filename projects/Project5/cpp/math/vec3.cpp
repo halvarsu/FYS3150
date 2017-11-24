@@ -133,7 +133,7 @@ vec3 &vec3::operator/=(vec3 rhs)
     return *this;
 }
 
-vec3 &vec3::mod(double rhs)
+vec3 &vec3::modEquals(double rhs)
 {
     components[0] -= floor(components[0] / rhs) * rhs;
     components[1] -= floor(components[1] / rhs) * rhs;
@@ -141,7 +141,7 @@ vec3 &vec3::mod(double rhs)
     return *this;
 }
 
-vec3 &vec3::mod(vec3 rhs){
+vec3 &vec3::modEquals(vec3 rhs){
     components[0] -= floor(components[0] / rhs[0]) * rhs[0];
     components[1] -= floor(components[1] / rhs[1]) * rhs[1];
     components[2] -= floor(components[2] / rhs[2]) * rhs[2];

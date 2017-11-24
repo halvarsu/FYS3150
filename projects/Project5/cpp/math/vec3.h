@@ -39,8 +39,8 @@ public:
     vec3 &operator/=(double rhs); // Componentwise division with scalar
     vec3 &operator/=(vec3 rhs);   // Componentwise division with vector
     vec3 &operator%=(vec3 rhs); // Componentwise modulo with scalar
-    vec3 &mod(double rhs);		// Componentwise modulo with scalar
-    vec3 &mod(vec3 rhs); 		// Componentwise modulo with vector
+    vec3 &modEquals(double rhs);		// Componentwise modulo with scalar
+    vec3 &modEquals(vec3 rhs); 		// Componentwise modulo with vector
     friend std::ostream& operator<<(std::ostream& os, const vec3& myVector); // Allows cout << myVector << endl;
 };
 

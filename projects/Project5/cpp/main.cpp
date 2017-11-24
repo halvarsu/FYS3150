@@ -13,6 +13,8 @@ using namespace std;
 
 int main(int numberOfArguments, char **argumentList)
 {
+    double a = 4.3;
+    cout << floor(a / 2) << endl;
     int numberOfUnitCells = 5;
     double initialTemperature = UnitConverter::temperatureFromSI(300.0); // measured in Kelvin
     double latticeConstant = UnitConverter::lengthFromAngstroms(5.26); // measured in angstroms
@@ -48,7 +50,7 @@ int main(int numberOfArguments, char **argumentList)
             setw(20) << "KineticEnergy" <<
             setw(20) << "PotentialEnergy" <<
             setw(20) << "TotalEnergy" << endl;
-    for(int timestep=0; timestep<1000; timestep++) {
+    for(int timestep=0; timestep<100000; timestep++) {
         system.step(dt);
         statisticsSampler.sample(system);
         if( timestep % 100 == 0 ) {

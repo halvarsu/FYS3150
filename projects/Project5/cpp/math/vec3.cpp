@@ -124,6 +124,7 @@ vec3 &vec3::operator/=(double rhs)
     return *this;
 }
 
+
 vec3 &vec3::operator/=(vec3 rhs)
 {
     components[0] /= rhs[0];
@@ -131,6 +132,21 @@ vec3 &vec3::operator/=(vec3 rhs)
     components[2] /= rhs[2];
     return *this;
 }
+
+vec3 &vec3::mod(double rhs)
+{
+    components[0] -= floor(components[0] / rhs) * rhs;
+    components[1] -= floor(components[1] / rhs) * rhs;
+    components[2] -= floor(components[2] / rhs) * rhs;
+    return *this;
+}
+
+vec3 &vec3::mod(vec3 rhs){
+    components[0] -= floor(components[0] / rhs[0]) * rhs[0];
+    components[1] -= floor(components[1] / rhs[1]) * rhs[1];
+    components[2] -= floor(components[2] / rhs[2]) * rhs[2];
+    return *this;
+};
 
 std::ostream &operator<<(std::ostream &os, const vec3 &myVector) // Allows cout << myVector << endl;
 {

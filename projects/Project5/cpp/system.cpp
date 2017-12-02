@@ -20,7 +20,14 @@ System::~System()
 
 void System::applyPeriodicBoundaryConditions() {
     for (Atom *atom : m_atoms) {
-        atom->position.modEquals(m_systemSize);
+        // atom->position.modEquals(m_systemSize);
+        for (int i = 0; i < 3; i++){
+            if (atom->position[i] <= 0){
+                atom->position[i] += m_systemSize[i];
+            } else if (atom->position[i] >= m_systemSize[i]){
+                atom->position[i] -= m_systemSize[i];
+            }
+        }
     }
         // Read here: http://en.wikipedia.org/wiki/Periodic_boundary_conditions#Practical_implementation:_continuity_and_the_minimum_image_convention
 }
@@ -63,12 +70,12 @@ void System::createUnitCell(vec3 R0, double latticeConstant, double temperature)
     m_atoms.push_back(atom4);
 }
 
-void System::createFCCLattice(int unitCellsPerDimention, double latticeConstant, double temperature) {
+void System::createFCCLattice(int unitCellsPerDimension, double latticeConstant, double temperature) {
     // You should implement this function properly. Right now, 100 atoms are created uniformly placed in the system of size (10, 10, 10).
     vec3 R0, size;
-    for (int i = 0; i < unitCellsPerDimention; i++){
-        for (int j = 0; j < unitCellsPerDimention; j++){
-            for (int k = 0; k < unitCellsPerDimention; k++){
+    for (int i = 0; i < unitCellsPerDimension; i++){
+        for (int j = 0; j < unitCellsPerDimension; j++){
+            for (int k = 0; k < unitCellsPerDimension; k++){
                 R0.set(i, j, k);
                 R0 *= latticeConstant;
                 this->createUnitCell(R0, latticeConstant, temperature);
@@ -77,19 +84,8 @@ void System::createFCCLattice(int unitCellsPerDimention, double latticeConstant,
     }
 
     size.set(1,1,1);
-    size *= unitCellsPerDimention*latticeConstant;
+    size *= unitCellsPerDimension*latticeConstant;
     setSystemSize(size);
-
-//    for(int i=0; i<100; i++) {
-//        Atom *atom = new Atom(UnitConverter::massFromSI(6.63352088e-26));
-//        double x = Random::nextDouble(0, 10); // random number in the interval [0,10]
-//        double y = Random::nextDouble(0, 10);
-//        double z = Random::nextDouble(0, 10);
-//        atom->position.set(x,y,z);
-//        atom->resetVelocityMaxwellian(temperature);
-//        m_atoms.push_back(atom);
-//    }
-//    setSystemSize(vec3(10, 10, 10)); // Remember to set the correct system size!
 }
 
 void System::calculateForces() {

@@ -2,6 +2,7 @@
 #include "statisticssampler.h"
 #include "lennardjones.h"
 #include <iostream>
+#include <iomanip>
 
 using std::ofstream; using std::cout; using std::endl;
 
@@ -23,6 +24,13 @@ void StatisticsSampler::saveToFile(System &system)
         }
     }
 
+    m_file << std::setw(20) << system.steps() <<
+            std::setw(20) << system.time() <<
+            std::setw(20) << m_temperature <<
+            std::setw(20) << m_kineticEnergy <<
+            std::setw(20) << m_potentialEnergy <<
+            std::setw(20) << m_potentialEnergy*m_kineticEnergy << std::endl;
+
     // Print out values here
 }
 
@@ -38,10 +46,10 @@ void StatisticsSampler::sample(System &system)
 
 void StatisticsSampler::sampleKineticEnergy(System &system)
 {
-    m_kineticEnergy = 0; // Remember to reset the value from the previous timestep
-    for(Atom *atom : system.atoms()) {
-
-    }
+//    m_kineticEnergy = 0; // Remember to reset the value from the previous timestep
+//    for(Atom *atom : system.atoms()) {
+//    }
+    m_kineticEnergy = system.potential().kineticEnergy();
 }
 
 void StatisticsSampler::samplePotentialEnergy(System &system)
@@ -51,7 +59,8 @@ void StatisticsSampler::samplePotentialEnergy(System &system)
 
 void StatisticsSampler::sampleTemperature(System &system)
 {
-    // Hint: reuse the kinetic energy that we already calculated
+    m_temperature = 2./3. * m_kineticEnergy/ system.atoms().size();
+    // Units of energy over boltzmans constant
 }
 
 void StatisticsSampler::sampleDensity(System &system)

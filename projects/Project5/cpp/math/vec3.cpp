@@ -61,6 +61,13 @@ void vec3::set(double x, double y, double z)
     setZ(z);
 }
 
+void vec3::set(vec3 other)
+{
+    setX(other[0]);
+    setY(other[1]);
+    setZ(other[2]);
+}
+
 void vec3::randomGaussian(double mean, double standardDeviation)
 {
     components[0] = Random::nextGaussian(mean, standardDeviation);

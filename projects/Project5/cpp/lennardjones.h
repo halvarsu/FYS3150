@@ -7,11 +7,13 @@ private:
     double m_sigma = 1.0;
     double m_epsilon = 1.0;
     double m_potentialEnergy = 0;
+    double m_kineticEnergy = 0;
 
 public:
     LennardJones() { }
     void calculateForces(class System &system);
     double potentialEnergy() const;
+    double kineticEnergy() const;
     double sigma() const;
     void setSigma(double sigma);
     double epsilon() const;

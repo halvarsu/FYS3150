@@ -7,19 +7,18 @@ Usage is project specific. We use qt creator for compiling c++, and a combinatio
 ## Descriptions
 ### Project 1
 Poisson equation. Spherically symmetric case solved using Thomas algorithm.
-- Was done in collaberation with others at [another repo](https://www.github.com/Caronthir/FYS3150). Split into two groups due to crowding.
+- Was done at [another repo](https://www.github.com/Caronthir/FYS3150). 
 
 ### Project 2
-Two electrons in a harmonic oscillator potential. Schödinger equation solved using the Jacobi algorithm and LU decomposition.
+Two electrons in a harmonic oscillator potential. Schrödinger equation solved using the Jacobi algorithm and LU decomposition.
 
 ### Project 3
-Celestial bodies in a vacuum. Newtonian dynamics with relativistic correction for Mercury solved using Velocity Verlet in an  Object Oriented approach.
+Celestial bodies in a vacuum. Newtonian dynamics with relativistic correction for Mercury solved using Velocity Verlet with an  Object Oriented approach.
 
 ### Project 4
 Phase transitions of the two dimensional Ising Model. Studied using the Metropolis algorithm.
 - Individual reports
 
 ### Project 5
-??? Choice between MD, diffusion, wave or economics
-
+Molecular Dynamics. 
 

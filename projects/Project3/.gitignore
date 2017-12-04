@@ -1,6 +1,15 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
 
+
+#---- latex folder
+latex
+#---- build folder
+build
+#---- data folder
+out 
+
+#
 *~
 *.autosave
 *.a

@@ -19,20 +19,23 @@ System::~System()
 }
 
 void System::applyPeriodicBoundaryConditions() {
+    // Goes through every particle and moves them to the other side of
+    // the box if they have left the boundaries
     for (Atom *atom : m_atoms) {
-        // atom->position.modEquals(m_systemSize);
         for (int i = 0; i < 3; i++){
             if (atom->position[i] <= 0){
                 atom->position[i] += m_systemSize[i];
+                atom->nRelocations[i] += 1;
             } else if (atom->position[i] >= m_systemSize[i]){
                 atom->position[i] -= m_systemSize[i];
+                atom->nRelocations[i] -= 1;
             }
         }
     }
-        // Read here: http://en.wikipedia.org/wiki/Periodic_boundary_conditions#Practical_implementation:_continuity_and_the_minimum_image_convention
 }
 
 void System::removeTotalMomentum() {
+    // Find the total momentum and remove momentum equally on each atom so the total momentum becomes zero.
     vec3 totalMomentum;
     double totalMass;
     for(Atom *atom : m_atoms){
@@ -44,35 +47,27 @@ void System::removeTotalMomentum() {
     for(Atom *atom : m_atoms){
         atom->velocity -= totalMomentum/totalMass;
     }
-    // Find the total momentum and remove momentum equally on each atom so the total momentum becomes zero.
 }
 
 void System::createUnitCell(vec3 R0, double latticeConstant, double temperature){
-    Atom *atom1	= new Atom(UnitConverter::massFromSI(6.63352088e-26));
-    Atom *atom2 = new Atom(UnitConverter::massFromSI(6.63352088e-26));
-    Atom *atom3 = new Atom(UnitConverter::massFromSI(6.63352088e-26));
-    Atom *atom4 = new Atom(UnitConverter::massFromSI(6.63352088e-26));
-    vec3 pos1(0, 0, 0);
-    vec3 pos2(latticeConstant/2, latticeConstant/2, 0);
-    vec3 pos3(0, latticeConstant/2, latticeConstant/2);
-    vec3 pos4(latticeConstant/2, 0, latticeConstant/2);
-    atom1->position.set(R0 + pos1);
-    atom2->position.set(R0 + pos2);
-    atom3->position.set(R0 + pos3);
-    atom4->position.set(R0 + pos4);
-    atom1->resetVelocityMaxwellian(temperature);
-    m_atoms.push_back(atom1);
-    atom2->resetVelocityMaxwellian(temperature);
-    m_atoms.push_back(atom2);
-    atom3->resetVelocityMaxwellian(temperature);
-    m_atoms.push_back(atom3);
-    atom4->resetVelocityMaxwellian(temperature);
-    m_atoms.push_back(atom4);
+    // Create 4 new atoms with positions in a Face Centered Cubic unit cell grid
+    vector<vec3 *> cellPositions = {new vec3(0,0,0),
+                                    new vec3(latticeConstant/2, latticeConstant/2, 0),
+                                    new vec3(0, latticeConstant/2, latticeConstant/2),
+                                    new vec3(latticeConstant/2, 0, latticeConstant/2)};
+    for (vec3* pos : cellPositions){
+        Atom *atom	= new Atom(UnitConverter::massFromSI(6.63352088e-26));
+        atom->position.set(R0 + *pos);
+        atom->initialPosition.set(R0 + *pos);
+        m_atoms.push_back(atom);
+        atom->resetVelocityMaxwellian(temperature);
+    }
 }
 
 void System::createFCCLattice(int unitCellsPerDimension, double latticeConstant, double temperature) {
-    // You should implement this function properly. Right now, 100 atoms are created uniformly placed in the system of size (10, 10, 10).
-    vec3 R0, size;
+    // Creates N cubed unit cells of a Face Centered Cubic with spacings between cells b,
+    // where N is unicCellsPerDimension and b is latticeConstant
+    vec3 R0, ones;
     for (int i = 0; i < unitCellsPerDimension; i++){
         for (int j = 0; j < unitCellsPerDimension; j++){
             for (int k = 0; k < unitCellsPerDimension; k++){
@@ -83,16 +78,15 @@ void System::createFCCLattice(int unitCellsPerDimension, double latticeConstant,
         }
     }
 
-    size.set(1,1,1);
-    size *= unitCellsPerDimension*latticeConstant;
-    setSystemSize(size);
+    ones.set(1,1,1);
+    setSystemSize(unitCellsPerDimension*latticeConstant*ones);
 }
 
 void System::calculateForces() {
     for(Atom *atom : m_atoms) {
         atom->resetForce();
     }
-    m_potential.calculateForces(*this); // this is a pointer, *this is a reference to this object
+    m_potential.calculateForces(*this); // this is a pointer, *this is a reference to that object
 }
 
 void System::step(double dt) {

@@ -36,8 +36,6 @@ void LennardJones::setEpsilon(double epsilon)
 void LennardJones::calculateForces(System &system)
 {
     m_potentialEnergy = 0;
-    m_kineticEnergy = 0;
-    // std::vector<Atom*> m_atoms;
     std::vector<Atom*> atoms = system.atoms();
     int numberOfAtoms = atoms.size();
 
@@ -46,8 +44,6 @@ void LennardJones::calculateForces(System &system)
         atom->resetForce();
     }
 
-    // vec3 a,b;
-    // Main body should be first celestial body
     for(int i=0; i<numberOfAtoms; i++) {
         Atom *atom1 = atoms[i];
 
@@ -61,7 +57,6 @@ void LennardJones::calculateForces(System &system)
                     drVec[i] -= system.systemSize()[i];
                 }
             }
-            // calculate norm of vector as \sqrt{\sum_i{x_i^2}}
             double drSquared = drVec.lengthSquared();
             double idr_ul2 = m_sigma*m_sigma/drSquared; // inverse delta r, unitless, squared
             double attractive = std::pow(idr_ul2, 3);
@@ -74,7 +69,6 @@ void LennardJones::calculateForces(System &system)
             atom1->force += forceVector;
             atom2->force -= forceVector;
         }
-        m_kineticEnergy += 0.5 * atom1->mass() * atom1->velocity.lengthSquared();
     }
     return;
 }

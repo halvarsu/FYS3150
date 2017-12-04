@@ -8,8 +8,10 @@ private:
     float m_mass;
 public:
     vec3 position;
+    vec3 initialPosition;
     vec3 velocity;
     vec3 force;
+    vec3 nRelocations; // How many times relocated in each dimension
 
     Atom(double mass);
     void resetForce();

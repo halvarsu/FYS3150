@@ -10,6 +10,7 @@ class System
 {
 private:
     vec3 m_systemSize;
+    vec3 m_systemSizeHalf;
     VelocityVerlet m_integrator;
     std::vector<Atom*> m_atoms;
     LennardJones m_potential;
@@ -19,6 +20,7 @@ private:
 public:
     System();
     ~System();
+    void createUnitCell(vec3 R0, double latticeConstant, double temperature);
     void createFCCLattice(int numberOfUnitCellsEachDimension, double latticeConstant, double temperature);
     void applyPeriodicBoundaryConditions();
     void removeTotalMomentum();
@@ -29,7 +31,8 @@ public:
     std::vector<Atom *> &atoms() { return m_atoms; } // Returns a reference to the std::vector of atom pointers
     double volume() { return m_systemSize[0]*m_systemSize[1]*m_systemSize[2]; }
     vec3 systemSize() { return m_systemSize; }
-    void setSystemSize(vec3 systemSize) { m_systemSize = systemSize; }
+    vec3 systemSizeHalf() { return m_systemSizeHalf; }
+    void setSystemSize(vec3 systemSize) { m_systemSize = systemSize; m_systemSizeHalf = systemSize/2;}
     LennardJones &potential() { return m_potential; }
     double time() { return m_time; }
     void setTime(double time) { m_time = time; }

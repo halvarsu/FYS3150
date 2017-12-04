@@ -29,7 +29,7 @@ void StatisticsSampler::saveToFile(System &system)
             std::setw(20) << m_temperature <<
             std::setw(20) << m_kineticEnergy <<
             std::setw(20) << m_potentialEnergy <<
-            std::setw(20) << m_potentialEnergy*m_kineticEnergy << std::endl;
+            std::setw(20) << m_diffusion << std::endl;
 
     // Print out values here
 }
@@ -40,6 +40,7 @@ void StatisticsSampler::sample(System &system)
     sampleKineticEnergy(system);
     samplePotentialEnergy(system);
     sampleTemperature(system);
+    sampleDiffusion(system);
     sampleDensity(system);
     saveToFile(system);
 }
@@ -64,6 +65,15 @@ void StatisticsSampler::sampleTemperature(System &system)
 {
     m_temperature = 2./3. * m_kineticEnergy/ system.atoms().size();
     // Units of energy over boltzmans constant
+}
+
+void StatisticsSampler::sampleDiffusion(System &system)
+{
+    m_diffusion = 0;
+    for (Atom *atom : system.atoms()){
+        m_diffusion += (atom->position - system.systemSize()*atom->nRelocations - atom->initialPosition).lengthSquared();
+    }
+    m_diffusion /= (6*system.time());
 }
 
 void StatisticsSampler::sampleDensity(System &system)

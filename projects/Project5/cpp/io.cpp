@@ -38,7 +38,7 @@ void IO::saveState(System &system)
 {
     if(file.is_open()) {
         file << system.atoms().size() << endl;
-        file << "The is an optional comment line that can be empty. The reason we use H is so particles get smaller in Ovito" << endl;
+        file << "H is used to get particles smaller particle sizes in Ovito" << endl;
         for(Atom *atom : system.atoms()) {
             file << "H " <<
                     UnitConverter::lengthToAngstroms(atom->position.x()) << " " <<

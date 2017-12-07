@@ -1,6 +1,8 @@
 
 #ifndef RANDOM_H
 #define RANDOM_H
+
+#include <iostream>
 #include <random>
 #include <ctime>
 
@@ -9,7 +11,7 @@
 static std::mt19937 generator;
 #else
 // this generator is now thread safe so we can use it with OpenMP.
-static thread_local std::mt19937 generator;
+static thread_local std::mt19937 generator(time(NULL));
 #endif
 
 class Random
@@ -19,7 +21,7 @@ public:
         generator.seed(seed);
     }
     static void randomSeed() {
-        generator.seed(std::time(0));
+        generator.seed(std::time(NULL));
     }
 
     static float nextFloat(const float & min, const float & max) {

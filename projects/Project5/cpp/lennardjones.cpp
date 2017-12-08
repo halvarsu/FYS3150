@@ -50,11 +50,11 @@ void LennardJones::calculateForces(System &system)
         for(int j=i+1; j<numberOfAtoms; j++) {
             Atom * atom2 = atoms[j];
             vec3 drVec = atom1->position - atom2->position;
-            for (int i = 0; i < 3; i++){
-                if (drVec[i] <= - system.systemSizeHalf()[i]){
-                    drVec[i] += system.systemSize()[i];
-                } else if (drVec[i] >= system.systemSizeHalf()[i]){
-                    drVec[i] -= system.systemSize()[i];
+            for (int k = 0; k < 3; k++){
+                if (drVec[k] <= - system.systemSizeHalf()[k]){
+                    drVec[k] += system.systemSize()[k];
+                } else if (drVec[k] >= system.systemSizeHalf()[k]){
+                    drVec[k] -= system.systemSize()[k];
                 }
             }
             double drSquared = drVec.lengthSquared();

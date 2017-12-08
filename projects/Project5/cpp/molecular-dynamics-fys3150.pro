@@ -4,6 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXX += -g
+QMAKE_CXXFLAGS_RELEASE += -g
 
 SOURCES += main.cpp \
     atom.cpp \

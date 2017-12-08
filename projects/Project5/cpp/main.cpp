@@ -8,11 +8,13 @@
 #include "unitconverter.h"
 #include <iostream>
 #include <iomanip>
+#include <chrono>
 
 using namespace std;
 
 int main(int numberOfArguments, char **argumentList)
 {
+    auto start = chrono::system_clock::now();
     int unitCellsPerDimention = 5;
     double initialTemperature = UnitConverter::temperatureFromSI(300.0); // measured in Kelvin
     double latticeConstant = UnitConverter::lengthFromAngstroms(5.26); // measured in angstroms
@@ -64,11 +66,14 @@ int main(int numberOfArguments, char **argumentList)
                     setw(20) << statisticsSampler.kineticEnergy() <<
                     setw(20) << statisticsSampler.potentialEnergy() <<
                     setw(20) << statisticsSampler.totalEnergy() << endl;
+                    movie.saveState(system);
         }
-        movie.saveState(system);
     }
 
     movie.close();
+    auto end = chrono::system_clock::now();
+    chrono::duration<double> time_used = end-start;
+    std::cout << time_used.count() << std::endl;
 
     return 0;
 }

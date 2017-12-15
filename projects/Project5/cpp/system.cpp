@@ -82,11 +82,24 @@ void System::createFCCLattice(int unitCellsPerDimension, double latticeConstant,
     setSystemSize(unitCellsPerDimension*latticeConstant*ones);
 }
 
+void System::create100Uniform(double temperature) {
+    for (int i = 0 ; i < 100; i ++){
+        Atom *atom	= new Atom(UnitConverter::massFromSI(6.63352088e-26));
+        double x = Random::nextDouble(0, 10); // random number in the interval [0,10]
+        double y = Random::nextDouble(0, 10);
+        double z = Random::nextDouble(0, 10);
+        atom->position.set(x,y,z);
+        atom->resetVelocityMaxwellian(temperature);
+        m_atoms.push_back(atom);
+    }
+    setSystemSize(vec3(10, 10, 10));
+}
+
 void System::calculateForces() {
     for(Atom *atom : m_atoms) {
         atom->resetForce();
     }
-    m_potential.calculateForces(*this); // this is a pointer, *this is a reference to that object
+    m_potential.calculateForces(*this); // 'this' is a pointer, '*this' is a reference to that object
 }
 
 void System::step(double dt) {

@@ -22,6 +22,7 @@ public:
     ~System();
     void createUnitCell(vec3 R0, double latticeConstant, double temperature);
     void createFCCLattice(int numberOfUnitCellsEachDimension, double latticeConstant, double temperature);
+    void create100Uniform(double temperature);
     void applyPeriodicBoundaryConditions();
     void removeTotalMomentum();
     void calculateForces();

@@ -41,10 +41,12 @@ int main(int numberOfArguments, char **argumentList)
 
     System system;
     system.createFCCLattice(unitCellsPerDimention, latticeConstant, initialTemperature);
+    // system.create100Uniform(initialTemperature);
+
     system.potential().setEpsilon(1.0);
     system.potential().setSigma(3.405);
 
-    system.removeTotalMomentum();
+    // system.removeTotalMomentum();
 
     StatisticsSampler statisticsSampler;
     IO movie("movie.xyz"); // To write the state to file
